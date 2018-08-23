@@ -1,6 +1,6 @@
 package model
 
-import "github.com/rollout/rox-go/core/custom-properties"
+import "github.com/rollout/rox-go/core/properties"
 
 type CustomPropertyAddedHandler = func(property *properties.CustomProperty)
 

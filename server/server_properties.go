@@ -12,9 +12,10 @@ type serverProperties struct {
 }
 
 func NewServerProperties(sdkSettings model.SdkSettings, roxOptions model.RoxOptions) model.DeviceProperties {
+	distinctId, _ := uuid.NewV4()
 	return &serverProperties{
 		DeviceProperties: client.NewDeviceProperties(sdkSettings, roxOptions),
-		distinctId:       uuid.NewV4().String(),
+		distinctId:       distinctId.String(),
 	}
 }
 

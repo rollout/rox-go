@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"github.com/rollout/rox-go/core/custom-properties"
 	"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/properties"
 	"sync"
 )
 
