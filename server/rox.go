@@ -37,14 +37,14 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty(consts.PropertyTypePlatform.Name, serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceSemverProperty(consts.PropertyTypeAppRelease.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAppRelease.Name]))
-	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceProperty(consts.PropertyTypeDistinctId.Name, properties.CustomPropertyTypeString, func(ctx context.Context) interface{} {
+	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty(consts.PropertyTypeDistinctId.Name, func(ctx context.Context) string {
 		value, _ := uuid.NewV4()
 		return value.String()
 	}))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.realPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.customPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.appKey", serverProperties.RolloutKey()))
-	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceProperty("internal."+consts.PropertyTypeDistinctId.Name, properties.CustomPropertyTypeString, func(ctx context.Context) interface{} {
+	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty("internal."+consts.PropertyTypeDistinctId.Name, func(ctx context.Context) string {
 		value, _ := uuid.NewV4()
 		return value.String()
 	}))
@@ -96,38 +96,38 @@ func (r *Rox) SetCustomStringProperty(name string, value string) {
 	r.core.AddCustomProperty(properties.NewCustomStringProperty(name, value))
 }
 
-func (r *Rox) SetCustomComputedStringProperty(name string, value properties.CustomPropertyGenerator) {
-	r.core.AddCustomProperty(properties.NewCustomProperty(name, properties.CustomPropertyTypeString, value))
+func (r *Rox) SetCustomComputedStringProperty(name string, value properties.CustomStringPropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewCustomComputedStringProperty(name, value))
 }
 
 func (r *Rox) SetCustomBooleanProperty(name string, value bool) {
 	r.core.AddCustomProperty(properties.NewCustomBooleanProperty(name, value))
 }
 
-func (r *Rox) SetCustomComputedBooleanProperty(name string, value properties.CustomPropertyGenerator) {
-	r.core.AddCustomProperty(properties.NewCustomProperty(name, properties.CustomPropertyTypeBool, value))
+func (r *Rox) SetCustomComputedBooleanProperty(name string, value properties.CustomBooleanPropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewCustomComputedBooleanProperty(name, value))
 }
 
 func (r *Rox) SetCustomIntegerProperty(name string, value int) {
 	r.core.AddCustomProperty(properties.NewCustomIntegerProperty(name, value))
 }
 
-func (r *Rox) SetCustomComputedIntegerProperty(name string, value properties.CustomPropertyGenerator) {
-	r.core.AddCustomProperty(properties.NewCustomProperty(name, properties.CustomPropertyTypeInt, value))
+func (r *Rox) SetCustomComputedIntegerProperty(name string, value properties.CustomIntegerPropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewCustomComputedIntegerProperty(name, value))
 }
 
 func (r *Rox) SetCustomFloatProperty(name string, value float64) {
 	r.core.AddCustomProperty(properties.NewCustomFloatProperty(name, value))
 }
 
-func (r *Rox) SetCustomComputedFloatProperty(name string, value properties.CustomPropertyGenerator) {
-	r.core.AddCustomProperty(properties.NewCustomProperty(name, properties.CustomPropertyTypeFloat, value))
+func (r *Rox) SetCustomComputedFloatProperty(name string, value properties.CustomFloatPropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewCustomComputedFloatProperty(name, value))
 }
 
 func (r *Rox) SetCustomSemverProperty(name string, value string) {
 	r.core.AddCustomProperty(properties.NewCustomSemverProperty(name, value))
 }
 
-func (r *Rox) SetCustomComputedSemverProperty(name string, value properties.CustomPropertyGenerator) {
-	r.core.AddCustomProperty(properties.NewCustomProperty(name, properties.CustomPropertyTypeSemver, value))
+func (r *Rox) SetCustomComputedSemverProperty(name string, value properties.CustomSemverPropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewCustomComputedSemverProperty(name, value))
 }
