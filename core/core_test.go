@@ -13,7 +13,7 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
-	deviceProperties.On("DistinctId").Return("")
+	deviceProperties.On("DistinctID").Return("")
 
 	options := &mocks.RoxOptions{}
 	options.On("RoxyURL").Return("http://site.com")
@@ -31,7 +31,7 @@ func TestCoreWillCheckCoreSetupWhenNoOptions(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
-	deviceProperties.On("DistinctId").Return("")
+	deviceProperties.On("DistinctID").Return("")
 
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, nil)

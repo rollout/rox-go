@@ -8,10 +8,10 @@ import (
 )
 
 func TestConfigurationFetchedInvokerWithNoSubscriberNoException(t *testing.T) {
-	configurationFetchedInvoker := NewConfigurationFetchedInvoker()
+	configurationFetchedInvoker := NewFetchedInvoker()
 	configurationFetchedInvoker.InvokeError(model.FetcherErrorUnknown)
 
-	configurationFetchedInvoker2 := NewConfigurationFetchedInvoker()
+	configurationFetchedInvoker2 := NewFetchedInvoker()
 	configurationFetchedInvoker2.Invoke(model.FetcherStatusAppliedFromEmbedded, time.Now(), true)
 }
 
@@ -37,9 +37,9 @@ func TestConfigurationFetchedInvokerArgsConstructor(t *testing.T) {
 
 func TestConfigurationFetchedInvokerInvokeWithError(t *testing.T) {
 	isConfigurationHandlerInvokerRaised := false
-	configurationFetchedInvoker := NewConfigurationFetchedInvoker()
+	configurationFetchedInvoker := NewFetchedInvoker()
 
-	configurationFetchedInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	configurationFetchedInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		assert.Equal(t, model.FetcherStatusErrorFetchedFailed, e.FetcherStatus)
 		assert.True(t, e.CreationDate.IsZero())
 		assert.Equal(t, false, e.HasChanges)
@@ -55,13 +55,13 @@ func TestConfigurationFetchedInvokerInvokeWithError(t *testing.T) {
 
 func TestConfigurationFetchedInvokerInvokeOK(t *testing.T) {
 	isConfigurationHandlerInvokerRaised := false
-	configurationFetchedInvoker := NewConfigurationFetchedInvoker()
+	configurationFetchedInvoker := NewFetchedInvoker()
 
 	now := time.Now()
 	status := model.FetcherStatusAppliedFromNetwork
 	hasChanges := true
 
-	configurationFetchedInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	configurationFetchedInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		assert.Equal(t, status, e.FetcherStatus)
 		assert.Equal(t, now, e.CreationDate)
 		assert.Equal(t, hasChanges, e.HasChanges)

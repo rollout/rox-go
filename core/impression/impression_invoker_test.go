@@ -50,6 +50,6 @@ func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
 	// TODO
 }
 
-func TestImpressionInvokerWillInvokeAnalyticsWithBadDistinctId(t *testing.T) {
+func TestImpressionInvokerWillInvokeAnalyticsWithBadDistinctID(t *testing.T) {
 	// TODO
 }

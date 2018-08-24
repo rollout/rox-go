@@ -61,7 +61,7 @@ func (st *StringTokenizer) scanToken(startPos int) int {
 }
 
 func (st *StringTokenizer) isDelimiter(r rune) bool {
-	return strings.IndexRune(st.delimiters, r) >= 0
+	return strings.ContainsRune(st.delimiters, r)
 }
 
 func (st *StringTokenizer) hasMoreTokens() bool {

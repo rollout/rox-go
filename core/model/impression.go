@@ -16,7 +16,7 @@ type ImpressionInvoker interface {
 }
 
 type ExperimentModel struct {
-	Id         string
+	ID         string
 	Name       string
 	Condition  string
 	IsArchived bool
@@ -26,7 +26,7 @@ type ExperimentModel struct {
 
 func NewExperimentModel(id, name, condition string, isArchived bool, flags, labels []string) *ExperimentModel {
 	return &ExperimentModel{
-		Id:         id,
+		ID:         id,
 		Name:       name,
 		Condition:  condition,
 		IsArchived: isArchived,

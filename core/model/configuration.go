@@ -6,8 +6,8 @@ type FetcherError int
 
 const (
 	FetcherErrorNoError FetcherError = iota
-	FetcherErrorCorruptedJson
-	FetcherErrorEmptyJson
+	FetcherErrorCorruptedJSON
+	FetcherErrorEmptyJSON
 	FetcherErrorSignatureVerification
 	FetcherErrorNetwork
 	FetcherErrorMismatchAppKey
@@ -60,20 +60,20 @@ type Experiment struct {
 func NewExperiment(experiment *ExperimentModel) *Experiment {
 	return &Experiment{
 		Name:       experiment.Name,
-		Identifier: experiment.Id,
+		Identifier: experiment.ID,
 		IsArchived: experiment.IsArchived,
 		Labels:     experiment.Labels,
 	}
 }
 
 type TargetGroupModel struct {
-	Id        string
+	ID        string
 	Condition string
 }
 
 func NewTargetGroupModel(id, condition string) *TargetGroupModel {
 	return &TargetGroupModel{
-		Id:        id,
+		ID:        id,
 		Condition: condition,
 	}
 }

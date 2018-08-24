@@ -112,34 +112,36 @@ func (te *TokenizedExpression) nodeFromDict(items map[string]interface{}) *Node 
 func (te *TokenizedExpression) nodeFromToken(token string) *Node {
 	if te.isOperator(token) {
 		return NewNode(NodeTypeRator, token)
-	} else {
-		if token == roxxTrue {
-			return NewNode(NodeTypeRand, true)
-		}
-		if token == roxxFalse {
-			return NewNode(NodeTypeRand, false)
-		}
-		if token == roxxUndefined {
-			return NewNode(NodeTypeRand, TokenTypeUndefined)
+	}
+
+	if token == roxxTrue {
+		return NewNode(NodeTypeRand, true)
+	}
+
+	if token == roxxFalse {
+		return NewNode(NodeTypeRand, false)
+	}
+
+	if token == roxxUndefined {
+		return NewNode(NodeTypeRand, TokenTypeUndefined)
+	}
+
+	tokenType := TokenTypeFromToken(token)
+	switch tokenType {
+	case TokenTypeString:
+		return NewNode(NodeTypeRand, token[1:len(token)-1])
+	case TokenTypeNumber:
+		intNumber, err := strconv.Atoi(token)
+		if err == nil {
+			return NewNode(NodeTypeRand, intNumber)
 		}
 
-		tokenType := TokenTypeFromToken(token)
-		switch tokenType {
-		case TokenTypeString:
-			return NewNode(NodeTypeRand, token[1:len(token)-1])
-		case TokenTypeNumber:
-			intNumber, err := strconv.Atoi(token)
-			if err == nil {
-				return NewNode(NodeTypeRand, intNumber)
-			}
-
-			number, err := strconv.ParseFloat(token, 64)
-			if err == nil {
-				return NewNode(NodeTypeRand, number)
-			}
-
-			panic(fmt.Sprintf("Excepted Number, got '%s' (%s)", token, tokenType.text))
+		number, err := strconv.ParseFloat(token, 64)
+		if err == nil {
+			return NewNode(NodeTypeRand, number)
 		}
+
+		panic(fmt.Sprintf("Excepted Number, got '%s' (%s)", token, tokenType.text))
 	}
 
 	return NewNode(NodeTypeUnknown, nil)

@@ -7,37 +7,37 @@ import (
 type configurationFetcherRoxy struct {
 	requestConfigurationBuilder RequestConfigurationBuilder
 	request                     Request
-	configurationFetcherLogger  configurationFetcherLogger
+	fetcherLogger               configurationFetcherLogger
 }
 
-func NewConfigurationFetcherRoxy(requestConfigurationBuilder RequestConfigurationBuilder, request Request, configurationFetchedInvoker *configuration.ConfigurationFetchedInvoker) ConfigurationFetcher {
+func NewConfigurationFetcherRoxy(requestConfigurationBuilder RequestConfigurationBuilder, request Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
 	return &configurationFetcherRoxy{
 		requestConfigurationBuilder: requestConfigurationBuilder,
 		request:                     request,
-		configurationFetcherLogger:  configurationFetcherLogger{configurationFetchedInvoker},
+		fetcherLogger:               configurationFetcherLogger{fetchedInvoker},
 	}
 }
 
-func (f *configurationFetcherRoxy) Fetch() *configuration.ConfigurationFetchResult {
+func (f *configurationFetcherRoxy) Fetch() *configuration.FetchResult {
 	source := configuration.SourceRoxy
 
 	defer func() {
 		if r := recover(); r != nil {
-			f.configurationFetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, r)
+			f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, r)
 		}
 	}()
 
 	fetchResult, err := f.fetchFromRoxy()
 	if err != nil {
-		f.configurationFetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
+		f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
 		return nil
 	}
 
 	if fetchResult.IsSuccessStatusCode() {
-		return configuration.NewConfigurationFetchResult(string(fetchResult.Content), source)
+		return configuration.NewFetchResult(string(fetchResult.Content), source)
 	}
 
-	f.configurationFetcherLogger.WriteFetchErrorToLogAndInvokeFetchHandler(source, fetchResult)
+	f.fetcherLogger.WriteFetchErrorToLogAndInvokeFetchHandler(source, fetchResult)
 	return nil
 }
 

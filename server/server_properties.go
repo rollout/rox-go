@@ -8,19 +8,19 @@ import (
 
 type serverProperties struct {
 	model.DeviceProperties
-	distinctId string
+	distinctID string
 }
 
 func NewServerProperties(sdkSettings model.SdkSettings, roxOptions model.RoxOptions) model.DeviceProperties {
-	distinctId, _ := uuid.NewV4()
+	distinctID, _ := uuid.NewV4()
 	return &serverProperties{
 		DeviceProperties: client.NewDeviceProperties(sdkSettings, roxOptions),
-		distinctId:       distinctId.String(),
+		distinctID:       distinctID.String(),
 	}
 }
 
-func (sp *serverProperties) DistinctId() string {
-	return sp.distinctId
+func (sp *serverProperties) DistinctID() string {
+	return sp.distinctID
 }
 
 // TODO

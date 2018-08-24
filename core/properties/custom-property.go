@@ -15,37 +15,37 @@ type CustomProperty struct {
 	Value CustomPropertyGenerator
 }
 
-func NewCustomStringProperty(name string, value string) *CustomProperty {
-	return NewCustomComputedStringProperty(name, func(context context.Context) string {
+func NewStringProperty(name string, value string) *CustomProperty {
+	return NewComputedStringProperty(name, func(context context.Context) string {
 		return value
 	})
 }
 
-func NewCustomIntegerProperty(name string, value int) *CustomProperty {
-	return NewCustomComputedIntegerProperty(name, func(context context.Context) int {
+func NewIntegerProperty(name string, value int) *CustomProperty {
+	return NewComputedIntegerProperty(name, func(context context.Context) int {
 		return value
 	})
 }
 
-func NewCustomFloatProperty(name string, value float64) *CustomProperty {
-	return NewCustomComputedFloatProperty(name, func(context context.Context) float64 {
+func NewFloatProperty(name string, value float64) *CustomProperty {
+	return NewComputedFloatProperty(name, func(context context.Context) float64 {
 		return value
 	})
 }
 
-func NewCustomBooleanProperty(name string, value bool) *CustomProperty {
-	return NewCustomComputedBooleanProperty(name, func(context context.Context) bool {
+func NewBooleanProperty(name string, value bool) *CustomProperty {
+	return NewComputedBooleanProperty(name, func(context context.Context) bool {
 		return value
 	})
 }
 
-func NewCustomSemverProperty(name string, value string) *CustomProperty {
-	return NewCustomComputedSemverProperty(name, func(context context.Context) string {
+func NewSemverProperty(name string, value string) *CustomProperty {
+	return NewComputedSemverProperty(name, func(context context.Context) string {
 		return value
 	})
 }
 
-func NewCustomComputedStringProperty(name string, value CustomStringPropertyGenerator) *CustomProperty {
+func NewComputedStringProperty(name string, value CustomStringPropertyGenerator) *CustomProperty {
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeString,
@@ -55,7 +55,7 @@ func NewCustomComputedStringProperty(name string, value CustomStringPropertyGene
 	}
 }
 
-func NewCustomComputedIntegerProperty(name string, value CustomIntegerPropertyGenerator) *CustomProperty {
+func NewComputedIntegerProperty(name string, value CustomIntegerPropertyGenerator) *CustomProperty {
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeInt,
@@ -65,7 +65,7 @@ func NewCustomComputedIntegerProperty(name string, value CustomIntegerPropertyGe
 	}
 }
 
-func NewCustomComputedFloatProperty(name string, value CustomFloatPropertyGenerator) *CustomProperty {
+func NewComputedFloatProperty(name string, value CustomFloatPropertyGenerator) *CustomProperty {
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeFloat,
@@ -75,7 +75,7 @@ func NewCustomComputedFloatProperty(name string, value CustomFloatPropertyGenera
 	}
 }
 
-func NewCustomComputedBooleanProperty(name string, value CustomBooleanPropertyGenerator) *CustomProperty {
+func NewComputedBooleanProperty(name string, value CustomBooleanPropertyGenerator) *CustomProperty {
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeBool,
@@ -85,7 +85,7 @@ func NewCustomComputedBooleanProperty(name string, value CustomBooleanPropertyGe
 	}
 }
 
-func NewCustomComputedSemverProperty(name string, value CustomSemverPropertyGenerator) *CustomProperty {
+func NewComputedSemverProperty(name string, value CustomSemverPropertyGenerator) *CustomProperty {
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeSemver,

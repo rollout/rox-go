@@ -15,9 +15,9 @@ func NewDeviceSemverProperty(name string, value string) *CustomProperty {
 }
 
 func NewDeviceComputedStringProperty(name string, value CustomStringPropertyGenerator) *CustomProperty {
-	return NewCustomComputedStringProperty("rox."+name, value)
+	return NewComputedStringProperty("rox."+name, value)
 }
 
 func NewDeviceComputedSemverProperty(name string, value CustomSemverPropertyGenerator) *CustomProperty {
-	return NewCustomComputedStringProperty("rox."+name, value)
+	return NewComputedStringProperty("rox."+name, value)
 }

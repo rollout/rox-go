@@ -6,57 +6,57 @@ import (
 )
 
 type ConfigurationFetcher interface {
-	Fetch() *configuration.ConfigurationFetchResult
+	Fetch() *configuration.FetchResult
 }
 
 type configurationFetcher struct {
 	requestConfigurationBuilder RequestConfigurationBuilder
 	request                     Request
-	configurationFetcherLogger  configurationFetcherLogger
+	fetcherLogger               configurationFetcherLogger
 }
 
-func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBuilder, request Request, configurationFetchedInvoker *configuration.ConfigurationFetchedInvoker) ConfigurationFetcher {
+func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBuilder, request Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
 	return &configurationFetcher{
 		requestConfigurationBuilder: requestConfigurationBuilder,
 		request:                     request,
-		configurationFetcherLogger:  configurationFetcherLogger{configurationFetchedInvoker},
+		fetcherLogger:               configurationFetcherLogger{fetchedInvoker},
 	}
 }
 
-func (f *configurationFetcher) Fetch() *configuration.ConfigurationFetchResult {
+func (f *configurationFetcher) Fetch() *configuration.FetchResult {
 	source := configuration.SourceCDN
 
 	defer func() {
 		if r := recover(); r != nil {
-			f.configurationFetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, r)
+			f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, r)
 		}
 	}()
 
 	fetchResult, err := f.fetchFromCDN()
 	if err != nil {
-		f.configurationFetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
+		f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
 		return nil
 	}
 
 	if fetchResult.IsSuccessStatusCode() {
-		return configuration.NewConfigurationFetchResult(string(fetchResult.Content), source)
+		return configuration.NewFetchResult(string(fetchResult.Content), source)
 	}
 
 	if fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
-		f.configurationFetcherLogger.WriteFetchErrorToLog(source, fetchResult, configuration.SourceAPI)
+		f.fetcherLogger.WriteFetchErrorToLog(source, fetchResult, configuration.SourceAPI)
 		source = configuration.SourceAPI
 		fetchResult, err := f.fetchFromAPI()
 		if err != nil {
-			f.configurationFetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
+			f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
 			return nil
 		}
 
 		if fetchResult.IsSuccessStatusCode() {
-			return configuration.NewConfigurationFetchResult(string(fetchResult.Content), source)
+			return configuration.NewFetchResult(string(fetchResult.Content), source)
 		}
 	}
 
-	f.configurationFetcherLogger.WriteFetchErrorToLogAndInvokeFetchHandler(source, fetchResult)
+	f.fetcherLogger.WriteFetchErrorToLogAndInvokeFetchHandler(source, fetchResult)
 	return nil
 }
 

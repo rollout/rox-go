@@ -18,7 +18,7 @@ func (r *targetGroupRepository) SetTargetGroups(targetGroups []*model.TargetGrou
 
 func (r *targetGroupRepository) GetTargetGroup(id string) *model.TargetGroupModel {
 	for _, g := range r.targetGroups {
-		if g.Id == id {
+		if g.ID == id {
 			return g
 		}
 	}

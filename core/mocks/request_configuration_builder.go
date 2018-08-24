@@ -9,17 +9,17 @@ type RequestConfigurationBuilder struct {
 	mock.Mock
 }
 
-func (m RequestConfigurationBuilder) BuildForRoxy() network.RequestData {
+func (m *RequestConfigurationBuilder) BuildForRoxy() network.RequestData {
 	args := m.Called()
 	return args.Get(0).(network.RequestData)
 }
 
-func (m RequestConfigurationBuilder) BuildForCDN() network.RequestData {
+func (m *RequestConfigurationBuilder) BuildForCDN() network.RequestData {
 	args := m.Called()
 	return args.Get(0).(network.RequestData)
 }
 
-func (m RequestConfigurationBuilder) BuildForAPI() network.RequestData {
+func (m *RequestConfigurationBuilder) BuildForAPI() network.RequestData {
 	args := m.Called()
 	return args.Get(0).(network.RequestData)
 }

@@ -11,7 +11,7 @@ type RoxOptionsBuilder struct {
 	FetchInterval               time.Duration
 	ImpressionHandler           model.ImpressionHandler
 	ConfigurationFetchedHandler model.ConfigurationFetchedHandler
-	RoxyUrl                     string
+	RoxyURL                     string
 }
 
 type roxOptions struct {
@@ -20,7 +20,7 @@ type roxOptions struct {
 	fetchInterval               time.Duration
 	impressionHandler           model.ImpressionHandler
 	configurationFetchedHandler model.ConfigurationFetchedHandler
-	roxyUrl                     string
+	roxyURL                     string
 }
 
 func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
@@ -51,7 +51,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		fetchInterval:               fetchInterval,
 		impressionHandler:           builder.ImpressionHandler,
 		configurationFetchedHandler: builder.ConfigurationFetchedHandler,
-		roxyUrl:                     builder.RoxyUrl,
+		roxyURL:                     builder.RoxyURL,
 	}
 }
 
@@ -76,5 +76,5 @@ func (ro *roxOptions) ConfigurationFetchedHandler() model.ConfigurationFetchedHa
 }
 
 func (ro *roxOptions) RoxyURL() string {
-	return ro.roxyUrl
+	return ro.roxyURL
 }

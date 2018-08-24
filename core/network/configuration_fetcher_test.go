@@ -12,13 +12,13 @@ import (
 )
 
 func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{Url: "harta.com"}
+	requestData := network.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
@@ -35,14 +35,14 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 }
 
 func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{Url: "harta1.com"}
-	requestDataAPI := network.RequestData{Url: "harta2.com"}
+	requestDataCDN := network.RequestData{URL: "harta1.com"}
+	requestDataAPI := network.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
 	request.On("SendGet", requestDataCDN).Return(nil, errors.New("not found"))
@@ -60,14 +60,14 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.
 }
 
 func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{Url: "harta1.com"}
-	requestDataAPI := network.RequestData{Url: "harta2.com"}
+	requestDataCDN := network.RequestData{URL: "harta1.com"}
+	requestDataAPI := network.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(response, nil)
@@ -85,14 +85,14 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *te
 }
 
 func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{Url: "harta1.com"}
-	requestDataAPI := network.RequestData{Url: "harta2.com"}
+	requestDataCDN := network.RequestData{URL: "harta1.com"}
+	requestDataAPI := network.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
 	responseCDN := &network.Response{StatusCode: http.StatusNotFound}
@@ -112,14 +112,14 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 }
 
 func TestConfigurationFetcherWillReturnNullDataWhenBothNotFound(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{Url: "harta1.com"}
-	requestDataAPI := network.RequestData{Url: "harta2.com"}
+	requestDataCDN := network.RequestData{URL: "harta1.com"}
+	requestDataAPI := network.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound}
 	responseCDN := &network.Response{StatusCode: http.StatusNotFound}

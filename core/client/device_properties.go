@@ -24,11 +24,11 @@ func (dp *deviceProperties) GetAllProperties() map[string]string {
 		consts.PropertyTypeVersionName.Name:  dp.roxOptions.Version(),
 		consts.PropertyTypeLibVersion.Name:   dp.LibVersion(),
 		consts.PropertyTypeRolloutBuild.Name: "50",
-		consts.PropertyTypeApiVersion.Name:   consts.BuildApiVersion,
+		consts.PropertyTypeAPIVersion.Name:   consts.BuildAPIVersion,
 		consts.PropertyTypeAppVersion.Name:   dp.roxOptions.Version(),
 		consts.PropertyTypeAppRelease.Name:   dp.roxOptions.Version(),
-		consts.PropertyTypeDistinctId.Name:   dp.DistinctId(),
-		consts.PropertyTypeAppKey.Name:       dp.sdkSettings.ApiKey(),
+		consts.PropertyTypeDistinctID.Name:   dp.DistinctID(),
+		consts.PropertyTypeAppKey.Name:       dp.sdkSettings.APIKey(),
 		consts.PropertyTypePlatform.Name:     consts.BuildPlatform,
 	}
 }
@@ -49,6 +49,6 @@ func (dp *deviceProperties) RolloutKey() string {
 	return dp.GetAllProperties()[consts.PropertyTypeAppKey.Name]
 }
 
-func (*deviceProperties) DistinctId() string {
+func (*deviceProperties) DistinctID() string {
 	return "stam"
 }

@@ -26,5 +26,5 @@ func TestExperimentRepositoryWillReturnWhenFound(t *testing.T) {
 	expRepo := repositories.NewExperimentRepository()
 	expRepo.SetExperiments(exp)
 
-	assert.Equal(t, "1", expRepo.GetExperimentByFlag("a").Id)
+	assert.Equal(t, "1", expRepo.GetExperimentByFlag("a").ID)
 }

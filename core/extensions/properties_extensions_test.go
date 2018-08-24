@@ -15,7 +15,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsString(t *testing.T) {
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomStringProperty("testKey", "test"))
+	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("testKey", "test"))
 
 	assert.Equal(t, true, parser.EvaluateExpression(`eq("test", property("testKey"))`, nil).Value())
 }
@@ -25,7 +25,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsInt(t *testing.T) {
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomIntegerProperty("testKey", 3))
+	customPropertiesRepository.AddCustomProperty(properties.NewIntegerProperty("testKey", 3))
 
 	assert.Equal(t, true, parser.EvaluateExpression(`eq(3, property("testKey"))`, nil).Value())
 }
@@ -35,7 +35,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsFloat(t *testing.T) {
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomFloatProperty("testKey", 3.3))
+	customPropertiesRepository.AddCustomProperty(properties.NewFloatProperty("testKey", 3.3))
 
 	assert.Equal(t, true, parser.EvaluateExpression(`eq(3.3, property("testKey"))`, nil).Value())
 }
@@ -45,7 +45,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextString(t *testin
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomComputedStringProperty("CustomPropertyTestKey", func(context context.Context) string {
+	customPropertiesRepository.AddCustomProperty(properties.NewComputedStringProperty("CustomPropertyTestKey", func(context context.Context) string {
 		return context.Get("ContextTestKey").(string)
 	}))
 
@@ -58,7 +58,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextInt(t *testing.T
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
+	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
 	}))
 
@@ -71,7 +71,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntWithString(t 
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
+	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
 	}))
 
@@ -84,7 +84,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntNotEqual(t *t
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
+	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
 	}))
 
@@ -97,7 +97,7 @@ func TestPropertiesExtensionsUnknownProperty(t *testing.T) {
 	parser := roxx.NewParser()
 	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
-	customPropertiesRepository.AddCustomProperty(properties.NewCustomStringProperty("testKey", "test"))
+	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("testKey", "test"))
 
 	assert.Equal(t, false, parser.EvaluateExpression(`eq("test", property("testKey1"))`, nil).Value())
 }

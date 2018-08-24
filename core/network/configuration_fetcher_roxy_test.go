@@ -12,13 +12,13 @@ import (
 )
 
 func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{Url: "harta.com"}
+	requestData := network.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
@@ -35,13 +35,13 @@ func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
 }
 
 func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithException(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{Url: "harta.com"}
+	requestData := network.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
 	request.On("SendGet", requestData).Return(nil, errors.New("not found"))
 
@@ -56,13 +56,13 @@ func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithException(t *tes
 }
 
 func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithHttpStatus(t *testing.T) {
-	confFetchInvoker := configuration.NewConfigurationFetchedInvoker()
+	confFetchInvoker := configuration.NewFetchedInvoker()
 	numberOfTimesCalled := 0
-	confFetchInvoker.RegisterConfigurationFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{Url: "harta.com"}
+	requestData := network.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound, Content: []byte("harto")}
 	request.On("SendGet", requestData).Return(response, nil)

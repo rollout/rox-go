@@ -15,7 +15,7 @@ func TestCustomPropertyRepositoryWillReturnNullWhenPropNotFound(t *testing.T) {
 
 func TestCustomPropertyRepositoryWillAddProp(t *testing.T) {
 	repo := repositories.NewCustomPropertyRepository()
-	cp := properties.NewCustomStringProperty("prop1", "123")
+	cp := properties.NewStringProperty("prop1", "123")
 	repo.AddCustomProperty(cp)
 
 	assert.Equal(t, "prop1", repo.GetCustomProperty("prop1").Name)
@@ -23,8 +23,8 @@ func TestCustomPropertyRepositoryWillAddProp(t *testing.T) {
 
 func TestCustomPropertyRepositoryWillNotOverrideProp(t *testing.T) {
 	repo := repositories.NewCustomPropertyRepository()
-	cp := properties.NewCustomStringProperty("prop1", "123")
-	cp2 := properties.NewCustomStringProperty("prop1", "234")
+	cp := properties.NewStringProperty("prop1", "123")
+	cp2 := properties.NewStringProperty("prop1", "234")
 
 	repo.AddCustomPropertyIfNotExists(cp)
 	repo.AddCustomPropertyIfNotExists(cp2)
@@ -34,8 +34,8 @@ func TestCustomPropertyRepositoryWillNotOverrideProp(t *testing.T) {
 
 func TestCustomPropertyRepositoryWillOverrideProp(t *testing.T) {
 	repo := repositories.NewCustomPropertyRepository()
-	cp := properties.NewCustomStringProperty("prop1", "123")
-	cp2 := properties.NewCustomStringProperty("prop1", "234")
+	cp := properties.NewStringProperty("prop1", "123")
+	cp2 := properties.NewStringProperty("prop1", "234")
 
 	repo.AddCustomPropertyIfNotExists(cp)
 	repo.AddCustomProperty(cp2)
@@ -45,7 +45,7 @@ func TestCustomPropertyRepositoryWillOverrideProp(t *testing.T) {
 
 func TestCustomPropertyRepositoryWillRaisePropAddedEvent(t *testing.T) {
 	repo := repositories.NewCustomPropertyRepository()
-	cp := properties.NewCustomStringProperty("prop1", "123")
+	cp := properties.NewStringProperty("prop1", "123")
 
 	var propFromEvent *properties.CustomProperty
 	repo.RegisterCustomPropertyAddedHandler(func(property *properties.CustomProperty) {

@@ -28,9 +28,8 @@ func (ev EvaluationResult) StringValue() string {
 	} else if value, ok := ev.value.(bool); ok {
 		if value {
 			return FlagTrueValue
-		} else {
-			return FlagFalseValue
 		}
+		return FlagFalseValue
 	}
 
 	return ""

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctId(t *testing.T) {
+func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.T) {
 	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("1")
 
@@ -17,7 +17,7 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctId(t *testing.
 	buid.On("GetValue").Return("123")
 
 	deviceProps := &mocks.DeviceProperties{}
-	deviceProps.On("DistinctId").Return("123")
+	deviceProps.On("DistinctID").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":        "123",
 		"api_version":    "4.0.0",
@@ -28,7 +28,7 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctId(t *testing.
 	requestConfiguraitonBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
 	result := requestConfiguraitonBuilder.BuildForCDN()
 
-	assert.Equal(t, fmt.Sprintf("%s/123", consts.EnvironmentCDNPath()), result.Url)
+	assert.Equal(t, fmt.Sprintf("%s/123", consts.EnvironmentCDNPath()), result.URL)
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
 }
 
@@ -43,7 +43,7 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 	})
 
 	deviceProps := &mocks.DeviceProperties{}
-	deviceProps.On("DistinctId").Return("123")
+	deviceProps.On("DistinctID").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":     "123",
 		"api_version": "4.0.0",
@@ -53,7 +53,7 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon")
 	result := requestConfigurationBuilder.BuildForRoxy()
 
-	assert.Equal(t, "http://bimba.bobi.o.ponpon/device/request_configuration", result.Url)
+	assert.Equal(t, "http://bimba.bobi.o.ponpon/device/request_configuration", result.URL)
 	assert.Equal(t, "123", result.QueryParams["app_key"])
 	assert.Equal(t, "4.0.0", result.QueryParams["api_version"])
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
@@ -73,7 +73,7 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 	})
 
 	deviceProps := &mocks.DeviceProperties{}
-	deviceProps.On("DistinctId").Return("123")
+	deviceProps.On("DistinctID").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":     "123",
 		"api_version": "4.0.0",
@@ -83,7 +83,7 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
 	result := requestConfigurationBuilder.BuildForAPI()
 
-	assert.Equal(t, consts.EnvironmentAPIPath(), result.Url)
+	assert.Equal(t, consts.EnvironmentAPIPath(), result.URL)
 	assert.Equal(t, "123", result.QueryParams["app_key"])
 	assert.Equal(t, "4.0.0", result.QueryParams["api_version"])
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])

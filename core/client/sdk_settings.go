@@ -14,7 +14,7 @@ func NewSdkSettings(apiKey, devModeSecret string) model.SdkSettings {
 	}
 }
 
-func (s sdkSettings) ApiKey() string {
+func (s sdkSettings) APIKey() string {
 	return s.apiKey
 }
 

@@ -7,23 +7,23 @@ import (
 )
 
 type configurationFetcherLogger struct {
-	configurationFetchedInvoker *configuration.ConfigurationFetchedInvoker
+	fetchedInvoker *configuration.FetchedInvoker
 }
 
-func (fl *configurationFetcherLogger) WriteFetchErrorToLogAndInvokeFetchHandler(source configuration.ConfigurationSource, response *Response) {
+func (fl *configurationFetcherLogger) WriteFetchErrorToLogAndInvokeFetchHandler(source configuration.Source, response *Response) {
 	// TODO logging
 	fmt.Printf("Failed to fetch from %s. http error code: %d\n", source, response.StatusCode)
-	fl.configurationFetchedInvoker.InvokeError(model.FetcherErrorNetwork)
+	fl.fetchedInvoker.InvokeError(model.FetcherErrorNetwork)
 }
 
-func (fl *configurationFetcherLogger) WriteFetchErrorToLog(source configuration.ConfigurationSource, response *Response, nextSource configuration.ConfigurationSource) {
+func (fl *configurationFetcherLogger) WriteFetchErrorToLog(source configuration.Source, response *Response, nextSource configuration.Source) {
 	retryMsg := fmt.Sprintf("Trying from %s. ", nextSource)
 	// TODO logging
 	fmt.Printf("Failed to fetch from %s. %shttp error code: %d\n", source, retryMsg, response.StatusCode)
 }
 
-func (fl *configurationFetcherLogger) WriteFetchExceptionToLogAndInvokeFetchHandler(source configuration.ConfigurationSource, ex interface{}) {
+func (fl *configurationFetcherLogger) WriteFetchExceptionToLogAndInvokeFetchHandler(source configuration.Source, ex interface{}) {
 	// TODO logging
 	fmt.Printf("Failed to fetch configuration. Source: %s. Ex: %s\n", source, ex)
-	fl.configurationFetchedInvoker.InvokeError(model.FetcherErrorNetwork)
+	fl.fetchedInvoker.InvokeError(model.FetcherErrorNetwork)
 }

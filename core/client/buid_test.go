@@ -17,7 +17,7 @@ func TestBUIDWillGenerateCorrectMD5Value(t *testing.T) {
 	flagRepo := &mocks.FlagRepository{}
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flag})
 
-	cp := properties.NewCustomStringProperty("prop1", "123")
+	cp := properties.NewStringProperty("prop1", "123")
 
 	cpRepo := &mocks.CustomPropertyRepository{}
 	cpRepo.On("GetAllCustomProperties").Return([]*properties.CustomProperty{cp})
@@ -59,7 +59,7 @@ func TestBUIDWillSerializeFlags(t *testing.T) {
 }
 
 func TestBUIDWillSerializeProps(t *testing.T) {
-	cp := properties.NewCustomStringProperty("prop1", "123")
+	cp := properties.NewStringProperty("prop1", "123")
 
 	cpRepo := &mocks.CustomPropertyRepository{}
 	cpRepo.On("GetAllCustomProperties").Return([]*properties.CustomProperty{cp})

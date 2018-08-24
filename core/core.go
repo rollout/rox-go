@@ -28,11 +28,11 @@ type Core struct {
 	flagSetter                  *entities.FlagSetter
 	parser                      roxx.Parser
 	impressionInvoker           model.ImpressionInvoker
-	configurationFetchedInvoker *configuration.ConfigurationFetchedInvoker
+	configurationFetchedInvoker *configuration.FetchedInvoker
 	sdkSettings                 model.SdkSettings
 	configurationFetcher        network.ConfigurationFetcher
 	errorReporter               reporting.ErrorReporter
-	lastConfigurations          *configuration.ConfigurationFetchResult
+	lastConfigurations          *configuration.FetchResult
 }
 
 func NewCore() *Core {
@@ -53,7 +53,7 @@ func NewCore() *Core {
 		targetGroupRepository:    targetGroupRepository,
 		experimentRepository:     experimentRepository,
 		parser:                   parser,
-		configurationFetchedInvoker: configuration.NewConfigurationFetchedInvoker(),
+		configurationFetchedInvoker: configuration.NewFetchedInvoker(),
 		registerer:                  register.NewRegisterer(flagRepository),
 	}
 }
@@ -90,7 +90,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	}
 
 	if roxOptions != nil && roxOptions.ConfigurationFetchedHandler() != nil {
-		core.configurationFetchedInvoker.RegisterConfigurationFetchedHandler(roxOptions.ConfigurationFetchedHandler())
+		core.configurationFetchedInvoker.RegisterFetchedHandler(roxOptions.ConfigurationFetchedHandler())
 	}
 
 	done := make(chan struct{})
@@ -126,7 +126,7 @@ func (core *Core) Fetch() <-chan struct{} {
 			return
 		}
 
-		configurationParser := configuration.NewConfigurationParser(security.NewSignatureVerifier(), core.errorReporter, core.configurationFetchedInvoker)
+		configurationParser := configuration.NewParser(security.NewSignatureVerifier(), core.errorReporter, core.configurationFetchedInvoker)
 		config := configurationParser.Parse(result, core.sdkSettings)
 		if config != nil {
 			core.experimentRepository.SetExperiments(config.Experiments)

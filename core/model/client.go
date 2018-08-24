@@ -11,7 +11,7 @@ type DeviceProperties interface {
 	GetAllProperties() map[string]string
 	RolloutEnvironment() string
 	LibVersion() string
-	DistinctId() string
+	DistinctID() string
 	RolloutKey() string
 }
 
@@ -25,7 +25,7 @@ type RoxOptions interface {
 }
 
 type SdkSettings interface {
-	ApiKey() string
+	APIKey() string
 	DevModeSecret() string
 }
 

@@ -18,7 +18,7 @@ type request struct {
 }
 
 type RequestData struct {
-	Url         string
+	URL         string
 	QueryParams map[string]string
 }
 
@@ -32,7 +32,7 @@ func NewRequest(httpClient *http.Client) Request {
 }
 
 func (r *request) SendGet(requestData RequestData) (*Response, error) {
-	uri, err := requestData.UrlWithQuery()
+	uri, err := requestData.URLWithQuery()
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +61,8 @@ func (r *request) SendPost(uri string, content interface{}) (*Response, error) {
 	return &Response{resp.StatusCode, respContent}, err
 }
 
-func (requestData RequestData) UrlWithQuery() (*url.URL, error) {
-	uri, err := url.Parse(requestData.Url)
+func (requestData RequestData) URLWithQuery() (*url.URL, error) {
+	uri, err := url.Parse(requestData.URL)
 	if err != nil {
 		return nil, err
 	}

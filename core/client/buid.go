@@ -14,7 +14,7 @@ var buidGenerators = []*consts.PropertyType{
 	consts.PropertyTypePlatform,
 	consts.PropertyTypeAppKey,
 	consts.PropertyTypeLibVersion,
-	consts.PropertyTypeApiVersion,
+	consts.PropertyTypeAPIVersion,
 	consts.PropertyTypeCustomProperties,
 	consts.PropertyTypeFeatureFlags,
 	consts.PropertyTypeRemoteVariables,
