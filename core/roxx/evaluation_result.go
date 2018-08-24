@@ -4,22 +4,22 @@ type EvaluationResult struct {
 	value interface{}
 }
 
+func NewEvaluationResult(value interface{}) EvaluationResult {
+	return EvaluationResult{value: value}
+}
+
 func (ev EvaluationResult) Value() interface{} {
 	return ev.value
 }
 
-func (ev EvaluationResult) BoolValue() *bool {
-	var result *bool
-
+func (ev EvaluationResult) BoolValue() bool {
 	if ev.value == nil {
-		result = new(bool)
-		*result = false
+		return false
 	} else if value, ok := ev.value.(bool); ok {
-		result = new(bool)
-		*result = value
+		return value
 	}
 
-	return result
+	return false
 }
 
 func (ev EvaluationResult) StringValue() string {

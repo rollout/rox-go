@@ -7,6 +7,13 @@ import (
 	"github.com/rollout/rox-go/core/utils"
 )
 
+type internalVariant interface {
+	Condition() string
+	Parser() roxx.Parser
+	ImpressionInvoker() model.ImpressionInvoker
+	ClientExperiment() *model.Experiment
+}
+
 type variant struct {
 	defaultValue      string
 	options           []string
@@ -83,4 +90,20 @@ func (v *variant) GetValue(ctx context.Context) string {
 	}
 
 	return returnValue
+}
+
+func (v *variant) Condition() string {
+	return v.condition
+}
+
+func (v *variant) Parser() roxx.Parser {
+	return v.parser
+}
+
+func (v *variant) ImpressionInvoker() model.ImpressionInvoker {
+	return v.impressionInvoker
+}
+
+func (v *variant) ClientExperiment() *model.Experiment {
+	return v.clientExperiment
 }

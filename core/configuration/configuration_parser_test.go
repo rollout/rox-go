@@ -1,16 +1,19 @@
 package configuration_test
 
 import (
+	"fmt"
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 )
 
 func TestConfigurationParserWillReturnNullWhenNoConfig(t *testing.T) {
-	errRe := &mockedErrorReporter{}
-	sf := &mockedSignatureVerifier{}
+	errRe := &mocks.ErrorReporter{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 	cfi := configuration.NewConfigurationFetchedInvoker()
 	var cfiEvent *model.ConfigurationFetchedArgs
@@ -26,8 +29,8 @@ func TestConfigurationParserWillReturnNullWhenNoConfig(t *testing.T) {
 }
 
 func TestConfigurationParserWillReturnNullWhenConfigWithNoData(t *testing.T) {
-	errRe := &mockedErrorReporter{}
-	sf := &mockedSignatureVerifier{}
+	errRe := &mocks.ErrorReporter{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 	cfi := configuration.NewConfigurationFetchedInvoker()
 	var cfiEvent *model.ConfigurationFetchedArgs
@@ -60,10 +63,10 @@ func TestConfigurationParserWillReturnNullWhenUnexpectedException(t *testing.T) 
 	}`)
 	configFetchResult := configuration.NewConfigurationFetchResult(json, configuration.SourceCDN)
 
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("ApiKey").Return("12345")
 
-	sf := &mockedSignatureVerifier{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 
 	cfi := configuration.NewConfigurationFetchedInvoker()
@@ -87,8 +90,8 @@ func TestConfigurationParserWillReturnNullWhenInvalidJson(t *testing.T) {
 	}`
 	configFetchResult := configuration.NewConfigurationFetchResult(json, configuration.SourceCDN)
 
-	errRe := &mockedErrorReporter{}
-	sf := &mockedSignatureVerifier{}
+	errRe := &mocks.ErrorReporter{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 
 	cfi := configuration.NewConfigurationFetchedInvoker()
@@ -122,9 +125,9 @@ func TestConfigurationParserWillReturnNullWhenWrongSignature(t *testing.T) {
 	}`)
 	configFetchResult := configuration.NewConfigurationFetchResult(json, configuration.SourceAPI)
 
-	errRe := &mockedErrorReporter{}
+	errRe := &mocks.ErrorReporter{}
 
-	sf := &mockedSignatureVerifier{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(false)
 
 	cfi := configuration.NewConfigurationFetchedInvoker()
@@ -159,12 +162,12 @@ func TestConfigurationParserWillReturnNullWhenWrongApiKey(t *testing.T) {
 
 	configFetchResult := configuration.NewConfigurationFetchResult(json, configuration.SourceAPI)
 
-	errRe := &mockedErrorReporter{}
+	errRe := &mocks.ErrorReporter{}
 
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("ApiKey").Return("123")
 
-	sf := &mockedSignatureVerifier{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 
 	cfi := configuration.NewConfigurationFetchedInvoker()
@@ -200,12 +203,12 @@ func TestConfigurationParserWillParseExperimentsAndTargetGroups(t *testing.T) {
 
 	configFetchResult := configuration.NewConfigurationFetchResult(json, configuration.SourceAPI)
 
-	errRe := &mockedErrorReporter{}
+	errRe := &mocks.ErrorReporter{}
 
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("ApiKey").Return("12345")
 
-	sf := &mockedSignatureVerifier{}
+	sf := &mocks.SignatureVerifier{}
 	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
 
 	cfi := configuration.NewConfigurationFetchedInvoker()
@@ -240,4 +243,11 @@ func TestConfigurationParserWillParseExperimentsAndTargetGroups(t *testing.T) {
 	assert.Equal(t, 1, len(conf.Experiments[1].Flags))
 	assert.Equal(t, "Invitations.isInvitationsEnabled", conf.Experiments[1].Flags[0])
 	assert.Equal(t, 0, len(conf.Experiments[1].Labels))
+}
+
+func mergeNestedAndMasterJson(nestedJson, masterJson string) string {
+	nestedJson = strings.Replace(nestedJson, "\n", `\n`, -1)
+	nestedJson = strings.Replace(nestedJson, "\t", ` `, -1)
+	nestedJson = strings.Replace(nestedJson, `"`, `\"`, -1)
+	return fmt.Sprintf(masterJson, nestedJson)
 }

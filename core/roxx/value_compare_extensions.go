@@ -3,6 +3,7 @@ package roxx
 import (
 	"github.com/hashicorp/go-version"
 	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/utils"
 	"strings"
 )
 
@@ -19,8 +20,8 @@ func (e *ValueCompareExtensions) Extend() {
 		op1 := stack.Pop()
 		op2 := stack.Pop()
 
-		number1, ok1 := e.toFloat(op1)
-		number2, ok2 := e.toFloat(op2)
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
 
 		if !ok1 || !ok2 {
 			stack.Push(false)
@@ -33,8 +34,8 @@ func (e *ValueCompareExtensions) Extend() {
 		op1 := stack.Pop()
 		op2 := stack.Pop()
 
-		number1, ok1 := e.toFloat(op1)
-		number2, ok2 := e.toFloat(op2)
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
 
 		if !ok1 || !ok2 {
 			stack.Push(false)
@@ -47,8 +48,8 @@ func (e *ValueCompareExtensions) Extend() {
 		op1 := stack.Pop()
 		op2 := stack.Pop()
 
-		number1, ok1 := e.toFloat(op1)
-		number2, ok2 := e.toFloat(op2)
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
 
 		if !ok1 || !ok2 {
 			stack.Push(false)
@@ -61,8 +62,8 @@ func (e *ValueCompareExtensions) Extend() {
 		op1 := stack.Pop()
 		op2 := stack.Pop()
 
-		number1, ok1 := e.toFloat(op1)
-		number2, ok2 := e.toFloat(op2)
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
 
 		if !ok1 || !ok2 {
 			stack.Push(false)
@@ -178,16 +179,6 @@ func (e *ValueCompareExtensions) Extend() {
 			}
 		}
 	})
-}
-
-func (e *ValueCompareExtensions) toFloat(value interface{}) (float64, bool) {
-	if value, ok := value.(float64); ok {
-		return value, true
-	}
-	if value, ok := value.(int); ok {
-		return float64(value), true
-	}
-	return 0, false
 }
 
 func (e *ValueCompareExtensions) normalizeVersions(version1, version2 string) (string, string) {

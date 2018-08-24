@@ -3,6 +3,7 @@ package network_test
 import (
 	"errors"
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
@@ -18,11 +19,11 @@ func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	})
 
 	requestData := network.RequestData{Url: "harta.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForRoxy").Return(requestData)
 
 	confFetcher := network.NewConfigurationFetcherRoxy(requestBuilder, request, confFetchInvoker)
@@ -41,10 +42,10 @@ func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithException(t *tes
 	})
 
 	requestData := network.RequestData{Url: "harta.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	request.On("SendGet", requestData).Return(nil, errors.New("not found"))
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForRoxy").Return(requestData)
 
 	confFetcher := network.NewConfigurationFetcherRoxy(requestBuilder, request, confFetchInvoker)
@@ -62,11 +63,11 @@ func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithHttpStatus(t *te
 	})
 
 	requestData := network.RequestData{Url: "harta.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound, Content: []byte("harto")}
 	request.On("SendGet", requestData).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForRoxy").Return(requestData)
 
 	confFetcher := network.NewConfigurationFetcherRoxy(requestBuilder, request, confFetchInvoker)

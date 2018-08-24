@@ -6,6 +6,7 @@ import (
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/roxx"
+	"github.com/rollout/rox-go/core/utils"
 	"math"
 )
 
@@ -33,17 +34,25 @@ func (e *ExperimentsExtensions) Extend() {
 	})
 
 	e.parser.AddOperator("isInPercentage", func(p roxx.Parser, stack *roxx.CoreStack, context context.Context) {
-		percentage := stack.Pop().(float64)
+		percentage, ok := utils.ToFloat(stack.Pop())
 		seed := stack.Pop().(string)
+
+		if !ok {
+			panic("should be number")
+		}
 
 		bucket := e.GetBucket(seed)
 		stack.Push(bucket <= percentage)
 	})
 
 	e.parser.AddOperator("isInPercentageRange", func(p roxx.Parser, stack *roxx.CoreStack, context context.Context) {
-		percentageLow := stack.Pop().(float64)
-		percentageHigh := stack.Pop().(float64)
+		percentageLow, ok1 := utils.ToFloat(stack.Pop())
+		percentageHigh, ok2 := utils.ToFloat(stack.Pop())
 		seed := stack.Pop().(string)
+
+		if !ok1 || !ok2 {
+			panic("should be number")
+		}
 
 		bucket := e.GetBucket(seed)
 		stack.Push(percentageLow <= bucket && bucket < percentageHigh)

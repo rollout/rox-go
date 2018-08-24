@@ -7,7 +7,7 @@ import (
 )
 
 type flag struct {
-	model.Variant
+	*variant
 }
 
 func NewFlag(defaultValue bool) model.Flag {
@@ -18,7 +18,7 @@ func NewFlag(defaultValue bool) model.Flag {
 		variantDefaultValue = roxx.FlagFalseValue
 	}
 	return &flag{
-		Variant: NewVariant(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}),
+		variant: NewVariant(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}).(*variant),
 	}
 }
 

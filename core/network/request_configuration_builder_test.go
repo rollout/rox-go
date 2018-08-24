@@ -3,19 +3,20 @@ package network_test
 import (
 	"fmt"
 	"github.com/rollout/rox-go/core/consts"
+	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctId(t *testing.T) {
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("1")
 
-	buid := &mockedBUID{}
+	buid := &mocks.BUID{}
 	buid.On("GetValue").Return("123")
 
-	deviceProps := &mockedDeviceProperties{}
+	deviceProps := &mocks.DeviceProperties{}
 	deviceProps.On("DistinctId").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":        "123",
@@ -32,16 +33,16 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctId(t *testing.
 }
 
 func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing.T) {
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("1")
 
-	buid := &mockedBUID{}
+	buid := &mocks.BUID{}
 	buid.On("GetValue").Return("123")
 	buid.On("GetQueryStringParts").Return(map[string]string{
 		"buid": "123",
 	})
 
-	deviceProps := &mockedDeviceProperties{}
+	deviceProps := &mocks.DeviceProperties{}
 	deviceProps.On("DistinctId").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":     "123",
@@ -62,16 +63,16 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 }
 
 func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.T) {
-	sdkSettings := &mockedSdkSettings{}
+	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("1")
 
-	buid := &mockedBUID{}
+	buid := &mocks.BUID{}
 	buid.On("GetValue").Return("123")
 	buid.On("GetQueryStringParts").Return(map[string]string{
 		"buid": "123",
 	})
 
-	deviceProps := &mockedDeviceProperties{}
+	deviceProps := &mocks.DeviceProperties{}
 	deviceProps.On("DistinctId").Return("123")
 	deviceProps.On("GetAllProperties").Return(map[string]string{
 		"app_key":     "123",

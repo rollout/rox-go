@@ -60,7 +60,7 @@ func (p *roxxParser) EvaluateExpression(expression string, context context.Conte
 				handler(p, stack, context)
 			}
 		} else {
-			return EvaluationResult{nil}
+			return NewEvaluationResult(nil)
 		}
 	}
 
@@ -68,7 +68,7 @@ func (p *roxxParser) EvaluateExpression(expression string, context context.Conte
 	if result == TokenTypeUndefined {
 		result = nil
 	}
-	return EvaluationResult{result}
+	return NewEvaluationResult(result)
 }
 
 func (p *roxxParser) setBasicOperators() {

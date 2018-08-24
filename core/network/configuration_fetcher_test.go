@@ -3,6 +3,7 @@ package network_test
 import (
 	"github.com/pkg/errors"
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
@@ -18,11 +19,11 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	})
 
 	requestData := network.RequestData{Url: "harta.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestData)
 
 	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
@@ -42,12 +43,12 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.
 
 	requestDataCDN := network.RequestData{Url: "harta1.com"}
 	requestDataAPI := network.RequestData{Url: "harta2.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
 	request.On("SendGet", requestDataCDN).Return(nil, errors.New("not found"))
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
@@ -67,12 +68,12 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *te
 
 	requestDataCDN := network.RequestData{Url: "harta1.com"}
 	requestDataAPI := network.RequestData{Url: "harta2.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(response, nil)
 	request.On("SendGet", requestDataAPI).Return(nil, errors.New("exception"))
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
@@ -92,13 +93,13 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 
 	requestDataCDN := network.RequestData{Url: "harta1.com"}
 	requestDataAPI := network.RequestData{Url: "harta2.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
 	responseCDN := &network.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
@@ -119,13 +120,13 @@ func TestConfigurationFetcherWillReturnNullDataWhenBothNotFound(t *testing.T) {
 
 	requestDataCDN := network.RequestData{Url: "harta1.com"}
 	requestDataAPI := network.RequestData{Url: "harta2.com"}
-	request := &mockedRequest{}
+	request := &mocks.Request{}
 	response := &network.Response{StatusCode: http.StatusNotFound}
 	responseCDN := &network.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	requestBuilder := &mockedRequestConfigurationBuilder{}
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
