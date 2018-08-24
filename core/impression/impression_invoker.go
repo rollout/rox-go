@@ -39,9 +39,11 @@ func (ii *impressionInvoker) RegisterImpressionHandler(handler model.ImpressionH
 
 func (ii *impressionInvoker) raiseImpressionEvent(args model.ImpressionArgs) {
 	ii.handlersMutex.RLock()
-	defer ii.handlersMutex.RUnlock()
+	handlers := make([]model.ImpressionHandler, len(ii.impressionHandlers))
+	copy(handlers, ii.impressionHandlers)
+	ii.handlersMutex.RUnlock()
 
-	for _, handler := range ii.impressionHandlers {
+	for _, handler := range handlers {
 		handler(args)
 	}
 }

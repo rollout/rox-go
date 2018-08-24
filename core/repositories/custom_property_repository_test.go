@@ -48,7 +48,7 @@ func TestCustomPropertyRepositoryWillRaisePropAddedEvent(t *testing.T) {
 	cp := properties.NewStringProperty("prop1", "123")
 
 	var propFromEvent *properties.CustomProperty
-	repo.RegisterCustomPropertyAddedHandler(func(property *properties.CustomProperty) {
+	repo.RegisterPropertyAddedHandler(func(property *properties.CustomProperty) {
 		propFromEvent = property
 	})
 

@@ -28,6 +28,6 @@ func (m *CustomPropertyRepository) GetAllCustomProperties() []*properties.Custom
 	return args.Get(0).([]*properties.CustomProperty)
 }
 
-func (m *CustomPropertyRepository) RegisterCustomPropertyAddedHandler(handler model.CustomPropertyAddedHandler) {
+func (m *CustomPropertyRepository) RegisterPropertyAddedHandler(handler model.CustomPropertyAddedHandler) {
 	m.Called(handler)
 }

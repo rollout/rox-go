@@ -10,8 +10,8 @@ type customPropertyRepository struct {
 	customProperties map[string]*properties.CustomProperty
 	mutex            sync.RWMutex
 
-	customPropertyAddedHandlers []model.CustomPropertyAddedHandler
-	handlersMutex               sync.RWMutex
+	propertyAddedHandlers []model.CustomPropertyAddedHandler
+	handlersMutex         sync.RWMutex
 }
 
 func NewCustomPropertyRepository() model.CustomPropertyRepository {
@@ -29,7 +29,7 @@ func (r *customPropertyRepository) AddCustomProperty(customProperty *properties.
 	r.customProperties[customProperty.Name] = customProperty
 	r.mutex.Unlock()
 
-	r.raiseCustomPropertyAddedEvent(customProperty)
+	r.raisePropertyAddedEvent(customProperty)
 }
 
 func (r *customPropertyRepository) AddCustomPropertyIfNotExists(customProperty *properties.CustomProperty) {
@@ -45,7 +45,7 @@ func (r *customPropertyRepository) AddCustomPropertyIfNotExists(customProperty *
 	r.mutex.Unlock()
 
 	if !ok {
-		r.raiseCustomPropertyAddedEvent(customProperty)
+		r.raisePropertyAddedEvent(customProperty)
 	}
 }
 
@@ -66,17 +66,19 @@ func (r *customPropertyRepository) GetAllCustomProperties() []*properties.Custom
 	return result
 }
 
-func (r *customPropertyRepository) RegisterCustomPropertyAddedHandler(handler model.CustomPropertyAddedHandler) {
+func (r *customPropertyRepository) RegisterPropertyAddedHandler(handler model.CustomPropertyAddedHandler) {
 	r.handlersMutex.Lock()
-	r.customPropertyAddedHandlers = append(r.customPropertyAddedHandlers, handler)
+	r.propertyAddedHandlers = append(r.propertyAddedHandlers, handler)
 	r.handlersMutex.Unlock()
 }
 
-func (r *customPropertyRepository) raiseCustomPropertyAddedEvent(property *properties.CustomProperty) {
+func (r *customPropertyRepository) raisePropertyAddedEvent(property *properties.CustomProperty) {
 	r.handlersMutex.RLock()
-	defer r.handlersMutex.RUnlock()
+	handlers := make([]model.CustomPropertyAddedHandler, len(r.propertyAddedHandlers))
+	copy(handlers, r.propertyAddedHandlers)
+	r.handlersMutex.RUnlock()
 
-	for _, handler := range r.customPropertyAddedHandlers {
+	for _, handler := range handlers {
 		handler(property)
 	}
 }

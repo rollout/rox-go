@@ -9,7 +9,7 @@ type CustomPropertyRepository interface {
 	AddCustomPropertyIfNotExists(customProperty *properties.CustomProperty)
 	GetCustomProperty(name string) *properties.CustomProperty
 	GetAllCustomProperties() []*properties.CustomProperty
-	RegisterCustomPropertyAddedHandler(handler CustomPropertyAddedHandler)
+	RegisterPropertyAddedHandler(handler CustomPropertyAddedHandler)
 }
 
 type ExperimentRepository interface {

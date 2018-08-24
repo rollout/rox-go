@@ -56,9 +56,11 @@ func (r *flagRepository) RegisterFlagAddedHandler(handler model.FlagAddedHandler
 
 func (r *flagRepository) raiseFlagAddedEvent(flag model.Variant) {
 	r.handlersMutex.RLock()
-	defer r.handlersMutex.RUnlock()
+	handlers := make([]model.FlagAddedHandler, len(r.flagAddedHandlers))
+	copy(handlers, r.flagAddedHandlers)
+	r.handlersMutex.RUnlock()
 
-	for _, handler := range r.flagAddedHandlers {
+	for _, handler := range handlers {
 		handler(flag)
 	}
 }
