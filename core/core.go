@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/context"
@@ -128,7 +129,9 @@ func (core *Core) Fetch() <-chan struct{} {
 
 		configurationParser := configuration.NewParser(security.NewSignatureVerifier(), core.errorReporter, core.configurationFetchedInvoker)
 		config := configurationParser.Parse(result, core.sdkSettings)
+		fmt.Println(config)
 		if config != nil {
+			fmt.Println(len(config.Experiments), len(config.TargetGroups), config.SignatureDate)
 			core.experimentRepository.SetExperiments(config.Experiments)
 			core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
 			core.flagSetter.SetExperiments()

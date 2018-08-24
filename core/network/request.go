@@ -2,7 +2,9 @@ package network
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -36,13 +38,18 @@ func (r *request) SendGet(requestData RequestData) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := r.httpClient.Get(uri.String())
+	request, err := http.NewRequest("GET", uri.String(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	respContent, err := ioutil.ReadAll(resp.Body)
-	return &Response{resp.StatusCode, respContent}, err
+	request.Header.Add("Accept-Encoding", "gzip")
+
+	resp, err := r.httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.readBody(resp)
 }
 
 func (r *request) SendPost(uri string, content interface{}) (*Response, error) {
@@ -52,12 +59,37 @@ func (r *request) SendPost(uri string, content interface{}) (*Response, error) {
 	}
 	buf := bytes.NewBuffer(data)
 
-	resp, err := r.httpClient.Post(uri, "application/json", buf)
+	request, err := http.NewRequest("POST", uri, buf)
 	if err != nil {
 		return nil, err
 	}
+	request.Header.Add("Accept-Encoding", "gzip")
+
+	resp, err := r.httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.readBody(resp)
+}
+
+func (r *request) readBody(resp *http.Response) (*Response, error) {
 	defer resp.Body.Close()
-	respContent, err := ioutil.ReadAll(resp.Body)
+
+	var reader io.ReadCloser
+	var err error
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	respContent, err := ioutil.ReadAll(reader)
 	return &Response{resp.StatusCode, respContent}, err
 }
 
