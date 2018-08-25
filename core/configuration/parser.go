@@ -6,18 +6,17 @@ import (
 	"fmt"
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
-	"github.com/rollout/rox-go/core/reporting"
 	"github.com/rollout/rox-go/core/security"
 	"time"
 )
 
 type Parser struct {
 	signatureVerifier security.SignatureVerifier
-	errorReporter     reporting.ErrorReporter
+	errorReporter     model.ErrorReporter
 	fetchedInvoker    *FetchedInvoker
 }
 
-func NewParser(signatureVerifier security.SignatureVerifier, errorReporter reporting.ErrorReporter, fetchedInvoker *FetchedInvoker) *Parser {
+func NewParser(signatureVerifier security.SignatureVerifier, errorReporter model.ErrorReporter, fetchedInvoker *FetchedInvoker) *Parser {
 	return &Parser{
 		signatureVerifier: signatureVerifier,
 		errorReporter:     errorReporter,

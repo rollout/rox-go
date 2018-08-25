@@ -18,9 +18,9 @@ func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{URL: "harta.com"}
+	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
@@ -41,7 +41,7 @@ func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithException(t *tes
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{URL: "harta.com"}
+	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
 	request.On("SendGet", requestData).Return(nil, errors.New("not found"))
 
@@ -62,9 +62,9 @@ func TestConfigurationFetcherRoxyWillReturnNullWhenRoxyFailsWithHttpStatus(t *te
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{URL: "harta.com"}
+	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusNotFound, Content: []byte("harto")}
+	response := &model.Response{StatusCode: http.StatusNotFound, Content: []byte("harto")}
 	request.On("SendGet", requestData).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}

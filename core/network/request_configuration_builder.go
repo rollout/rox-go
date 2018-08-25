@@ -8,9 +8,9 @@ import (
 )
 
 type RequestConfigurationBuilder interface {
-	BuildForRoxy() RequestData
-	BuildForCDN() RequestData
-	BuildForAPI() RequestData
+	BuildForRoxy() model.RequestData
+	BuildForCDN() model.RequestData
+	BuildForAPI() model.RequestData
 }
 
 type requestConfigurationBuilder struct {
@@ -29,25 +29,25 @@ func NewRequestConfigurationBuilder(sdkSettings model.SdkSettings, buid model.BU
 	}
 }
 
-func (b *requestConfigurationBuilder) BuildForRoxy() RequestData {
+func (b *requestConfigurationBuilder) BuildForRoxy() model.RequestData {
 	uri, _ := url.Parse(b.roxyURL)
 	internalURI, _ := url.Parse(consts.EnvironmentRoxyInternalPath())
 	uri = uri.ResolveReference(internalURI)
 	return b.buildRequestWithFullParams(uri.String())
 }
 
-func (b *requestConfigurationBuilder) BuildForCDN() RequestData {
-	return RequestData{
+func (b *requestConfigurationBuilder) BuildForCDN() model.RequestData {
+	return model.RequestData{
 		fmt.Sprintf("%s/%s", consts.EnvironmentCDNPath(), b.buid.GetValue()),
 		map[string]string{consts.PropertyTypeDistinctID.Name: b.deviceProperties.DistinctID()},
 	}
 }
 
-func (b *requestConfigurationBuilder) BuildForAPI() RequestData {
+func (b *requestConfigurationBuilder) BuildForAPI() model.RequestData {
 	return b.buildRequestWithFullParams(consts.EnvironmentAPIPath())
 }
 
-func (b *requestConfigurationBuilder) buildRequestWithFullParams(uri string) RequestData {
+func (b *requestConfigurationBuilder) buildRequestWithFullParams(uri string) model.RequestData {
 	queryParams := make(map[string]string)
 
 	for k, v := range b.buid.GetQueryStringParts() {
@@ -66,5 +66,5 @@ func (b *requestConfigurationBuilder) buildRequestWithFullParams(uri string) Req
 	queryParams[consts.PropertyTypeCacheMissURL.Name] = cdnData.URL
 	queryParams["devModeSecret"] = b.sdkSettings.DevModeSecret()
 
-	return RequestData{uri, queryParams}
+	return model.RequestData{uri, queryParams}
 }

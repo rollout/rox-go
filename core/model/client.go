@@ -1,8 +1,12 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type BUID interface {
+	fmt.Stringer
 	GetValue() string
 	GetQueryStringParts() map[string]string
 }

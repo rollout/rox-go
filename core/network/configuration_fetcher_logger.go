@@ -11,12 +11,12 @@ type configurationFetcherLogger struct {
 	fetchedInvoker *configuration.FetchedInvoker
 }
 
-func (fl *configurationFetcherLogger) WriteFetchErrorToLogAndInvokeFetchHandler(source configuration.Source, response *Response) {
+func (fl *configurationFetcherLogger) WriteFetchErrorToLogAndInvokeFetchHandler(source configuration.Source, response *model.Response) {
 	logging.GetLogger().Debug(fmt.Sprintf("Failed to fetch from %s. http error code: %d\n", source, response.StatusCode), nil)
 	fl.fetchedInvoker.InvokeError(model.FetcherErrorNetwork)
 }
 
-func (fl *configurationFetcherLogger) WriteFetchErrorToLog(source configuration.Source, response *Response, nextSource configuration.Source) {
+func (fl *configurationFetcherLogger) WriteFetchErrorToLog(source configuration.Source, response *model.Response, nextSource configuration.Source) {
 	retryMsg := fmt.Sprintf("Trying from %s. ", nextSource)
 	logging.GetLogger().Error(fmt.Sprintf("Failed to fetch from %s. %shttp error code: %d\n", source, retryMsg, response.StatusCode), nil)
 }

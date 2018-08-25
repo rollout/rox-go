@@ -2,15 +2,16 @@ package network
 
 import (
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/model"
 )
 
 type configurationFetcherRoxy struct {
 	requestConfigurationBuilder RequestConfigurationBuilder
-	request                     Request
+	request                     model.Request
 	fetcherLogger               configurationFetcherLogger
 }
 
-func NewConfigurationFetcherRoxy(requestConfigurationBuilder RequestConfigurationBuilder, request Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
+func NewConfigurationFetcherRoxy(requestConfigurationBuilder RequestConfigurationBuilder, request model.Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
 	return &configurationFetcherRoxy{
 		requestConfigurationBuilder: requestConfigurationBuilder,
 		request:                     request,
@@ -41,6 +42,6 @@ func (f *configurationFetcherRoxy) Fetch() *configuration.FetchResult {
 	return nil
 }
 
-func (f *configurationFetcherRoxy) fetchFromRoxy() (response *Response, err error) {
+func (f *configurationFetcherRoxy) fetchFromRoxy() (response *model.Response, err error) {
 	return f.request.SendGet(f.requestConfigurationBuilder.BuildForRoxy())
 }

@@ -4,36 +4,21 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"github.com/rollout/rox-go/core/model"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 )
-
-type Request interface {
-	SendGet(requestData RequestData) (response *Response, err error)
-	SendPost(uri string, content interface{}) (response *Response, err error)
-}
 
 type request struct {
 	httpClient *http.Client
 }
 
-type RequestData struct {
-	URL         string
-	QueryParams map[string]string
-}
-
-type Response struct {
-	StatusCode int
-	Content    []byte
-}
-
-func NewRequest(httpClient *http.Client) Request {
+func NewRequest(httpClient *http.Client) model.Request {
 	return &request{httpClient: httpClient}
 }
 
-func (r *request) SendGet(requestData RequestData) (*Response, error) {
+func (r *request) SendGet(requestData model.RequestData) (*model.Response, error) {
 	uri, err := requestData.URLWithQuery()
 	if err != nil {
 		return nil, err
@@ -52,7 +37,7 @@ func (r *request) SendGet(requestData RequestData) (*Response, error) {
 	return r.readBody(resp)
 }
 
-func (r *request) SendPost(uri string, content interface{}) (*Response, error) {
+func (r *request) SendPost(uri string, content interface{}) (*model.Response, error) {
 	data, err := json.Marshal(content)
 	if err != nil {
 		return nil, err
@@ -73,7 +58,7 @@ func (r *request) SendPost(uri string, content interface{}) (*Response, error) {
 	return r.readBody(resp)
 }
 
-func (r *request) readBody(resp *http.Response) (*Response, error) {
+func (r *request) readBody(resp *http.Response) (*model.Response, error) {
 	defer resp.Body.Close()
 
 	var reader io.ReadCloser
@@ -90,23 +75,5 @@ func (r *request) readBody(resp *http.Response) (*Response, error) {
 	}
 
 	respContent, err := ioutil.ReadAll(reader)
-	return &Response{resp.StatusCode, respContent}, err
-}
-
-func (requestData RequestData) URLWithQuery() (*url.URL, error) {
-	uri, err := url.Parse(requestData.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	q := uri.Query()
-	for k, v := range requestData.QueryParams {
-		q.Set(k, v)
-	}
-	uri.RawQuery = q.Encode()
-	return uri, nil
-}
-
-func (r Response) IsSuccessStatusCode() bool {
-	return 200 <= r.StatusCode && r.StatusCode < 300
+	return &model.Response{resp.StatusCode, respContent}, err
 }

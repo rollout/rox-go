@@ -15,3 +15,8 @@ func (m *BUID) GetQueryStringParts() map[string]string {
 	args := m.Called()
 	return args.Get(0).(map[string]string)
 }
+
+func (m *BUID) String() string {
+	args := m.Called()
+	return args.String(0)
+}

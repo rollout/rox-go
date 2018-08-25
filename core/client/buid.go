@@ -98,6 +98,10 @@ func (b *buid) serializeCustomProperties() string {
 	return string(result)
 }
 
+func (b *buid) String() string {
+	return b.buid
+}
+
 type jsonProperty struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`

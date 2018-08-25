@@ -18,9 +18,9 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 		numberOfTimesCalled++
 	})
 
-	requestData := network.RequestData{URL: "harta.com"}
+	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
 	request.On("SendGet", requestData).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
@@ -41,10 +41,10 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{URL: "harta1.com"}
-	requestDataAPI := network.RequestData{URL: "harta2.com"}
+	requestDataCDN := model.RequestData{URL: "harta1.com"}
+	requestDataAPI := model.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
 	request.On("SendGet", requestDataCDN).Return(nil, errors.New("not found"))
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
@@ -66,10 +66,10 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *te
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{URL: "harta1.com"}
-	requestDataAPI := network.RequestData{URL: "harta2.com"}
+	requestDataCDN := model.RequestData{URL: "harta1.com"}
+	requestDataAPI := model.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusNotFound}
+	response := &model.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(response, nil)
 	request.On("SendGet", requestDataAPI).Return(nil, errors.New("exception"))
 
@@ -91,11 +91,11 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{URL: "harta1.com"}
-	requestDataAPI := network.RequestData{URL: "harta2.com"}
+	requestDataCDN := model.RequestData{URL: "harta1.com"}
+	requestDataAPI := model.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
-	responseCDN := &network.Response{StatusCode: http.StatusNotFound}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
+	responseCDN := &model.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
@@ -118,11 +118,11 @@ func TestConfigurationFetcherWillReturnNullDataWhenBothNotFound(t *testing.T) {
 		numberOfTimesCalled++
 	})
 
-	requestDataCDN := network.RequestData{URL: "harta1.com"}
-	requestDataAPI := network.RequestData{URL: "harta2.com"}
+	requestDataCDN := model.RequestData{URL: "harta1.com"}
+	requestDataAPI := model.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
-	response := &network.Response{StatusCode: http.StatusNotFound}
-	responseCDN := &network.Response{StatusCode: http.StatusNotFound}
+	response := &model.Response{StatusCode: http.StatusNotFound}
+	responseCDN := &model.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 

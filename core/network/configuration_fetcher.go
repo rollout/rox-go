@@ -2,6 +2,7 @@ package network
 
 import (
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/model"
 	"net/http"
 )
 
@@ -11,11 +12,11 @@ type ConfigurationFetcher interface {
 
 type configurationFetcher struct {
 	requestConfigurationBuilder RequestConfigurationBuilder
-	request                     Request
+	request                     model.Request
 	fetcherLogger               configurationFetcherLogger
 }
 
-func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBuilder, request Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
+func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBuilder, request model.Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
 	return &configurationFetcher{
 		requestConfigurationBuilder: requestConfigurationBuilder,
 		request:                     request,
@@ -60,10 +61,10 @@ func (f *configurationFetcher) Fetch() *configuration.FetchResult {
 	return nil
 }
 
-func (f *configurationFetcher) fetchFromCDN() (response *Response, err error) {
+func (f *configurationFetcher) fetchFromCDN() (response *model.Response, err error) {
 	return f.request.SendGet(f.requestConfigurationBuilder.BuildForCDN())
 }
 
-func (f *configurationFetcher) fetchFromAPI() (response *Response, err error) {
+func (f *configurationFetcher) fetchFromAPI() (response *model.Response, err error) {
 	return f.request.SendGet(f.requestConfigurationBuilder.BuildForAPI())
 }

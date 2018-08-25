@@ -31,7 +31,7 @@ type Core struct {
 	configurationFetchedInvoker *configuration.FetchedInvoker
 	sdkSettings                 model.SdkSettings
 	configurationFetcher        network.ConfigurationFetcher
-	errorReporter               reporting.ErrorReporter
+	errorReporter               model.ErrorReporter
 	lastConfigurations          *configuration.FetchResult
 }
 
@@ -78,8 +78,9 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	// TODO http client
 	clientRequest := network.NewRequest(http.DefaultClient)
 
-	// TODO errReporterRequest := network.NewRequest(http.DefaultClient)
-	core.errorReporter = reporting.NewErrorReporter()
+	// TODO http client
+	errReporterRequest := network.NewRequest(http.DefaultClient)
+	core.errorReporter = reporting.NewErrorReporter(errReporterRequest, deviceProperties, buid)
 
 	if roxyPath != "" {
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
