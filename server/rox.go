@@ -1,10 +1,10 @@
 package server
 
 import (
-	"fmt"
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/properties"
 	"github.com/satori/go.uuid"
@@ -23,8 +23,7 @@ func NewRox() *Rox {
 func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} {
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO logger
-			fmt.Printf("Failed in Rox.Setup %s\n", r)
+			logging.GetLogger().Error("Failed in Rox.Setup", r)
 		}
 	}()
 
@@ -55,8 +54,7 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 
 		defer func() {
 			if r := recover(); r != nil {
-				// TODO logger
-				fmt.Printf("Failed in Rox.Setup %s\n", r)
+				logging.GetLogger().Error("Failed in Rox.Setup", r)
 			}
 		}()
 
@@ -81,8 +79,7 @@ func (r *Rox) Fetch() <-chan struct{} {
 
 		defer func() {
 			if r := recover(); r != nil {
-				// TODO logger
-				fmt.Printf("Failed in Rox.Fetch %s\n", r)
+				logging.GetLogger().Error("Failed in Rox.Fetch", r)
 			}
 		}()
 

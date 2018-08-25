@@ -75,8 +75,6 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 	requestConfigBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProperties, roxyPath)
 
-	// TODO gzip
-
 	// TODO http client
 	clientRequest := network.NewRequest(http.DefaultClient)
 

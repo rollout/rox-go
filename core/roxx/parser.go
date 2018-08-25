@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/logging"
 	"time"
 )
 
@@ -44,8 +45,7 @@ func (p *roxxParser) EvaluateExpression(expression string, context context.Conte
 
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO logger
-			fmt.Printf("Roxx Exception: Failed evaluate expression %s\n", r)
+			logging.GetLogger().Warn(fmt.Sprintf("Roxx Exception: Failed evaluate expression %s\n", r), nil)
 		}
 	}()
 

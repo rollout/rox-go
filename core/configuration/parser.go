@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/reporting"
 	"github.com/rollout/rox-go/core/security"
@@ -27,8 +28,7 @@ func NewParser(signatureVerifier security.SignatureVerifier, errorReporter repor
 func (cp *Parser) Parse(fetchResult *FetchResult, sdkSettings model.SdkSettings) (configuration *Configuration) {
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO logger
-			fmt.Printf("Failed to parse configurations: %s\n", r)
+			logging.GetLogger().Error("Failed to parse configurations", r)
 			cp.fetchedInvoker.InvokeError(model.FetcherErrorUnknown)
 			configuration = nil
 		}

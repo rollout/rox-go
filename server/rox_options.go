@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"time"
 )
@@ -9,6 +10,7 @@ type RoxOptionsBuilder struct {
 	Version                     string
 	DevModeKey                  string
 	FetchInterval               time.Duration
+	Logger                      logging.Logger
 	ImpressionHandler           model.ImpressionHandler
 	ConfigurationFetchedHandler model.ConfigurationFetchedHandler
 	RoxyURL                     string
@@ -43,7 +45,11 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		fetchInterval = 60 * time.Second
 	}
 
-	// TODO logger
+	if builder.Logger != nil {
+		logging.SetLogger(builder.Logger)
+	} else {
+		logging.SetLogger(NewServerLogger())
+	}
 
 	return &roxOptions{
 		version:                     version,
