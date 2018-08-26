@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type Operation = func(p Parser, stack *CoreStack, context context.Context)
-
 type Parser interface {
 	EvaluateExpression(expression string, context context.Context) EvaluationResult
 	AddOperator(name string, operation Operation)
 }
+
+type Operation = func(p Parser, stack *CoreStack, context context.Context)
 
 type roxxParser struct {
 	operatorsMap map[string]Operation
