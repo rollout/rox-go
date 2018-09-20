@@ -18,7 +18,7 @@ Rollout Go SDK. Define and use simple and advanced feature flags, remote configu
 
 ## Installation
 ```
-go get -u github.com/rollout/rox-go
+go get -u github.com/rollout/rox-go/...
 ```
 
 ## LICENSE
