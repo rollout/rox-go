@@ -48,11 +48,11 @@ func NewCore() *Core {
 	propertiesExtensions.Extend()
 
 	return &Core{
-		flagRepository:           flagRepository,
-		customPropertyRepository: customPropertyRepository,
-		targetGroupRepository:    targetGroupRepository,
-		experimentRepository:     experimentRepository,
-		parser:                   parser,
+		flagRepository:              flagRepository,
+		customPropertyRepository:    customPropertyRepository,
+		targetGroupRepository:       targetGroupRepository,
+		experimentRepository:        experimentRepository,
+		parser:                      parser,
 		configurationFetchedInvoker: configuration.NewFetchedInvoker(),
 		registerer:                  register.NewRegisterer(flagRepository),
 	}
