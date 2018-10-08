@@ -18,7 +18,7 @@ func (fl *configurationFetcherLogger) WriteFetchErrorToLogAndInvokeFetchHandler(
 
 func (fl *configurationFetcherLogger) WriteFetchErrorToLog(source configuration.Source, response *model.Response, nextSource configuration.Source) {
 	retryMsg := fmt.Sprintf("Trying from %s. ", nextSource)
-	logging.GetLogger().Error(fmt.Sprintf("Failed to fetch from %s. %shttp error code: %d\n", source, retryMsg, response.StatusCode), nil)
+	logging.GetLogger().Debug(fmt.Sprintf("Failed to fetch from %s. %shttp error code: %d\n", source, retryMsg, response.StatusCode), nil)
 }
 
 func (fl *configurationFetcherLogger) WriteFetchExceptionToLogAndInvokeFetchHandler(source configuration.Source, ex interface{}) {
