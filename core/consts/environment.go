@@ -47,9 +47,9 @@ func EnvironmentNotificationsPath() string {
 
 	switch rolloutMode {
 	case "QA":
-		return "http://127.0.0.1:8887/sse" // TODO
+		return "https://qax-push.rollout.io/sse"
 	case "LOCAL":
 		return "http://127.0.0.1:8887/sse"
 	}
-	return "http://127.0.0.1:8887/sse" // TODO
+	return "https://push.rollout.io/sse"
 }
