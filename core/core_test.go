@@ -10,6 +10,7 @@ import (
 func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("")
+	sdkSettings.On("APIKey").Return("api_key")
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
@@ -28,6 +29,7 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 func TestCoreWillCheckCoreSetupWhenNoOptions(t *testing.T) {
 	sdkSettings := &mocks.SdkSettings{}
 	sdkSettings.On("DevModeSecret").Return("")
+	sdkSettings.On("APIKey").Return("api_key")
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})

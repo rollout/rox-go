@@ -41,3 +41,15 @@ func EnvironmentAnalyticsPath() string {
 	}
 	return "https://analytic.rollout.io"
 }
+
+func EnvironmentNotificationsPath() string {
+	rolloutMode := os.Getenv("ROLLOUT_MODE")
+
+	switch rolloutMode {
+	case "QA":
+		return "https://qax-push.rollout.io/sse"
+	case "LOCAL":
+		return "http://127.0.0.1:8887/sse"
+	}
+	return "https://push.rollout.io/sse"
+}

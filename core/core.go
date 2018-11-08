@@ -3,12 +3,14 @@ package core
 import (
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
+	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/entities"
 	"github.com/rollout/rox-go/core/extensions"
 	"github.com/rollout/rox-go/core/impression"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/network"
+	"github.com/rollout/rox-go/core/notifications"
 	"github.com/rollout/rox-go/core/properties"
 	"github.com/rollout/rox-go/core/register"
 	"github.com/rollout/rox-go/core/reporting"
@@ -33,6 +35,8 @@ type Core struct {
 	configurationFetcher        network.ConfigurationFetcher
 	errorReporter               model.ErrorReporter
 	lastConfigurations          *configuration.FetchResult
+	internalFlags               model.InternalFlags
+	pushUpdatesListener         *notifications.NotificationListener
 }
 
 func NewCore() *Core {
@@ -68,8 +72,8 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
 
-	internalFlags := client.NewInternalFlags(core.experimentRepository, core.parser)
-	core.impressionInvoker = impression.NewImpressionInvoker(internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
+	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser)
+	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
@@ -88,9 +92,11 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.configurationFetcher = network.NewConfigurationFetcher(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	}
 
-	if roxOptions != nil && roxOptions.ConfigurationFetchedHandler() != nil {
-		core.configurationFetchedInvoker.RegisterFetchedHandler(roxOptions.ConfigurationFetchedHandler())
+	var configurationFetchedHandler model.ConfigurationFetchedHandler
+	if roxOptions != nil {
+		configurationFetchedHandler = roxOptions.ConfigurationFetchedHandler()
 	}
+	core.configurationFetchedInvoker.RegisterFetchedHandler(core.wrapConfigurationFetchedHandler(configurationFetchedHandler))
 
 	done := make(chan struct{})
 	go func() {
@@ -156,4 +162,33 @@ func (core *Core) AddCustomProperty(property *properties.CustomProperty) {
 
 func (core *Core) AddCustomPropertyIfNotExists(property *properties.CustomProperty) {
 	core.customPropertyRepository.AddCustomPropertyIfNotExists(property)
+}
+
+func (core *Core) wrapConfigurationFetchedHandler(handler model.ConfigurationFetchedHandler) model.ConfigurationFetchedHandler {
+	return func(args *model.ConfigurationFetchedArgs) {
+		if args.FetcherStatus != model.FetcherStatusErrorFetchedFailed {
+			core.startOrStopPushUpdatesListener()
+		}
+
+		if handler != nil {
+			handler(args)
+		}
+	}
+}
+
+func (core *Core) startOrStopPushUpdatesListener() {
+	if core.internalFlags.IsEnabled("rox.internal.pushUpdates") {
+		if core.pushUpdatesListener == nil {
+			core.pushUpdatesListener = notifications.NewNotificationListener(consts.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
+			core.pushUpdatesListener.On("changed", func(event notifications.Event) {
+				<-core.Fetch()
+			})
+			core.pushUpdatesListener.Start()
+		}
+	} else {
+		if core.pushUpdatesListener != nil {
+			core.pushUpdatesListener.Stop()
+			core.pushUpdatesListener = nil
+		}
+	}
 }
