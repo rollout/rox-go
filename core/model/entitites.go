@@ -21,3 +21,16 @@ type Flag interface {
 	Enabled(ctx context.Context, action func())
 	Disabled(ctx context.Context, action func())
 }
+
+type EntitiesProvider interface {
+	CreateFlag(defaultValue bool) Flag
+	CreateVariant(defaultValue string, options []string) Variant
+}
+
+type InternalVariant interface {
+	InternalGetValue(ctx context.Context) (returnValue string, isDefault bool)
+}
+
+type InternalFlag interface {
+	InternalIsEnabled(ctx context.Context) (isEnabled bool, isDefault bool)
+}

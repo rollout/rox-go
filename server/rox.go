@@ -128,3 +128,7 @@ func (r *Rox) SetCustomSemverProperty(name string, value string) {
 func (r *Rox) SetCustomComputedSemverProperty(name string, value properties.CustomSemverPropertyGenerator) {
 	r.core.AddCustomProperty(properties.NewComputedSemverProperty(name, value))
 }
+
+func (r *Rox) DynamicAPI() model.DynamicAPI {
+	return r.core.DynamicAPI(&ServerEntitiesProvider{})
+}

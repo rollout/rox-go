@@ -192,3 +192,7 @@ func (core *Core) startOrStopPushUpdatesListener() {
 		}
 	}
 }
+
+func (core *Core) DynamicAPI(entitiesProvider model.EntitiesProvider) model.DynamicAPI {
+	return client.NewDynamicAPI(core.flagRepository, entitiesProvider)
+}
