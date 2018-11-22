@@ -152,7 +152,7 @@ func (core *Core) Register(ns string, roxContainer interface{}) {
 
 func (core *Core) SetContext(ctx context.Context) {
 	for _, flag := range core.flagRepository.GetAllFlags() {
-		flag.SetContext(ctx)
+		flag.(model.InternalVariant).SetContext(ctx)
 	}
 }
 
@@ -191,4 +191,8 @@ func (core *Core) startOrStopPushUpdatesListener() {
 			core.pushUpdatesListener = nil
 		}
 	}
+}
+
+func (core *Core) DynamicAPI(entitiesProvider model.EntitiesProvider) model.DynamicAPI {
+	return client.NewDynamicAPI(core.flagRepository, entitiesProvider)
 }

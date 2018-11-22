@@ -21,7 +21,7 @@ func NewFlagRepository() model.FlagRepository {
 
 func (r *flagRepository) AddFlag(variant model.Variant, name string) {
 	if variant.Name() == "" {
-		variant.SetName(name)
+		variant.(model.InternalVariant).SetName(name)
 	}
 
 	r.mutex.Lock()

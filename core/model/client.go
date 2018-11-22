@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/rollout/rox-go/core/context"
 	"time"
 )
 
@@ -35,4 +36,9 @@ type SdkSettings interface {
 
 type InternalFlags interface {
 	IsEnabled(flagName string) bool
+}
+
+type DynamicAPI interface {
+	IsEnabled(name string, defaultValue bool, ctx context.Context) bool
+	Value(name string, defaultValue string, options []string, ctx context.Context) string
 }

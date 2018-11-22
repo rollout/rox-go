@@ -28,7 +28,7 @@ func TestVariantWillSetName(t *testing.T) {
 
 	assert.Equal(t, "", variant.Name())
 
-	variant.SetName("bop")
+	variant.(model.InternalVariant).SetName("bop")
 
 	assert.Equal(t, "bop", variant.Name())
 }
@@ -38,13 +38,13 @@ func TestVariantWillReturnDefaultValueWhenNoParserOrCondition(t *testing.T) {
 
 	assert.Equal(t, "1", variant.GetValue(nil))
 
-	variant.SetForEvaluation(&mocks.Parser{}, nil, nil)
+	variant.(model.InternalVariant).SetForEvaluation(&mocks.Parser{}, nil, nil)
 
 	assert.Equal(t, "1", variant.GetValue(nil))
 
 	parser := &mocks.Parser{}
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
-	variant.SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+	variant.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
 
 	assert.Equal(t, "1", variant.GetValue(nil))
 }
@@ -54,7 +54,7 @@ func TestVariantWillReturnDefaultValueWhenResultNotInOptions(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult("xxx"))
 
 	variant := NewVariant("1", []string{"2", "3"})
-	variant.SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+	variant.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
 
 	assert.Equal(t, "1", variant.GetValue(nil))
 }
@@ -64,7 +64,7 @@ func TestVariantWillReturnValueWhenOnEvaluation(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult("2"))
 
 	variant := NewVariant("1", []string{"2", "3"})
-	variant.SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+	variant.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
 
 	assert.Equal(t, "2", variant.GetValue(nil))
 }
@@ -81,7 +81,7 @@ func TestVariantWillRaiseImpression(t *testing.T) {
 	})
 
 	variant := NewVariant("1", []string{"2", "3"})
-	variant.SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), impInvoker)
+	variant.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), impInvoker)
 
 	assert.Equal(t, "2", variant.GetValue(nil))
 	assert.True(t, isImpressionRaised)

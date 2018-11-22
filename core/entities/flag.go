@@ -23,8 +23,13 @@ func NewFlag(defaultValue bool) model.Flag {
 }
 
 func (f *flag) IsEnabled(ctx context.Context) bool {
-	value := f.GetValue(ctx)
-	return value == roxx.FlagTrueValue
+	isEnabled, _ := f.InternalIsEnabled(ctx)
+	return isEnabled
+}
+
+func (f *flag) InternalIsEnabled(ctx context.Context) (isEnabled bool, isDefault bool) {
+	value, isDefault := f.InternalGetValue(ctx)
+	return value == roxx.FlagTrueValue, isDefault
 }
 
 func (f *flag) Enabled(ctx context.Context, action func()) {

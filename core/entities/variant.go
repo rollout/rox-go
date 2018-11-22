@@ -72,7 +72,12 @@ func (v *variant) SetName(name string) {
 }
 
 func (v *variant) GetValue(ctx context.Context) string {
-	returnValue := v.defaultValue
+	returnValue, _ := v.InternalGetValue(ctx)
+	return returnValue
+}
+
+func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
+	returnValue, isDefault = v.defaultValue, true
 	mergedContext := context.NewMergedContext(v.globalContext, ctx)
 
 	if v.parser != nil && v.condition != "" {
@@ -80,7 +85,7 @@ func (v *variant) GetValue(ctx context.Context) string {
 		value := evaluationResult.StringValue()
 		if value != "" {
 			if utils.ContainsString(v.options, value) {
-				returnValue = value
+				returnValue, isDefault = value, false
 			}
 		}
 	}
@@ -89,7 +94,7 @@ func (v *variant) GetValue(ctx context.Context) string {
 		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, returnValue), v.clientExperiment, mergedContext)
 	}
 
-	return returnValue
+	return returnValue, isDefault
 }
 
 func (v *variant) Condition() string {

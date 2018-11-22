@@ -5,16 +5,8 @@ import (
 	"github.com/rollout/rox-go/core/model"
 )
 
-type RoxFlag interface {
-	model.Flag
-}
-
-type roxFlag struct {
-	model.Flag
-}
+type RoxFlag = model.Flag
 
 func NewRoxFlag(defaultValue bool) RoxFlag {
-	return &roxFlag{
-		Flag: entities.NewFlag(defaultValue),
-	}
+	return entities.NewFlag(defaultValue)
 }
