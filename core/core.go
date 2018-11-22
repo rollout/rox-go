@@ -152,7 +152,7 @@ func (core *Core) Register(ns string, roxContainer interface{}) {
 
 func (core *Core) SetContext(ctx context.Context) {
 	for _, flag := range core.flagRepository.GetAllFlags() {
-		flag.SetContext(ctx)
+		flag.(model.InternalVariant).SetContext(ctx)
 	}
 }
 

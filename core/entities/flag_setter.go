@@ -49,5 +49,5 @@ func (fs *FlagSetter) SetExperiments() {
 }
 
 func (fs *FlagSetter) setFlagData(variant model.Variant, experiment *model.ExperimentModel) {
-	variant.SetForEvaluation(fs.parser, experiment, fs.impressionInvoker)
+	variant.(model.InternalVariant).SetForEvaluation(fs.parser, experiment, fs.impressionInvoker)
 }

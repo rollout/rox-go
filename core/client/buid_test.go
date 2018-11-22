@@ -12,7 +12,7 @@ import (
 
 func TestBUIDWillGenerateCorrectMD5Value(t *testing.T) {
 	flag := entities.NewFlag(false)
-	flag.SetName("flag1")
+	flag.(model.InternalVariant).SetName("flag1")
 
 	flagRepo := &mocks.FlagRepository{}
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flag})
@@ -38,7 +38,7 @@ func TestBUIDWillGenerateCorrectMD5Value(t *testing.T) {
 
 func TestBUIDWillSerializeFlags(t *testing.T) {
 	flag := entities.NewFlag(false)
-	flag.SetName("flag1")
+	flag.(model.InternalVariant).SetName("flag1")
 
 	flagRepo := &mocks.FlagRepository{}
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flag})
