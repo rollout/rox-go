@@ -26,6 +26,9 @@ type variant struct {
 }
 
 func NewVariant(defaultValue string, options []string) model.Variant {
+	if (options == nil) {
+		options = []string {}
+	}
 	allOptions := make([]string, len(options))
 	copy(allOptions, options)
 	if !utils.ContainsString(allOptions, defaultValue) {
@@ -84,9 +87,7 @@ func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isD
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
 		value := evaluationResult.StringValue()
 		if value != "" {
-			if utils.ContainsString(v.options, value) {
-				returnValue, isDefault = value, false
-			}
+			returnValue, isDefault = value, false
 		}
 	}
 

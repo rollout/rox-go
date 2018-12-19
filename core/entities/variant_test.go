@@ -10,6 +10,12 @@ import (
 	"testing"
 )
 
+func TestVariantWithoutOptions(t *testing.T) {
+	variant := NewVariant("1", nil)
+
+	assert.Equal(t, 1, len(variant.Options()))
+}
+
 func TestVariantWillNotAddDefaultToOptionsIfExists(t *testing.T) {
 	variant := NewVariant("1", []string{"1", "2", "3"})
 
@@ -56,7 +62,7 @@ func TestVariantWillReturnDefaultValueWhenResultNotInOptions(t *testing.T) {
 	variant := NewVariant("1", []string{"2", "3"})
 	variant.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
 
-	assert.Equal(t, "1", variant.GetValue(nil))
+	assert.Equal(t, "xxx", variant.GetValue(nil))
 }
 
 func TestVariantWillReturnValueWhenOnEvaluation(t *testing.T) {
