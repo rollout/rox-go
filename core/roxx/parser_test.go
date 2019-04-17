@@ -2,6 +2,8 @@ package roxx_test
 
 import (
 	"fmt"
+	"github.com/rollout/rox-go/core/extensions"
+	"github.com/rollout/rox-go/core/repositories"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/stretchr/testify/assert"
@@ -212,7 +214,9 @@ func TestParserIfThenExpressionEvaluationBoolean(t *testing.T) {
 }
 
 func TestParserInArray(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
 
 	parser.AddOperator(`mergeSeed`, func(p roxx.Parser, stack *roxx.CoreStack, context context.Context) {
 		seed1 := stack.Pop()
@@ -241,4 +245,5 @@ func TestParserInArray(t *testing.T) {
 	assert.Equal(t, `07915255d64730d06d2349d11ac3bfd8`, parser.EvaluateExpression(`md5("stam")`, nil).Value())
 	assert.Equal(t, `stamstam2`, parser.EvaluateExpression(`concat("stam","stam2")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`inArray(md5(concat("st","am")), ["07915255d64730d06d2349d11ac3bfd8"]`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(md5(concat("st",property("am"))), undefined)`, nil).Value())
 }

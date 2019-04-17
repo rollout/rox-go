@@ -185,16 +185,24 @@ func (p *roxxParser) setBasicOperators() {
 	})
 
 	p.AddOperator("md5", func(p Parser, stack *CoreStack, context context.Context) {
-		op1 := stack.Pop().(string)
-		hasher := md5.New()
-		hasher.Write([]byte(op1))
-		stack.Push(hex.EncodeToString(hasher.Sum(nil)))
+		op1, ok := stack.Pop().(string)
+		if ok {
+			hasher := md5.New()
+			hasher.Write([]byte(op1))
+			stack.Push(hex.EncodeToString(hasher.Sum(nil)))
+		} else {
+			stack.Push(TokenTypeUndefined)
+		}
 	})
 
 	p.AddOperator("concat", func(p Parser, stack *CoreStack, context context.Context) {
-		op1 := stack.Pop().(string)
-		op2 := stack.Pop().(string)
-		stack.Push(fmt.Sprintf("%s%s", op1, op2))
+		op1, ok1 := stack.Pop().(string)
+		op2, ok2 := stack.Pop().(string)
+		if ok1 && ok2 {
+			stack.Push(fmt.Sprintf("%s%s", op1, op2))
+		} else {
+			stack.Push(TokenTypeUndefined)
+		}
 	})
 }
 
