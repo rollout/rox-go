@@ -7,6 +7,7 @@ import (
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/logging"
 	"time"
+	"encoding/base64"
 )
 
 type Parser interface {
@@ -200,6 +201,16 @@ func (p *roxxParser) setBasicOperators() {
 		op2, ok2 := stack.Pop().(string)
 		if ok1 && ok2 {
 			stack.Push(fmt.Sprintf("%s%s", op1, op2))
+		} else {
+			stack.Push(TokenTypeUndefined)
+		}
+	})
+
+	p.AddOperator("b64d", func(p Parser, stack *CoreStack, context context.Context) {
+		op1, ok1 := stack.Pop().(string)
+		if ok1 {
+			sDec, _ := base64.StdEncoding.DecodeString(op1);
+			stack.Push(string(sDec))
 		} else {
 			stack.Push(TokenTypeUndefined)
 		}
