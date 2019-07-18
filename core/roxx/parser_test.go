@@ -246,4 +246,7 @@ func TestParserInArray(t *testing.T) {
 	assert.Equal(t, `stamstam2`, parser.EvaluateExpression(`concat("stam","stam2")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`inArray(md5(concat("st","am")), ["07915255d64730d06d2349d11ac3bfd8"]`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`eq(md5(concat("st",property("am"))), undefined)`, nil).Value())
+
+	assert.Equal(t, `stam`, parser.EvaluateExpression(`b64d("c3RhbQ==")`, nil).Value())
+	assert.Equal(t, `𩸽`, parser.EvaluateExpression(`b64d("8Km4vQ==")`, nil).Value())
 }
