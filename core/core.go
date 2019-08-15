@@ -1,6 +1,8 @@
 package core
 
 import (
+	"net/http"
+
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/consts"
@@ -18,7 +20,6 @@ import (
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/rollout/rox-go/core/security"
 	"github.com/rollout/rox-go/core/utils"
-	"net/http"
 )
 
 type Core struct {
@@ -31,6 +32,7 @@ type Core struct {
 	parser                      roxx.Parser
 	impressionInvoker           model.ImpressionInvoker
 	configurationFetchedInvoker *configuration.FetchedInvoker
+	stateSender                 *network.StateSender
 	sdkSettings                 model.SdkSettings
 	configurationFetcher        network.ConfigurationFetcher
 	errorReporter               model.ErrorReporter
@@ -89,6 +91,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	if roxyPath != "" {
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	} else {
+		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository)
 		core.configurationFetcher = network.NewConfigurationFetcher(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	}
 
@@ -112,6 +115,10 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 			go utils.RunPeriodicTask(func() {
 				<-core.Fetch()
 			}, roxOptions.FetchInterval())
+		}
+
+		if core.stateSender != nil {
+			core.stateSender.Send()
 		}
 	}()
 	return done
@@ -138,7 +145,7 @@ func (core *Core) Fetch() <-chan struct{} {
 			core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
 			core.flagSetter.SetExperiments()
 
-			hasChanges := core.lastConfigurations == nil || core.lastConfigurations.Data != result.Data
+			hasChanges := core.lastConfigurations == nil || *core.lastConfigurations != *result
 			core.lastConfigurations = result
 			core.configurationFetchedInvoker.Invoke(model.FetcherStatusAppliedFromNetwork, config.SignatureDate, hasChanges)
 		}

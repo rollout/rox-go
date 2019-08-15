@@ -2,13 +2,14 @@ package network_test
 
 import (
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
@@ -20,7 +21,7 @@ func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
 
 	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
-	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"data\": \"harti\"}")}
 	request.On("SendGet", requestData).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
@@ -29,7 +30,7 @@ func TestConfigurationFetcherRoxyWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	confFetcher := network.NewConfigurationFetcherRoxy(requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
-	assert.Equal(t, "harti", result.Data)
+	assert.Equal(t, "harti", result.ParsedData.Data)
 	assert.Equal(t, configuration.SourceRoxy, result.Source)
 	assert.Equal(t, 0, numberOfTimesCalled)
 }

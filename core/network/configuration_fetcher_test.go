@@ -1,14 +1,15 @@
 package network_test
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/pkg/errors"
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
@@ -20,7 +21,7 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 
 	requestData := model.RequestData{URL: "harta.com"}
 	request := &mocks.Request{}
-	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harti")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"data\": \"harti\"}")}
 	request.On("SendGet", requestData).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
@@ -29,7 +30,7 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
-	assert.Equal(t, "harti", result.Data)
+	assert.Equal(t, "harti", result.ParsedData.Data)
 	assert.Equal(t, configuration.SourceCDN, result.Source)
 	assert.Equal(t, 0, numberOfTimesCalled)
 }
@@ -94,10 +95,10 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 	requestDataCDN := model.RequestData{URL: "harta1.com"}
 	requestDataAPI := model.RequestData{URL: "harta2.com"}
 	request := &mocks.Request{}
-	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("harto")}
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"data\": \"harto\"}")}
 	responseCDN := &model.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
-	request.On("SendGet", requestDataAPI).Return(response, nil)
+	request.On("SendPost", requestDataAPI.URL, requestDataAPI.QueryParams).Return(response, nil)
 
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
@@ -106,7 +107,7 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
-	assert.Equal(t, "harto", result.Data)
+	assert.Equal(t, "harto", result.ParsedData.Data)
 	assert.Equal(t, configuration.SourceAPI, result.Source)
 	assert.Equal(t, 0, numberOfTimesCalled)
 }

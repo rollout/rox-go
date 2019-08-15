@@ -1,6 +1,9 @@
 package configuration
 
-import "strconv"
+import (
+	"encoding/json"
+	"strconv"
+)
 
 type Source int
 
@@ -23,10 +26,20 @@ func (cs Source) String() string {
 }
 
 type FetchResult struct {
-	Data   string
-	Source Source
+	ParsedData jsonConfiguration
+	Source     Source
 }
 
 func NewFetchResult(data string, source Source) *FetchResult {
-	return &FetchResult{Data: data, Source: source}
+	if data == "" {
+		return nil
+	}
+
+	var parsedData jsonConfiguration
+	err := json.Unmarshal([]byte(data), &parsedData)
+	if err != nil {
+		return nil
+	}
+
+	return &FetchResult{ParsedData: parsedData, Source: source}
 }

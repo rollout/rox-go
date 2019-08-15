@@ -2,12 +2,12 @@ package configuration
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"time"
+
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/security"
-	"time"
 )
 
 type Parser struct {
@@ -33,19 +33,7 @@ func (cp *Parser) Parse(fetchResult *FetchResult, sdkSettings model.SdkSettings)
 		}
 	}()
 
-	if fetchResult == nil || fetchResult.Data == "" {
-		cp.fetchedInvoker.InvokeError(model.FetcherErrorEmptyJSON)
-		cp.errorReporter.Report("Failed to parse JSON configuration - Null Or Empty", errors.New("null data"))
-		return nil
-	}
-
-	var jsonConf jsonConfiguration
-	err := json.Unmarshal([]byte(fetchResult.Data), &jsonConf)
-	if err != nil {
-		cp.fetchedInvoker.InvokeError(model.FetcherErrorCorruptedJSON)
-		cp.errorReporter.Report("Failed to parse JSON configuration", err)
-		return nil
-	}
+	jsonConf := fetchResult.ParsedData
 
 	if fetchResult.Source != SourceRoxy && !cp.signatureVerifier.Verify(jsonConf.Data, jsonConf.Signature) {
 		cp.fetchedInvoker.InvokeError(model.FetcherErrorSignatureVerification)
@@ -107,6 +95,7 @@ type jsonConfiguration struct {
 	Data       string `json:"data"`
 	Signature  string `json:"signature_v0"`
 	SignedDate string `json:"signed_date"`
+	Result     int    `json:"result"`
 }
 
 type jsonInternalConfiguration struct {

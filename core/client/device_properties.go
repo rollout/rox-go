@@ -1,9 +1,10 @@
 package client
 
 import (
+	"os"
+
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/model"
-	"os"
 )
 
 type deviceProperties struct {
@@ -20,16 +21,14 @@ func NewDeviceProperties(sdkSettings model.SdkSettings, roxOptions model.RoxOpti
 
 func (dp *deviceProperties) GetAllProperties() map[string]string {
 	return map[string]string{
-		consts.PropertyTypePackageName.Name:  dp.roxOptions.Version(),
-		consts.PropertyTypeVersionName.Name:  dp.roxOptions.Version(),
-		consts.PropertyTypeLibVersion.Name:   dp.LibVersion(),
-		consts.PropertyTypeRolloutBuild.Name: "50",
-		consts.PropertyTypeAPIVersion.Name:   consts.BuildAPIVersion,
-		consts.PropertyTypeAppVersion.Name:   dp.roxOptions.Version(),
-		consts.PropertyTypeAppRelease.Name:   dp.roxOptions.Version(),
-		consts.PropertyTypeDistinctID.Name:   dp.DistinctID(),
-		consts.PropertyTypeAppKey.Name:       dp.sdkSettings.APIKey(),
-		consts.PropertyTypePlatform.Name:     consts.BuildPlatform,
+		consts.PropertyTypeLibVersion.Name:    dp.LibVersion(),
+		consts.PropertyTypeRolloutBuild.Name:  "50", // TODO: fix the build number
+		consts.PropertyTypeAPIVersion.Name:    consts.BuildAPIVersion,
+		consts.PropertyTypeAppRelease.Name:    dp.roxOptions.Version(), // used for the version filter
+		consts.PropertyTypeDistinctID.Name:    dp.DistinctID(),
+		consts.PropertyTypeAppKey.Name:        dp.sdkSettings.APIKey(),
+		consts.PropertyTypePlatform.Name:      consts.BuildPlatform,
+		consts.PropertyTypeDevModeSecret.Name: dp.roxOptions.DevModeKey(),
 	}
 }
 
