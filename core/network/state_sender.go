@@ -8,7 +8,9 @@ import (
 
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/consts"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/properties"
 	"github.com/rollout/rox-go/core/utils"
 )
 
@@ -47,6 +49,12 @@ func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, fl
 	stateSender.stateDebouncer = *utils.NewDebouncer(3000, func() {
 		stateSender.Send()
 	})
+	customPropertyRepository.RegisterPropertyAddedHandler(func(p *properties.CustomProperty) {
+		stateSender.sendStateDebounce()
+	})
+	flagRepository.RegisterFlagAddedHandler(func(variant model.Variant) {
+		stateSender.sendStateDebounce()
+	})
 	return stateSender
 }
 
@@ -55,7 +63,7 @@ func getStateMd5(properties map[string]string) string {
 }
 
 func getPath(properties map[string]string) string {
-	return fmt.Sprintf("%s/%s", properties[consts.PropertyTypePlatform.Name], properties[consts.PropertyTypeStateMD5.Name])
+	return fmt.Sprintf("%s/%s", properties[consts.PropertyTypeAppKey.Name], properties[consts.PropertyTypeStateMD5.Name])
 }
 
 func getCDNUrl(properties map[string]string) string {
@@ -98,12 +106,24 @@ func (s *StateSender) sendStateToCDN(properties map[string]string) (response *mo
 }
 
 func (s *StateSender) sendStateToAPI(properties map[string]string) (response *model.Response, err error) {
-	queryParams := make(map[string]string)
+	queryParams := make(map[string]interface{}, len(relevantAPICallParams))
 	for _, prop := range relevantAPICallParams {
 		propName := prop.Name
 		propValue := properties[propName]
 		if propValue != "" {
-			queryParams[propName] = propValue
+			if propValue[0] == '[' && propValue[len(propValue)-1:] == "]" {
+				// The value most likely contains a JSON array. In order for the marshaller to
+				// marshall it properly (and not as a string), we must first unmarshall it
+				var valueAsObject interface{}
+				err := json.Unmarshal([]byte(propValue), &valueAsObject)
+				if err != nil {
+					queryParams[propName] = propValue
+					break
+				}
+				queryParams[propName] = valueAsObject
+			} else {
+				queryParams[propName] = propValue
+			}
 		}
 	}
 
@@ -127,6 +147,10 @@ func (s *StateSender) preparePropsFromDeviceProps() map[string]string {
 	return properties
 }
 
+func (s *StateSender) sendStateDebounce() {
+	s.stateDebouncer.Invoke()
+}
+
 func (s *StateSender) Send() {
 	properties := s.preparePropsFromDeviceProps()
 	shouldRetry := false
@@ -135,14 +159,14 @@ func (s *StateSender) Send() {
 	fetchResult, err := s.sendStateToCDN(properties)
 
 	if err != nil {
-		// TODO: log
+		s.logSendStateError(source, err)
 		return
 	}
 
 	if fetchResult.IsSuccessStatusCode() {
 		configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
 		if configurationFetchResult == nil {
-			// TODO: log
+			s.logSendStateError(source, nil)
 			return
 		}
 
@@ -155,11 +179,11 @@ func (s *StateSender) Send() {
 	}
 
 	if shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
-		// TODO: log
+		s.logSendStateErrorRetry(source, fetchResult, configuration.SourceAPI)
 		source = configuration.SourceAPI
 		fetchResult, err := s.sendStateToAPI(properties)
 		if err != nil {
-			// TODO log
+			s.logSendStateError(source, err)
 			return
 		}
 
@@ -168,6 +192,15 @@ func (s *StateSender) Send() {
 			return
 		}
 	}
+}
+
+func (s *StateSender) logSendStateErrorRetry(source configuration.Source, response *model.Response, nextSource configuration.Source) {
+	retryMsg := fmt.Sprintf("Trying from %s. ", nextSource)
+	logging.GetLogger().Debug(fmt.Sprintf("Failed to send state to %s. %shttp error code: %d\n", source, retryMsg, response.StatusCode), nil)
+}
+
+func (s *StateSender) logSendStateError(source configuration.Source, err error) {
+	logging.GetLogger().Debug(fmt.Sprintf("Failed to send state. Source: %s", err), nil)
 }
 
 type jsonFlag struct {
