@@ -38,7 +38,7 @@ func (b *buid) GetQueryStringParts() map[string]string {
 
 func (b *buid) GetValue() string {
 	properties := b.deviceProperties.GetAllProperties()
-	buid := utils.GenerateMD5(properties, buidGenerators, nil)
+	buid := utils.GenerateMD5(properties, buidGenerators)
 	return buid
 }
 

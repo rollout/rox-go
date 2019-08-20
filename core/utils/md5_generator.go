@@ -8,7 +8,7 @@ import (
 	"github.com/rollout/rox-go/core/consts"
 )
 
-func GenerateMD5(properties map[string]string, generatorList []consts.PropertyType, extraValues []string) string {
+func GenerateMD5(properties map[string]string, generatorList []consts.PropertyType) string {
 	var values []string
 
 	for _, pt := range generatorList {
@@ -16,10 +16,6 @@ func GenerateMD5(properties map[string]string, generatorList []consts.PropertyTy
 		if value != "" {
 			values = append(values, value)
 		}
-	}
-
-	if len(extraValues) > 0 {
-		// TODO
 	}
 
 	valueBytes := []byte(strings.Join(values, "|"))

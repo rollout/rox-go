@@ -59,7 +59,7 @@ func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, fl
 }
 
 func getStateMd5(properties map[string]string) string {
-	return utils.GenerateMD5(properties, stateGenerators, nil)
+	return utils.GenerateMD5(properties, stateGenerators)
 }
 
 func getPath(properties map[string]string) string {
