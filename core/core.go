@@ -1,6 +1,9 @@
 package core
 
 import (
+	"net/http"
+	"regexp"
+
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/consts"
@@ -18,7 +21,6 @@ import (
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/rollout/rox-go/core/security"
 	"github.com/rollout/rox-go/core/utils"
-	"net/http"
 )
 
 type Core struct {
@@ -64,6 +66,12 @@ func NewCore() *Core {
 
 func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.DeviceProperties, roxOptions model.RoxOptions) <-chan struct{} {
 	core.sdkSettings = sdkSettings
+
+	validAPIKeyPattern := "^[a-f\\d]{24}$"
+	matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
+	if err != nil || !matched {
+		panic("Invalid rollout apikey")
+	}
 
 	roxyPath := ""
 	if roxOptions != nil && roxOptions.RoxyURL() != "" {
