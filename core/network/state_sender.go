@@ -25,9 +25,9 @@ var relevantAPICallParams = []*consts.PropertyType{
 var stateGenerators = []consts.PropertyType{
 	*consts.PropertyTypePlatform,
 	*consts.PropertyTypeAppKey,
-	*consts.PropertyTypeCustomPropertiesString,
-	*consts.PropertyTypeFeatureFlagsString,
-	*consts.PropertyTypeRemoteVariablesString,
+	*consts.PropertyTypeCustomProperties,
+	*consts.PropertyTypeFeatureFlags,
+	*consts.PropertyTypeRemoteVariables,
 	*consts.PropertyTypeDevModeSecret,
 }
 
@@ -135,10 +135,6 @@ func (s *StateSender) preparePropsFromDeviceProps() map[string]string {
 	properties[consts.PropertyTypeFeatureFlags.Name] = s.serializeFeatureFlags()
 	properties[consts.PropertyTypeRemoteVariables.Name] = ""
 	properties[consts.PropertyTypeCustomProperties.Name] = s.serializeCustomProperties()
-
-	properties[consts.PropertyTypeFeatureFlagsString.Name] = properties[consts.PropertyTypeFeatureFlags.Name]
-	properties[consts.PropertyTypeRemoteVariablesString.Name] = properties[consts.PropertyTypeRemoteVariables.Name]
-	properties[consts.PropertyTypeCustomPropertiesString.Name] = properties[consts.PropertyTypeCustomProperties.Name]
 
 	stateMD5 := getStateMd5(properties)
 	properties[consts.PropertyTypeStateMD5.Name] = stateMD5
