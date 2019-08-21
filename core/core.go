@@ -67,15 +67,15 @@ func NewCore() *Core {
 func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.DeviceProperties, roxOptions model.RoxOptions) <-chan struct{} {
 	core.sdkSettings = sdkSettings
 
-	validAPIKeyPattern := "^[a-f\\d]{24}$"
-	matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
-	if err != nil || !matched {
-		panic("Invalid rollout apikey")
-	}
-
 	roxyPath := ""
 	if roxOptions != nil && roxOptions.RoxyURL() != "" {
 		roxyPath = roxOptions.RoxyURL()
+	}
+
+	validAPIKeyPattern := "^[a-f\\d]{24}$"
+	matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
+	if roxyPath == "" && (err != nil || !matched) {
+		panic("Invalid rollout apikey")
 	}
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
