@@ -1,9 +1,10 @@
 package network
 
 import (
+	"net/http"
+
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/model"
-	"net/http"
 )
 
 type ConfigurationFetcher interface {
@@ -25,6 +26,7 @@ func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBui
 }
 
 func (f *configurationFetcher) Fetch() *configuration.FetchResult {
+	shouldRetry := false
 	source := configuration.SourceCDN
 
 	defer func() {
@@ -40,10 +42,19 @@ func (f *configurationFetcher) Fetch() *configuration.FetchResult {
 	}
 
 	if fetchResult.IsSuccessStatusCode() {
-		return configuration.NewFetchResult(string(fetchResult.Content), source)
+		configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
+		if configurationFetchResult == nil {
+			return nil
+		}
+
+		if configurationFetchResult.ParsedData.Result == 404 {
+			shouldRetry = true
+		} else {
+			return configurationFetchResult
+		}
 	}
 
-	if fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
+	if shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
 		f.fetcherLogger.WriteFetchErrorToLog(source, fetchResult, configuration.SourceAPI)
 		source = configuration.SourceAPI
 		fetchResult, err := f.fetchFromAPI()
@@ -66,5 +77,6 @@ func (f *configurationFetcher) fetchFromCDN() (response *model.Response, err err
 }
 
 func (f *configurationFetcher) fetchFromAPI() (response *model.Response, err error) {
-	return f.request.SendGet(f.requestConfigurationBuilder.BuildForAPI())
+	requestData := f.requestConfigurationBuilder.BuildForAPI()
+	return f.request.SendPost(requestData.URL, requestData.QueryParams)
 }
