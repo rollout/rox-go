@@ -2,11 +2,12 @@ package network_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/network"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.T) {
@@ -24,11 +25,13 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.
 		"cache_miss_url": "harta",
 		"distinct_id":    "123",
 	})
+	appKey := "ABCD"
+	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfiguraitonBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
-	result := requestConfiguraitonBuilder.BuildForCDN()
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
+	result := requestConfigurationBuilder.BuildForCDN()
 
-	assert.Equal(t, fmt.Sprintf("%s/123", consts.EnvironmentCDNPath()), result.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentCDNPath(), appKey), result.URL)
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
 }
 
@@ -49,6 +52,8 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 		"api_version": "4.0.0",
 		"distinct_id": "123",
 	})
+	appKey := "ABCD"
+	deviceProps.On("RolloutKey").Return(appKey)
 
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon")
 	result := requestConfigurationBuilder.BuildForRoxy()
@@ -58,7 +63,7 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 	assert.Equal(t, "4.0.0", result.QueryParams["api_version"])
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
 	assert.Equal(t, "123", result.QueryParams["buid"])
-	assert.Equal(t, fmt.Sprintf("%s/123", consts.EnvironmentCDNPath()), result.QueryParams["cache_miss_url"])
+	assert.Equal(t, fmt.Sprintf("%s/123", appKey), result.QueryParams["cache_miss_relative_url"])
 	assert.Equal(t, 6, len(result.QueryParams))
 }
 
@@ -79,15 +84,17 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 		"api_version": "4.0.0",
 		"distinct_id": "123",
 	})
+	appKey := "ABCD"
+	deviceProps.On("RolloutKey").Return(appKey)
 
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
 	result := requestConfigurationBuilder.BuildForAPI()
 
-	assert.Equal(t, consts.EnvironmentAPIPath(), result.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentAPIPath(), appKey), result.URL)
 	assert.Equal(t, "123", result.QueryParams["app_key"])
 	assert.Equal(t, "4.0.0", result.QueryParams["api_version"])
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
 	assert.Equal(t, "123", result.QueryParams["buid"])
-	assert.Equal(t, fmt.Sprintf("%s/123", consts.EnvironmentCDNPath()), result.QueryParams["cache_miss_url"])
+	assert.Equal(t, fmt.Sprintf("%s/123", appKey), result.QueryParams["cache_miss_relative_url"])
 	assert.Equal(t, 6, len(result.QueryParams))
 }

@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/rollout/rox-go/core/context"
 	"time"
+
+	"github.com/rollout/rox-go/core/context"
 )
 
 type BUID interface {

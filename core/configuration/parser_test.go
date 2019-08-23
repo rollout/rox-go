@@ -2,49 +2,15 @@ package configuration_test
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"strings"
-	"testing"
 )
-
-func TestConfigurationParserWillReturnNullWhenNoConfig(t *testing.T) {
-	errRe := &mocks.ErrorReporter{}
-	sf := &mocks.SignatureVerifier{}
-	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
-	cfi := configuration.NewFetchedInvoker()
-	var cfiEvent *model.ConfigurationFetchedArgs
-	cfi.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
-		cfiEvent = e
-	})
-
-	cp := configuration.NewParser(sf, errRe, cfi)
-
-	assert.Nil(t, cp.Parse(nil, nil))
-	assert.NotNil(t, cfiEvent)
-	assert.Equal(t, model.FetcherErrorEmptyJSON, cfiEvent.ErrorDetails)
-}
-
-func TestConfigurationParserWillReturnNullWhenConfigWithNoData(t *testing.T) {
-	errRe := &mocks.ErrorReporter{}
-	sf := &mocks.SignatureVerifier{}
-	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
-	cfi := configuration.NewFetchedInvoker()
-	var cfiEvent *model.ConfigurationFetchedArgs
-	cfi.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
-		cfiEvent = e
-	})
-
-	cp := configuration.NewParser(sf, errRe, cfi)
-	configFetchResult := configuration.NewFetchResult("", configuration.SourceCDN)
-
-	assert.Nil(t, cp.Parse(configFetchResult, nil))
-	assert.NotNil(t, cfiEvent)
-	assert.Equal(t, model.FetcherErrorEmptyJSON, cfiEvent.ErrorDetails)
-}
 
 func TestConfigurationParserWillReturnNullWhenUnexpectedException(t *testing.T) {
 	nestedJson := `
@@ -81,31 +47,6 @@ func TestConfigurationParserWillReturnNullWhenUnexpectedException(t *testing.T) 
 	assert.Nil(t, conf)
 	assert.NotNil(t, cfiEvent)
 	assert.Equal(t, model.FetcherErrorUnknown, cfiEvent.ErrorDetails)
-}
-
-func TestConfigurationParserWillReturnNullWhenInvalidJson(t *testing.T) {
-	json := `
-	{
-		"data"("sss"
-	}`
-	configFetchResult := configuration.NewFetchResult(json, configuration.SourceCDN)
-
-	errRe := &mocks.ErrorReporter{}
-	sf := &mocks.SignatureVerifier{}
-	sf.On("Verify", mock.Anything, mock.Anything).Return(true)
-
-	cfi := configuration.NewFetchedInvoker()
-	var cfiEvent *model.ConfigurationFetchedArgs
-	cfi.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
-		cfiEvent = e
-	})
-
-	cp := configuration.NewParser(sf, errRe, cfi)
-	conf := cp.Parse(configFetchResult, nil)
-
-	assert.Nil(t, conf)
-	assert.NotNil(t, cfiEvent)
-	assert.Equal(t, model.FetcherErrorCorruptedJSON, cfiEvent.ErrorDetails)
 }
 
 func TestConfigurationParserWillReturnNullWhenWrongSignature(t *testing.T) {

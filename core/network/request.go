@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/rollout/rox-go/core/model"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/rollout/rox-go/core/model"
 )
 
 type request struct {
@@ -49,6 +50,7 @@ func (r *request) SendPost(uri string, content interface{}) (*model.Response, er
 		return nil, err
 	}
 	request.Header.Add("Accept-Encoding", "gzip")
+	request.Header.Add("Content-Type", "application/json")
 
 	resp, err := r.httpClient.Do(request)
 	if err != nil {
