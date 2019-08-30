@@ -74,7 +74,7 @@ func getAPIUrl(properties map[string]string) string {
 	return fmt.Sprintf("%s/%s", consts.EnvironmentStateAPIPath(), properties[consts.PropertyTypeCacheMissRelativeURL.Name])
 }
 
-func (s *StateSender) serializeFeatureFlags() string {
+func (s *StateSender) serializeFeatureFlags() (string, []jsonFlag) {
 	var flags []jsonFlag
 	allFlags := s.flagRepository.GetAllFlags()
 	sort.Slice(allFlags, func(i, j int) bool {
@@ -84,10 +84,11 @@ func (s *StateSender) serializeFeatureFlags() string {
 		flags = append(flags, jsonFlag{f.Name(), f.DefaultValue(), f.Options()})
 	}
 	result, _ := json.Marshal(flags)
-	return string(result)
+
+	return string(result), flags
 }
 
-func (s *StateSender) serializeCustomProperties() string {
+func (s *StateSender) serializeCustomProperties() (string, []jsonProperty) {
 	var properties []jsonProperty
 	customProperties := s.customPropertyRepository.GetAllCustomProperties()
 	sort.Slice(customProperties, func(i, j int) bool {
@@ -97,7 +98,7 @@ func (s *StateSender) serializeCustomProperties() string {
 		properties = append(properties, jsonProperty{p.Name, p.Type.Type, p.Type.ExternalType})
 	}
 	result, _ := json.Marshal(properties)
-	return string(result)
+	return string(result), properties
 }
 
 func (s *StateSender) sendStateToCDN(properties map[string]string) (response *model.Response, err error) {
@@ -105,42 +106,36 @@ func (s *StateSender) sendStateToCDN(properties map[string]string) (response *mo
 	return s.request.SendGet(cdnRequest)
 }
 
-func (s *StateSender) sendStateToAPI(properties map[string]string) (response *model.Response, err error) {
+func (s *StateSender) sendStateToAPI(properties map[string]string, featureFlags []jsonFlag, customProperties []jsonProperty) (response *model.Response, err error) {
 	queryParams := make(map[string]interface{}, len(relevantAPICallParams))
 	for _, prop := range relevantAPICallParams {
 		propName := prop.Name
-		propValue := properties[propName]
-		if propValue != "" {
-			if propValue[0] == '[' && propValue[len(propValue)-1:] == "]" {
-				// The value most likely contains a JSON array. In order for the marshaller to
-				// marshall it properly (and not as a string), we must first unmarshall it
-				var valueAsObject interface{}
-				err := json.Unmarshal([]byte(propValue), &valueAsObject)
-				if err != nil {
-					queryParams[propName] = propValue
-					break
-				}
-				queryParams[propName] = valueAsObject
-			} else {
-				queryParams[propName] = propValue
-			}
+
+		if propName == consts.PropertyTypeFeatureFlags.Name {
+			queryParams[propName] = featureFlags
+		} else if propName == consts.PropertyTypeCustomProperties.Name {
+			queryParams[propName] = customProperties
+		} else {
+			queryParams[propName] = properties[propName]
 		}
 	}
 
 	return s.request.SendPost(getAPIUrl(properties), queryParams)
 }
 
-func (s *StateSender) preparePropsFromDeviceProps() map[string]string {
+func (s *StateSender) preparePropsFromDeviceProps() (map[string]string, []jsonFlag /* feature flags*/, []jsonProperty /* custom properties */) {
+	var featureFlags []jsonFlag
+	var customProperties []jsonProperty
 	properties := s.deviceProperties.GetAllProperties()
-	properties[consts.PropertyTypeFeatureFlags.Name] = s.serializeFeatureFlags()
+	properties[consts.PropertyTypeFeatureFlags.Name], featureFlags = s.serializeFeatureFlags()
 	properties[consts.PropertyTypeRemoteVariables.Name] = ""
-	properties[consts.PropertyTypeCustomProperties.Name] = s.serializeCustomProperties()
+	properties[consts.PropertyTypeCustomProperties.Name], customProperties = s.serializeCustomProperties()
 
 	stateMD5 := getStateMd5(properties)
 	properties[consts.PropertyTypeStateMD5.Name] = stateMD5
 	properties[consts.PropertyTypeCacheMissRelativeURL.Name] = getPath(properties)
 
-	return properties
+	return properties, featureFlags, customProperties
 }
 
 func (s *StateSender) sendStateDebounce() {
@@ -148,7 +143,7 @@ func (s *StateSender) sendStateDebounce() {
 }
 
 func (s *StateSender) Send() {
-	properties := s.preparePropsFromDeviceProps()
+	properties, featureFlags, customProperties := s.preparePropsFromDeviceProps()
 	shouldRetry := false
 	source := configuration.SourceCDN
 
@@ -177,7 +172,7 @@ func (s *StateSender) Send() {
 	if shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
 		s.logSendStateErrorRetry(source, fetchResult, configuration.SourceAPI)
 		source = configuration.SourceAPI
-		fetchResult, err := s.sendStateToAPI(properties)
+		fetchResult, err := s.sendStateToAPI(properties, featureFlags, customProperties)
 		if err != nil {
 			s.logSendStateError(source, err)
 			return
