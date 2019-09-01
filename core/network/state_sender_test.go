@@ -42,8 +42,9 @@ func TestWillSerializeFlags(t *testing.T) {
 
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
 
+	serializedFlags, featureFlags := stateSender.serializeFeatureFlags()
 	var flags []map[string]interface{}
-	err := json.Unmarshal([]byte(stateSender.serializeFeatureFlags()), &flags)
+	err := json.Unmarshal([]byte(serializedFlags), &flags)
 
 	assert.Nil(t, err)
 
@@ -54,6 +55,11 @@ func TestWillSerializeFlags(t *testing.T) {
 	assert.Equal(t, "false", obj["defaultValue"])
 	assert.Equal(t, "false", options[0])
 	assert.Equal(t, "true", options[1])
+
+	assert.Equal(t, obj["name"], featureFlags[0].Name)
+	assert.Equal(t, obj["defaultValue"], featureFlags[0].DefaultValue)
+	assert.Equal(t, options[0], featureFlags[0].Options[0])
+	assert.Equal(t, options[1], featureFlags[0].Options[1])
 }
 
 func TestWillSerializeProps(t *testing.T) {
@@ -69,7 +75,8 @@ func TestWillSerializeProps(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
 
 	var props []map[string]interface{}
-	err := json.Unmarshal([]byte(stateSender.serializeCustomProperties()), &props)
+	serializedCustomProperties, customProperties := stateSender.serializeCustomProperties()
+	err := json.Unmarshal([]byte(serializedCustomProperties), &props)
 
 	assert.Nil(t, err)
 
@@ -78,6 +85,10 @@ func TestWillSerializeProps(t *testing.T) {
 	assert.Equal(t, "prop1", obj["name"])
 	assert.Equal(t, properties.CustomPropertyTypeString.Type, obj["type"])
 	assert.Equal(t, properties.CustomPropertyTypeString.ExternalType, obj["externalType"])
+
+	assert.Equal(t, obj["name"], customProperties[0].Name)
+	assert.Equal(t, obj["type"], customProperties[0].Type)
+	assert.Equal(t, obj["externalType"], customProperties[0].ExternalType)
 }
 
 func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
