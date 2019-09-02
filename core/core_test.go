@@ -7,6 +7,7 @@ import (
 
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
 var validApiKey = "5008ef002000b62ceaaab37b"
@@ -44,9 +45,11 @@ func TestCoreWillCheckCoreSetupWhenNoOptions(t *testing.T) {
 }
 
 func TestInvalidAPIKey(t *testing.T) {
+	c := core.NewCore()
+
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(err)
+			assert.Equal(t, true, c.IsUnrecoverableError(err))
 		}
 	}()
 	sdkSettings := &mocks.SdkSettings{}
@@ -54,7 +57,6 @@ func TestInvalidAPIKey(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 
-	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, nil)
 	// We should never reach this point because the API key is invalid
 	t.FailNow()

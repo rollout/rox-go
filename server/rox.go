@@ -7,7 +7,7 @@ import (
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/properties"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Rox struct {
@@ -53,8 +53,12 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 		defer close(done)
 
 		defer func() {
-			if r := recover(); r != nil {
-				logging.GetLogger().Error("Failed in Rox.Setup", r)
+			if err := recover(); err != nil {
+				if r.core.IsUnrecoverableError(err) {
+					panic(err)
+				} else {
+					logging.GetLogger().Error("Failed in Rox.Setup", err)
+				}
 			}
 		}()
 

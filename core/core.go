@@ -42,6 +42,8 @@ type Core struct {
 	pushUpdatesListener         *notifications.NotificationListener
 }
 
+const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
+
 func NewCore() *Core {
 	parser := roxx.NewParser()
 	flagRepository := repositories.NewFlagRepository()
@@ -76,7 +78,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	validAPIKeyPattern := "^[a-f\\d]{24}$"
 	matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
 	if roxyPath == "" && (err != nil || !matched) {
-		panic("Invalid rollout apikey")
+		panic(invalidAPIKeyErrorMessage)
 	}
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
@@ -129,6 +131,10 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		}
 	}()
 	return done
+}
+
+func (core *Core) IsUnrecoverableError(err interface{}) bool {
+	return err == invalidAPIKeyErrorMessage
 }
 
 func (core *Core) Fetch() <-chan struct{} {
