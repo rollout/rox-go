@@ -7,7 +7,6 @@ import (
 
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/mocks"
-	"github.com/stretchr/testify/assert"
 )
 
 var validApiKey = "5008ef002000b62ceaaab37b"
@@ -49,7 +48,8 @@ func TestInvalidAPIKey(t *testing.T) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			assert.Equal(t, true, c.IsUnrecoverableError(err))
+			// Due to the panic() generated but the Setup,
+			// we should reach here and not the t.FailNow() underneath
 		}
 	}()
 	sdkSettings := &mocks.SdkSettings{}

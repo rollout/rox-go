@@ -54,11 +54,8 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 
 		defer func() {
 			if err := recover(); err != nil {
-				if r.core.IsUnrecoverableError(err) {
-					panic(err)
-				} else {
-					logging.GetLogger().Error("Failed in Rox.Setup", err)
-				}
+				logging.GetLogger().Error("Failed in Rox.Setup", err)
+				panic(err)
 			}
 		}()
 

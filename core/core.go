@@ -135,10 +135,6 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	return done
 }
 
-func (core *Core) IsUnrecoverableError(err interface{}) bool {
-	return err == invalidAPIKeyErrorMessage
-}
-
 func (core *Core) Fetch() <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
