@@ -1,10 +1,11 @@
 package core_test
 
 import (
-	"github.com/rollout/rox-go/core"
-	"github.com/rollout/rox-go/core/mocks"
 	"testing"
 	"time"
+
+	"github.com/rollout/rox-go/core"
+	"github.com/rollout/rox-go/core/mocks"
 )
 
 func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
@@ -15,6 +16,8 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
 	deviceProperties.On("DistinctID").Return("")
+	deviceProperties.On("RolloutEnvironment").Return("Test")
+	deviceProperties.On("LibVersion").Return("0.0.1-test")
 
 	options := &mocks.RoxOptions{}
 	options.On("RoxyURL").Return("http://site.com")
@@ -34,6 +37,8 @@ func TestCoreWillCheckCoreSetupWhenNoOptions(t *testing.T) {
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
 	deviceProperties.On("DistinctID").Return("")
+	deviceProperties.On("RolloutEnvironment").Return("Test")
+	deviceProperties.On("LibVersion").Return("0.0.1-test")
 
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, nil)
