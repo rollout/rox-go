@@ -75,10 +75,12 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		roxyPath = roxOptions.RoxyURL()
 	}
 
-	validAPIKeyPattern := "^[a-f\\d]{24}$"
-	matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
-	if roxyPath == "" && (err != nil || !matched) {
-		panic(invalidAPIKeyErrorMessage)
+	if roxyPath == "" {
+		validAPIKeyPattern := "^[a-f\\d]{24}$"
+		matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
+		if err != nil || !matched {
+			panic(invalidAPIKeyErrorMessage)
+		}
 	}
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
