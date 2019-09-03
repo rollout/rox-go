@@ -2,6 +2,7 @@ package core
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
@@ -41,6 +42,8 @@ type Core struct {
 	pushUpdatesListener         *notifications.NotificationListener
 }
 
+const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
+
 func NewCore() *Core {
 	parser := roxx.NewParser()
 	flagRepository := repositories.NewFlagRepository()
@@ -70,6 +73,14 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	roxyPath := ""
 	if roxOptions != nil && roxOptions.RoxyURL() != "" {
 		roxyPath = roxOptions.RoxyURL()
+	}
+
+	if roxyPath == "" {
+		validAPIKeyPattern := "^[a-f\\d]{24}$"
+		matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
+		if err != nil || !matched {
+			panic(invalidAPIKeyErrorMessage)
+		}
 	}
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
