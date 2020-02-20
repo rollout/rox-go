@@ -23,7 +23,7 @@ func EnvironmentAPIPath() string {
 
 	switch rolloutMode {
 	case "QA":
-		return "https://qax.rollout.io/device/get_configuration"
+		return "https://qa-api.rollout.io/device/get_configuration"
 	case "LOCAL":
 		return "http://127.0.0.1:8557/device/get_configuration"
 	}
@@ -47,7 +47,7 @@ func EnvironmentStateAPIPath() string {
 
 	switch rolloutMode {
 	case "QA":
-		return "https://qax.rollout.io/device/update_state_store"
+		return "https://qa-api.rollout.io/device/update_state_store"
 	case "LOCAL":
 		return "http://127.0.0.1:8557/device/update_state_store"
 	}
