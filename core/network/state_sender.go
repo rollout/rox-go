@@ -37,14 +37,16 @@ type StateSender struct {
 	flagRepository           model.FlagRepository
 	request                  model.Request
 	stateDebouncer           utils.Debouncer
+	environment              model.Environment
 }
 
-func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, flagRepository model.FlagRepository, customPropertyRepository model.CustomPropertyRepository) *StateSender {
+func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, flagRepository model.FlagRepository, customPropertyRepository model.CustomPropertyRepository, environment model.Environment) *StateSender {
 	stateSender := &StateSender{
 		customPropertyRepository: customPropertyRepository,
 		deviceProperties:         deviceProperties,
 		flagRepository:           flagRepository,
 		request:                  r,
+		environment:              environment,
 	}
 	stateSender.stateDebouncer = *utils.NewDebouncer(3000, func() {
 		stateSender.Send()
@@ -66,12 +68,12 @@ func getPath(properties map[string]string) string {
 	return fmt.Sprintf("%s/%s", properties[consts.PropertyTypeAppKey.Name], properties[consts.PropertyTypeStateMD5.Name])
 }
 
-func getCDNUrl(properties map[string]string) string {
-	return fmt.Sprintf("%s/%s", consts.EnvironmentStateCDNPath(), properties[consts.PropertyTypeCacheMissRelativeURL.Name])
+func (s *StateSender) getCDNUrl(properties map[string]string) string {
+	return fmt.Sprintf("%s/%s", s.environment.EnvironmentStateCDNPath(), properties[consts.PropertyTypeCacheMissRelativeURL.Name])
 }
 
-func getAPIUrl(properties map[string]string) string {
-	return fmt.Sprintf("%s/%s", consts.EnvironmentStateAPIPath(), properties[consts.PropertyTypeCacheMissRelativeURL.Name])
+func (s *StateSender) getAPIUrl(properties map[string]string) string {
+	return fmt.Sprintf("%s/%s", s.environment.EnvironmentStateAPIPath(), properties[consts.PropertyTypeCacheMissRelativeURL.Name])
 }
 
 func (s *StateSender) serializeFeatureFlags() (string, []jsonFlag) {
@@ -102,7 +104,7 @@ func (s *StateSender) serializeCustomProperties() (string, []jsonProperty) {
 }
 
 func (s *StateSender) sendStateToCDN(properties map[string]string) (response *model.Response, err error) {
-	cdnRequest := model.RequestData{URL: getCDNUrl(properties), QueryParams: nil}
+	cdnRequest := model.RequestData{URL: s.getCDNUrl(properties), QueryParams: nil}
 	return s.request.SendGet(cdnRequest)
 }
 
@@ -120,7 +122,7 @@ func (s *StateSender) sendStateToAPI(properties map[string]string, featureFlags 
 		}
 	}
 
-	return s.request.SendPost(getAPIUrl(properties), queryParams)
+	return s.request.SendPost(s.getAPIUrl(properties), queryParams)
 }
 
 func (s *StateSender) preparePropsFromDeviceProps() (map[string]string, []jsonFlag /* feature flags*/, []jsonProperty /* custom properties */) {

@@ -19,20 +19,22 @@ type requestConfigurationBuilder struct {
 	buid             model.BUID
 	deviceProperties model.DeviceProperties
 	roxyURL          string
+	environment      model.Environment
 }
 
-func NewRequestConfigurationBuilder(sdkSettings model.SdkSettings, buid model.BUID, deviceProperties model.DeviceProperties, roxyURL string) RequestConfigurationBuilder {
+func NewRequestConfigurationBuilder(sdkSettings model.SdkSettings, buid model.BUID, deviceProperties model.DeviceProperties, roxyURL string, environment model.Environment) RequestConfigurationBuilder {
 	return &requestConfigurationBuilder{
 		sdkSettings:      sdkSettings,
 		buid:             buid,
 		deviceProperties: deviceProperties,
 		roxyURL:          roxyURL,
+		environment:      environment,
 	}
 }
 
 func (b *requestConfigurationBuilder) BuildForRoxy() model.RequestData {
 	uri, _ := url.Parse(b.roxyURL)
-	internalURI, _ := url.Parse(consts.EnvironmentRoxyInternalPath())
+	internalURI, _ := url.Parse(b.environment.EnvironmentRoxyInternalPath())
 	uri = uri.ResolveReference(internalURI)
 	return b.buildRequestWithFullParams(uri.String())
 }
@@ -43,13 +45,13 @@ func (b *requestConfigurationBuilder) GetPath() string {
 
 func (b *requestConfigurationBuilder) BuildForCDN() model.RequestData {
 	return model.RequestData{
-		fmt.Sprintf("%s/%s", consts.EnvironmentCDNPath(), b.GetPath()),
+		fmt.Sprintf("%s/%s", b.environment.EnvironmentCDNPath(), b.GetPath()),
 		map[string]string{consts.PropertyTypeDistinctID.Name: b.deviceProperties.DistinctID()},
 	}
 }
 
 func (b *requestConfigurationBuilder) BuildForAPI() model.RequestData {
-	return b.buildRequestWithFullParams(fmt.Sprintf("%s/%s", consts.EnvironmentAPIPath(), b.GetPath()))
+	return b.buildRequestWithFullParams(fmt.Sprintf("%s/%s", b.environment.EnvironmentAPIPath(), b.GetPath()))
 }
 
 func (b *requestConfigurationBuilder) buildRequestWithFullParams(uri string) model.RequestData {

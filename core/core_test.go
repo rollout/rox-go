@@ -25,6 +25,7 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	options.On("FetchInterval").Return(time.Duration(0))
 	options.On("ConfigurationFetchedHandler").Return(nil)
 	options.On("ImpressionHandler").Return(nil)
+	options.On("SelfManagedOptions").Return(nil)
 
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, options)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/entities"
 	"github.com/rollout/rox-go/core/mocks"
@@ -39,8 +40,9 @@ func TestWillSerializeFlags(t *testing.T) {
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flag})
 	flagRepo.On("RegisterFlagAddedHandler", mock.Anything).Return()
 	cpRepo := repositories.NewCustomPropertyRepository()
+	environment := client.NewSaasEnvironment()
 
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 
 	serializedFlags, featureFlags := stateSender.serializeFeatureFlags()
 	var flags []map[string]interface{}
@@ -71,8 +73,9 @@ func TestWillSerializeProps(t *testing.T) {
 	cpRepo := &mocks.CustomPropertyRepository{}
 	cpRepo.On("GetAllCustomProperties").Return([]*properties.CustomProperty{cp})
 	cpRepo.On("RegisterPropertyAddedHandler", mock.Anything).Return()
+	environment := client.NewSaasEnvironment()
 
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 
 	var props []map[string]interface{}
 	serializedCustomProperties, customProperties := stateSender.serializeCustomProperties()
@@ -97,6 +100,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -105,7 +109,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
 	})
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag1")
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "C1C65A5AC8A732EAB7FCD81017BF5A87"), requestData.URL)
@@ -122,6 +126,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForCustomProperty(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -130,7 +135,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForCustomProperty(t *testing.T) {
 	})
 
 	cpRepo.AddCustomProperty(properties.NewStringProperty("cp1", "true"))
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "02338C470874941BEB8335F76A0F0FBB"), requestData.URL)
@@ -147,6 +152,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -156,7 +162,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag1")
 	flagRepo.AddFlag(entities.NewFlag(false), "flag2")
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
@@ -165,7 +171,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	flagRepo2 := repositories.NewFlagRepository()
 	flagRepo2.AddFlag(entities.NewFlag(false), "flag2")
 	flagRepo2.AddFlag(entities.NewFlag(false), "flag1")
-	stateSender = NewStateSender(request, dp, flagRepo2, cpRepo)
+	stateSender = NewStateSender(request, dp, flagRepo2, cpRepo, environment)
 	stateSender.Send()
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
 }
@@ -176,6 +182,7 @@ func TestWillCallOnlyCDNStateMD5CustomPropertyOrderNotImportant(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -185,7 +192,7 @@ func TestWillCallOnlyCDNStateMD5CustomPropertyOrderNotImportant(t *testing.T) {
 
 	cpRepo.AddCustomProperty(properties.NewStringProperty("cp1", "1111"))
 	cpRepo.AddCustomProperty(properties.NewStringProperty("cp2", "2222"))
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "8BB417F48703DDBD07EC0C2F2160B4B2"), requestData.URL)
@@ -204,6 +211,7 @@ func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var reqCDNData model.RequestData
 	var reqAPIData model.RequestData
@@ -216,7 +224,7 @@ func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
 	})
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag")
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
@@ -231,6 +239,7 @@ func TestWillReturnNullWhenCDNSucceedWithEmptyResponse(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -243,7 +252,7 @@ func TestWillReturnNullWhenCDNSucceedWithEmptyResponse(t *testing.T) {
 	})
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag")
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
@@ -258,6 +267,7 @@ func TestWillReturnNullWhenCDNSucceedWithNotJsonResponse(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -270,7 +280,7 @@ func TestWillReturnNullWhenCDNSucceedWithNotJsonResponse(t *testing.T) {
 	})
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag")
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
@@ -285,6 +295,7 @@ func TestWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -298,7 +309,7 @@ func TestWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag")
 	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
@@ -313,6 +324,7 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSaasEnvironment()
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -326,7 +338,7 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag")
 	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
-	stateSender := NewStateSender(request, dp, flagRepo, cpRepo)
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
