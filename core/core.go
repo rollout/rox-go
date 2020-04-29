@@ -91,7 +91,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
 
-	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser)
+	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
 	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
