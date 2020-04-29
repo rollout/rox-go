@@ -3,6 +3,8 @@ package security
 import (
 	"crypto/x509"
 	"encoding/base64"
+
+	"github.com/rollout/rox-go/core/model"
 )
 
 const (
@@ -14,13 +16,20 @@ type SignatureVerifier interface {
 }
 
 type signatureVerifier struct {
+	environment model.Environment
 }
 
-func NewSignatureVerifier() SignatureVerifier {
-	return &signatureVerifier{}
+func NewSignatureVerifier(environment model.Environment) SignatureVerifier {
+	return &signatureVerifier{
+		environment: environment,
+	}
 }
 
 func (sv *signatureVerifier) Verify(data, signatureBase64 string) bool {
+	if sv.environment.IsSelfManaged() {
+		return true
+	}
+
 	certificateBytes, err := base64.StdEncoding.DecodeString(roxCertificateBase64)
 	if err != nil {
 		return false

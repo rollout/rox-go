@@ -155,7 +155,7 @@ func (core *Core) Fetch() <-chan struct{} {
 			return
 		}
 
-		configurationParser := configuration.NewParser(security.NewSignatureVerifier(), core.errorReporter, core.configurationFetchedInvoker)
+		configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
 		config := configurationParser.Parse(result, core.sdkSettings)
 		if config != nil {
 			core.experimentRepository.SetExperiments(config.Experiments)
