@@ -103,7 +103,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 	// TODO http client
 	errReporterRequest := network.NewRequest(http.DefaultClient)
-	core.errorReporter = reporting.NewErrorReporter(errReporterRequest, deviceProperties, buid)
+	core.errorReporter = reporting.NewErrorReporter(core.environment, errReporterRequest, deviceProperties, buid)
 
 	if roxyPath != "" {
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
