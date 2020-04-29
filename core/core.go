@@ -109,7 +109,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	} else {
 		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository, core.environment)
-		core.configurationFetcher = network.NewConfigurationFetcher(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
+		core.configurationFetcher = network.NewConfigurationFetcher(core.environment, requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	}
 
 	var configurationFetchedHandler model.ConfigurationFetchedHandler

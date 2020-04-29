@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/model"
@@ -24,10 +25,11 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"data\": \"harti\"}")}
 	request.On("SendGet", requestData).Return(response, nil)
 
+	environment := client.NewSaasEnvironment()
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestData)
 
-	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
 	assert.Equal(t, "harti", result.ParsedData.Data)
@@ -49,11 +51,12 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.
 	request.On("SendGet", requestDataCDN).Return(nil, errors.New("not found"))
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
+	environment := client.NewSaasEnvironment()
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
-	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
 	assert.Nil(t, result)
@@ -74,11 +77,12 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *te
 	request.On("SendGet", requestDataCDN).Return(response, nil)
 	request.On("SendGet", requestDataAPI).Return(nil, errors.New("exception"))
 
+	environment := client.NewSaasEnvironment()
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
-	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
 	assert.Nil(t, result)
@@ -100,11 +104,12 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendPost", requestDataAPI.URL, requestDataAPI.QueryParams).Return(response, nil)
 
+	environment := client.NewSaasEnvironment()
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
-	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
 	assert.Equal(t, "harto", result.ParsedData.Data)
@@ -127,11 +132,35 @@ func TestConfigurationFetcherWillReturnNullDataWhenBothNotFound(t *testing.T) {
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
+	environment := client.NewSaasEnvironment()
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 
-	confFetcher := network.NewConfigurationFetcher(requestBuilder, request, confFetchInvoker)
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
+	result := confFetcher.Fetch()
+
+	assert.Nil(t, result)
+	assert.Equal(t, 1, numberOfTimesCalled)
+}
+
+func TestConfigurationFetcherWillReturnAPIDataWhenSelfManaged(t *testing.T) {
+	confFetchInvoker := configuration.NewFetchedInvoker()
+	numberOfTimesCalled := 0
+	confFetchInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+		numberOfTimesCalled++
+	})
+
+	requestDataAPI := model.RequestData{URL: "http://harta2.com"}
+	request := &mocks.Request{}
+	response := &model.Response{StatusCode: http.StatusNotFound}
+	request.On("SendGet", requestDataAPI).Return(response, nil)
+
+	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions("http://harta2.com", "http://harta2.com"))
+	requestBuilder := &mocks.RequestConfigurationBuilder{}
+	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
+
+	confFetcher := network.NewConfigurationFetcher(environment, requestBuilder, request, confFetchInvoker)
 	result := confFetcher.Fetch()
 
 	assert.Nil(t, result)

@@ -12,13 +12,15 @@ type ConfigurationFetcher interface {
 }
 
 type configurationFetcher struct {
+	environment                 model.Environment
 	requestConfigurationBuilder RequestConfigurationBuilder
 	request                     model.Request
 	fetcherLogger               configurationFetcherLogger
 }
 
-func NewConfigurationFetcher(requestConfigurationBuilder RequestConfigurationBuilder, request model.Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
+func NewConfigurationFetcher(environment model.Environment, requestConfigurationBuilder RequestConfigurationBuilder, request model.Request, fetchedInvoker *configuration.FetchedInvoker) ConfigurationFetcher {
 	return &configurationFetcher{
+		environment:                 environment,
 		requestConfigurationBuilder: requestConfigurationBuilder,
 		request:                     request,
 		fetcherLogger:               configurationFetcherLogger{fetchedInvoker},
@@ -35,29 +37,37 @@ func (f *configurationFetcher) Fetch() *configuration.FetchResult {
 		}
 	}()
 
-	fetchResult, err := f.fetchFromCDN()
-	if err != nil {
-		f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
-		return nil
-	}
+	var fetchResult *model.Response = nil
+	var err error = nil
+	isSelfManaged := f.environment.IsSelfManaged()
 
-	if fetchResult.IsSuccessStatusCode() {
-		configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
-		if configurationFetchResult == nil {
+	if !isSelfManaged {
+		fetchResult, err = f.fetchFromCDN()
+		if err != nil {
+			f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
 			return nil
 		}
 
-		if configurationFetchResult.ParsedData.Result == 404 {
-			shouldRetry = true
-		} else {
-			return configurationFetchResult
+		if fetchResult.IsSuccessStatusCode() {
+			configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
+			if configurationFetchResult == nil {
+				return nil
+			}
+
+			if configurationFetchResult.ParsedData.Result == 404 {
+				shouldRetry = true
+			} else {
+				return configurationFetchResult
+			}
 		}
 	}
 
-	if shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
-		f.fetcherLogger.WriteFetchErrorToLog(source, fetchResult, configuration.SourceAPI)
+	if isSelfManaged || shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
+		if !isSelfManaged {
+			f.fetcherLogger.WriteFetchErrorToLog(source, fetchResult, configuration.SourceAPI)
+		}
 		source = configuration.SourceAPI
-		fetchResult, err := f.fetchFromAPI()
+		fetchResult, err = f.fetchFromAPI()
 		if err != nil {
 			f.fetcherLogger.WriteFetchExceptionToLogAndInvokeFetchHandler(source, err)
 			return nil

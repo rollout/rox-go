@@ -149,32 +149,40 @@ func (s *StateSender) Send() {
 	shouldRetry := false
 	source := configuration.SourceCDN
 
-	fetchResult, err := s.sendStateToCDN(properties)
+	var fetchResult *model.Response = nil
+	var err error = nil
+	isSelfManaged := s.environment.IsSelfManaged()
 
-	if err != nil {
-		s.logSendStateError(source, err)
-		return
-	}
+	if !isSelfManaged {
+		fetchResult, err = s.sendStateToCDN(properties)
 
-	if fetchResult.IsSuccessStatusCode() {
-		configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
-		if configurationFetchResult == nil {
-			s.logSendStateError(source, nil)
+		if err != nil {
+			s.logSendStateError(source, err)
 			return
 		}
 
-		if configurationFetchResult.ParsedData.Result == 404 {
-			shouldRetry = true
-		} else {
-			// success from CDN
-			return
+		if fetchResult.IsSuccessStatusCode() {
+			configurationFetchResult := configuration.NewFetchResult(string(fetchResult.Content), source)
+			if configurationFetchResult == nil {
+				s.logSendStateError(source, nil)
+				return
+			}
+
+			if configurationFetchResult.ParsedData.Result == 404 {
+				shouldRetry = true
+			} else {
+				// success from CDN
+				return
+			}
 		}
 	}
 
-	if shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
-		s.logSendStateErrorRetry(source, fetchResult, configuration.SourceAPI)
+	if isSelfManaged || shouldRetry || fetchResult.StatusCode == http.StatusForbidden || fetchResult.StatusCode == http.StatusNotFound {
+		if !isSelfManaged {
+			s.logSendStateErrorRetry(source, fetchResult, configuration.SourceAPI)
+		}
 		source = configuration.SourceAPI
-		fetchResult, err := s.sendStateToAPI(properties, featureFlags, customProperties)
+		fetchResult, err = s.sendStateToAPI(properties, featureFlags, customProperties)
 		if err != nil {
 			s.logSendStateError(source, err)
 			return

@@ -346,3 +346,26 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateAPIPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 1)
 }
+
+func TestWillReturnAPIDataWhenWhenSelfManaged(t *testing.T) {
+	request := &mocks.Request{}
+	flagRepo := repositories.NewFlagRepository()
+	cpRepo := repositories.NewCustomPropertyRepository()
+	dp := &mocks.DeviceProperties{}
+	dp.On("GetAllProperties").Return(createNewDeviceProp())
+	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions("http://harta2.com", "http://harta2.com"))
+
+	var reqAPIData string
+	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 404}")}
+	request.On("SendPost", mock.Anything, mock.Anything).Return(response, nil).Run(func(args mock.Arguments) {
+		reqAPIData = args.Get(0).(string)
+	})
+
+	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
+	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
+	stateSender.Send()
+
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", "http://harta2.com/device/update_state_store", appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
+	request.AssertNumberOfCalls(t, "SendPost", 1)
+}
