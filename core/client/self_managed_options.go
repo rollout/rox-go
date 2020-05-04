@@ -2,15 +2,20 @@ package client
 
 import "github.com/rollout/rox-go/core/model"
 
+type SelfManagedOptionsBuilder struct {
+	ServerURL    string
+	AnalyticsURL string
+}
+
 type selfManagedOptions struct {
 	serverURL    string
 	analyticsURL string
 }
 
-func NewSelfManagedOptions(serverURL string, analyticsURL string) model.SelfManagedOptions {
+func NewSelfManagedOptions(builder SelfManagedOptionsBuilder) model.SelfManagedOptions {
 	return selfManagedOptions{
-		serverURL:    serverURL,
-		analyticsURL: analyticsURL,
+		serverURL:    builder.ServerURL,
+		analyticsURL: builder.AnalyticsURL,
 	}
 }
 

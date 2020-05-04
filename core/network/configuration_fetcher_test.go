@@ -156,7 +156,10 @@ func TestConfigurationFetcherWillReturnAPIDataWhenSelfManaged(t *testing.T) {
 	response := &model.Response{StatusCode: http.StatusNotFound}
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions("http://harta2.com", "http://harta2.com"))
+	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions(client.SelfManagedOptionsBuilder{
+		ServerURL:    "http://harta2.com",
+		AnalyticsURL: "http://harta2.com",
+	}))
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
 

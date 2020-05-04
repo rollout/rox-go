@@ -26,7 +26,10 @@ func TestSignatureVerifierShouldNotVerifyWithROXSignature(t *testing.T) {
 }
 
 func TestSignatureVerifierShouldAcceptAnythingOnSelfManaged(t *testing.T) {
-	selfManagedOptions := client.NewSelfManagedOptions("", "")
+	selfManagedOptions := client.NewSelfManagedOptions(client.SelfManagedOptionsBuilder{
+		ServerURL:    "",
+		AnalyticsURL: "",
+	})
 	environment := client.NewSelfManagedEnvironment(selfManagedOptions)
 	var sigVerify = NewSignatureVerifier(environment)
 

@@ -353,7 +353,11 @@ func TestWillReturnAPIDataWhenWhenSelfManaged(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions("http://harta2.com", "http://harta2.com"))
+	environment := client.NewSelfManagedEnvironment(client.NewSelfManagedOptions(
+		client.SelfManagedOptionsBuilder{
+			ServerURL:    "http://harta2.com",
+			AnalyticsURL: "http://harta2.com",
+		}))
 
 	var reqAPIData string
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 404}")}
