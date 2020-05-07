@@ -1,9 +1,10 @@
 package mocks
 
 import (
+	"time"
+
 	"github.com/rollout/rox-go/core/model"
 	"github.com/stretchr/testify/mock"
-	"time"
 )
 
 type RoxOptions struct {
@@ -47,4 +48,13 @@ func (m *RoxOptions) RoxyURL() string {
 	args := m.Called()
 	return args.String(0)
 
+}
+
+func (m *RoxOptions) SelfManagedOptions() model.SelfManagedOptions {
+	args := m.Called()
+	result := args.Get(0)
+	if result == nil {
+		return nil
+	}
+	return result.(model.SelfManagedOptions)
 }

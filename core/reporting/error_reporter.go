@@ -2,10 +2,11 @@ package reporting
 
 import (
 	"fmt"
+	"runtime"
+
 	"github.com/go-errors/errors"
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
-	"runtime"
 )
 
 const (
@@ -13,13 +14,15 @@ const (
 )
 
 type errorReporter struct {
+	environment      model.Environment
 	request          model.Request
 	deviceProperties model.DeviceProperties
 	buid             model.BUID
 }
 
-func NewErrorReporter(request model.Request, deviceProperties model.DeviceProperties, buid model.BUID) model.ErrorReporter {
+func NewErrorReporter(environment model.Environment, request model.Request, deviceProperties model.DeviceProperties, buid model.BUID) model.ErrorReporter {
 	return &errorReporter{
+		environment:      environment,
 		request:          request,
 		deviceProperties: deviceProperties,
 		buid:             buid,
@@ -27,7 +30,7 @@ func NewErrorReporter(request model.Request, deviceProperties model.DeviceProper
 }
 
 func (er *errorReporter) Report(message string, err error) {
-	if er.deviceProperties.RolloutEnvironment() == "LOCAL" {
+	if er.deviceProperties.RolloutEnvironment() == "LOCAL" || er.environment.IsSelfManaged() {
 		return
 	}
 

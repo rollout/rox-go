@@ -1,5 +1,7 @@
 module github.com/rollout/rox-go
 
+go 1.14
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-errors/errors v1.0.1

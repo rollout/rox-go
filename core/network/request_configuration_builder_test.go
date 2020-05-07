@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/mocks"
 	"github.com/rollout/rox-go/core/network"
@@ -28,7 +29,7 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment())
 	result := requestConfigurationBuilder.BuildForCDN()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentCDNPath(), appKey), result.URL)
@@ -55,7 +56,7 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon")
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon", client.NewSaasEnvironment())
 	result := requestConfigurationBuilder.BuildForRoxy()
 
 	assert.Equal(t, "http://bimba.bobi.o.ponpon/device/request_configuration", result.URL)
@@ -87,7 +88,7 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "")
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment())
 	result := requestConfigurationBuilder.BuildForAPI()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentAPIPath(), appKey), result.URL)

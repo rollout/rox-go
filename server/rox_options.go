@@ -1,9 +1,10 @@
 package server
 
 import (
+	"time"
+
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
-	"time"
 )
 
 type RoxOptionsBuilder struct {
@@ -14,6 +15,7 @@ type RoxOptionsBuilder struct {
 	ImpressionHandler           model.ImpressionHandler
 	ConfigurationFetchedHandler model.ConfigurationFetchedHandler
 	RoxyURL                     string
+	SelfManagedOptions          model.SelfManagedOptions
 }
 
 type roxOptions struct {
@@ -23,6 +25,7 @@ type roxOptions struct {
 	impressionHandler           model.ImpressionHandler
 	configurationFetchedHandler model.ConfigurationFetchedHandler
 	roxyURL                     string
+	selfManagedOptions          model.SelfManagedOptions
 }
 
 func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
@@ -58,6 +61,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		impressionHandler:           builder.ImpressionHandler,
 		configurationFetchedHandler: builder.ConfigurationFetchedHandler,
 		roxyURL:                     builder.RoxyURL,
+		selfManagedOptions:          builder.SelfManagedOptions,
 	}
 }
 
@@ -83,4 +87,8 @@ func (ro *roxOptions) ConfigurationFetchedHandler() model.ConfigurationFetchedHa
 
 func (ro *roxOptions) RoxyURL() string {
 	return ro.roxyURL
+}
+
+func (ro *roxOptions) SelfManagedOptions() model.SelfManagedOptions {
+	return ro.selfManagedOptions
 }

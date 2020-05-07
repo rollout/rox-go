@@ -21,6 +21,11 @@ type DeviceProperties interface {
 	RolloutKey() string
 }
 
+type SelfManagedOptions interface {
+	ServerURL() string
+	AnalyticsURL() string
+}
+
 type RoxOptions interface {
 	DevModeKey() string
 	Version() string
@@ -28,6 +33,7 @@ type RoxOptions interface {
 	ImpressionHandler() ImpressionHandler
 	ConfigurationFetchedHandler() ConfigurationFetchedHandler
 	RoxyURL() string
+	SelfManagedOptions() SelfManagedOptions
 }
 
 type SdkSettings interface {

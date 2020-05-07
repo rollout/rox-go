@@ -6,7 +6,6 @@ import (
 
 	"github.com/rollout/rox-go/core/client"
 	"github.com/rollout/rox-go/core/configuration"
-	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/entities"
 	"github.com/rollout/rox-go/core/extensions"
@@ -40,6 +39,7 @@ type Core struct {
 	lastConfigurations          *configuration.FetchResult
 	internalFlags               model.InternalFlags
 	pushUpdatesListener         *notifications.NotificationListener
+	environment                 model.Environment
 }
 
 const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
@@ -83,27 +83,33 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		}
 	}
 
+	if roxOptions != nil && roxOptions.SelfManagedOptions() != nil {
+		core.environment = client.NewSelfManagedEnvironment(roxOptions.SelfManagedOptions())
+	} else {
+		core.environment = client.NewSaasEnvironment()
+	}
+
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
 
-	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser)
+	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
 	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
-	requestConfigBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProperties, roxyPath)
+	requestConfigBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProperties, roxyPath, core.environment)
 
 	// TODO http client
 	clientRequest := network.NewRequest(http.DefaultClient)
 
 	// TODO http client
 	errReporterRequest := network.NewRequest(http.DefaultClient)
-	core.errorReporter = reporting.NewErrorReporter(errReporterRequest, deviceProperties, buid)
+	core.errorReporter = reporting.NewErrorReporter(core.environment, errReporterRequest, deviceProperties, buid)
 
 	if roxyPath != "" {
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	} else {
-		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository)
-		core.configurationFetcher = network.NewConfigurationFetcher(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
+		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository, core.environment)
+		core.configurationFetcher = network.NewConfigurationFetcher(core.environment, requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	}
 
 	var configurationFetchedHandler model.ConfigurationFetchedHandler
@@ -149,7 +155,7 @@ func (core *Core) Fetch() <-chan struct{} {
 			return
 		}
 
-		configurationParser := configuration.NewParser(security.NewSignatureVerifier(), core.errorReporter, core.configurationFetchedInvoker)
+		configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
 		config := configurationParser.Parse(result, core.sdkSettings)
 		if config != nil {
 			core.experimentRepository.SetExperiments(config.Experiments)
@@ -197,7 +203,7 @@ func (core *Core) wrapConfigurationFetchedHandler(handler model.ConfigurationFet
 func (core *Core) startOrStopPushUpdatesListener() {
 	if core.internalFlags.IsEnabled("rox.internal.pushUpdates") {
 		if core.pushUpdatesListener == nil {
-			core.pushUpdatesListener = notifications.NewNotificationListener(consts.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
+			core.pushUpdatesListener = notifications.NewNotificationListener(core.environment.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
 			core.pushUpdatesListener.On("changed", func(event notifications.Event) {
 				<-core.Fetch()
 			})
