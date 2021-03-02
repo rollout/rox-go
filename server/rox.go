@@ -66,6 +66,10 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 	return done
 }
 
+func (r *Rox) RegisterWithEmptyNamespace(roxContainer interface{}) {
+	r.Register("", roxContainer)
+}
+
 func (r *Rox) Register(namespace string, roxContainer interface{}) {
 	r.core.Register(namespace, roxContainer)
 }
