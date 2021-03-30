@@ -19,7 +19,6 @@ type variant struct {
 	options           []string
 	condition         string
 	parser            roxx.Parser
-	globalContext     context.Context
 	impressionInvoker model.ImpressionInvoker
 	clientExperiment  *model.Experiment
 	name              string
@@ -66,10 +65,6 @@ func (v *variant) SetForEvaluation(parser roxx.Parser, experiment *model.Experim
 	v.impressionInvoker = impressionInvoker
 }
 
-func (v *variant) SetContext(globalContext context.Context) {
-	v.globalContext = globalContext
-}
-
 func (v *variant) SetName(name string) {
 	v.name = name
 }
@@ -81,7 +76,7 @@ func (v *variant) GetValue(ctx context.Context) string {
 
 func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
-	mergedContext := context.NewMergedContext(v.globalContext, ctx)
+	mergedContext := context.NewMergedContext(v.parser.GetGlobalContext(), ctx)
 
 	if v.parser != nil && v.condition != "" {
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)

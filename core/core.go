@@ -175,9 +175,7 @@ func (core *Core) Register(ns string, roxContainer interface{}) {
 }
 
 func (core *Core) SetContext(ctx context.Context) {
-	for _, flag := range core.flagRepository.GetAllFlags() {
-		flag.(model.InternalVariant).SetContext(ctx)
-	}
+	core.parser.SetGlobalContext(ctx)
 }
 
 func (core *Core) AddCustomProperty(property *properties.CustomProperty) {

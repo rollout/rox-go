@@ -13,22 +13,34 @@ import (
 type Parser interface {
 	EvaluateExpression(expression string, context context.Context) EvaluationResult
 	AddOperator(name string, operation Operation)
+	SetGlobalContext(context context.Context)
+	GetGlobalContext() context.Context
 }
 
 type Operation = func(p Parser, stack *CoreStack, context context.Context)
 
 type roxxParser struct {
 	operatorsMap map[string]Operation
+	globalContext context.Context
 }
 
 func NewParser() Parser {
 	p := &roxxParser{
 		operatorsMap: make(map[string]Operation),
+		globalContext: nil,
 	}
 	p.setBasicOperators()
 	NewValueCompareExtensions(p).Extend()
 	NewRegularExpressionExtensions(p).Extend()
 	return p
+}
+
+func (p *roxxParser) GetGlobalContext() context.Context {
+	return p.globalContext
+}
+
+func (p *roxxParser) SetGlobalContext(context context.Context) {
+	p.globalContext = context
 }
 
 func (p *roxxParser) AddOperator(name string, operation Operation) {
