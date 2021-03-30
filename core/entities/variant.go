@@ -92,7 +92,11 @@ func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isD
 	}
 
 	if v.impressionInvoker != nil {
-		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, returnValue), v.clientExperiment, mergedContext)
+		targeting := false
+		if v.clientExperiment != nil {
+			targeting = true
+		}
+		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, returnValue, targeting), mergedContext)
 	}
 
 	return returnValue, isDefault
