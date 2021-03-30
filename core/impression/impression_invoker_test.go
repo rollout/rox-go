@@ -12,7 +12,7 @@ import (
 func TestImpressionInvokerEmptyInvokeNotThrowingException(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
-	impressionInvoker.Invoke(nil, nil, nil)
+	impressionInvoker.Invoke(nil, nil)
 }
 
 func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
@@ -20,20 +20,17 @@ func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
 
 	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
-	reportingValue := model.NewReportingValue("name", "value")
-	originalExperiment := model.NewExperimentModel("id", "name", "cond", true, nil, nil)
-	experiment := model.NewExperiment(originalExperiment)
+	reportingValue := model.NewReportingValue("name", "value", false)
 
 	isImpressionRaised := false
 	impressionInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		assert.Equal(t, reportingValue, e.ReportingValue)
-		assert.Equal(t, experiment, e.Experiment)
 		assert.Equal(t, ctx, e.Context)
 
 		isImpressionRaised = true
 	})
 
-	impressionInvoker.Invoke(reportingValue, experiment, ctx)
+	impressionInvoker.Invoke(reportingValue, ctx)
 
 	assert.True(t, isImpressionRaised)
 }

@@ -25,10 +25,10 @@ func NewImpressionInvoker(internalFlags model.InternalFlags, customPropertyRepos
 	}
 }
 
-func (ii *impressionInvoker) Invoke(value *model.ReportingValue, experiment *model.Experiment, context context.Context) {
+func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context.Context) {
 	// TODO Implement analytics logic
 
-	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Experiment: experiment, Context: context})
+	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Context: context})
 }
 
 func (ii *impressionInvoker) RegisterImpressionHandler(handler model.ImpressionHandler) {
