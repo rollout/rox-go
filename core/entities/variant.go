@@ -76,12 +76,10 @@ func (v *variant) GetValue(ctx context.Context) string {
 
 func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
-	var mergedContext context.Context = nil
+	mergedContext := ctx
 
 	if v.parser != nil {
 		mergedContext = context.NewMergedContext(v.parser.GetGlobalContext(), ctx)
-	} else {
-		mergedContext = context.NewMergedContext(nil, ctx)
 	}
 
 	if v.parser != nil && v.condition != "" {

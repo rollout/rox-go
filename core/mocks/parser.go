@@ -10,6 +10,15 @@ type Parser struct {
 	mock.Mock
 }
 
+func (m *Parser) GetGlobalContext() context.Context {
+	args := m.Called()
+	return args.Get(0).(context.Context)
+}
+
+func (m *Parser) SetGlobalContext(context context.Context) {
+	m.Called(context)
+}
+
 func (m *Parser) EvaluateExpression(expression string, context context.Context) roxx.EvaluationResult {
 	args := m.Called(expression, context)
 	return args.Get(0).(roxx.EvaluationResult)
