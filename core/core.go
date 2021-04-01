@@ -51,11 +51,6 @@ func NewCore() *Core {
 	experimentRepository := repositories.NewExperimentRepository()
 	customPropertyRepository := repositories.NewCustomPropertyRepository()
 
-	experimentsExtensions := extensions.NewExperimentsExtensions(parser, targetGroupRepository, flagRepository, experimentRepository)
-	propertiesExtensions := extensions.NewPropertiesExtensions(parser, customPropertyRepository)
-	experimentsExtensions.Extend()
-	propertiesExtensions.Extend()
-
 	return &Core{
 		flagRepository:              flagRepository,
 		customPropertyRepository:    customPropertyRepository,
@@ -95,6 +90,11 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
+
+	experimentsExtensions := extensions.NewExperimentsExtensions(core.parser, core.targetGroupRepository, core.flagRepository, core.experimentRepository)
+	propertiesExtensions := extensions.NewPropertiesExtensions(core.parser, core.customPropertyRepository, roxOptions.dynamicPropertyRuleHandler)
+	experimentsExtensions.Extend()
+	propertiesExtensions.Extend()
 
 	requestConfigBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProperties, roxyPath, core.environment)
 

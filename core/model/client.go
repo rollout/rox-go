@@ -34,6 +34,7 @@ type RoxOptions interface {
 	ConfigurationFetchedHandler() ConfigurationFetchedHandler
 	RoxyURL() string
 	SelfManagedOptions() SelfManagedOptions
+	DynamicPropertyRuleHandler() DynamicPropertyRuleHandler
 }
 
 type SdkSettings interface {
@@ -48,4 +49,11 @@ type InternalFlags interface {
 type DynamicAPI interface {
 	IsEnabled(name string, defaultValue bool, ctx context.Context) bool
 	Value(name string, defaultValue string, options []string, ctx context.Context) string
+}
+
+type DynamicPropertyRuleHandler = func(args DynamicPropertyRuleHandlerArgs) interface{}
+
+type DynamicPropertyRuleHandlerArgs struct {
+	propName string
+	context context.Context
 }
