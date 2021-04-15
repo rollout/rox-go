@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/rollout/rox-go/server"
 	roxContext "github.com/rollout/rox-go/core/context"
 	"io/ioutil"
@@ -86,7 +85,7 @@ func main() {
 			if s, ok := configMap["env"] ; ok {
 				switch s {
 				case "localhost":
-						os.Setenv("ROLLOUT_MODE", "LOCAL")
+					os.Setenv("ROLLOUT_MODE", "LOCAL")
 				case "qa":
 					os.Setenv("ROLLOUT_MODE", "QA")
 				default:
@@ -124,12 +123,10 @@ func main() {
 			if err := json.Unmarshal(payload, &dynamicFlag); err != nil{
 				log.Fatal(err)
 			}
-			var contextMap map[string]interface{}
 
+			contextMap := make(map[string]interface{})
 			json.Unmarshal(*dynamicFlag.Context, &contextMap)
-
 			rCtx := roxContext.NewContext(contextMap)
-
 			for key, value := range contextMap {
 
 				switch value.(type) {
@@ -148,7 +145,6 @@ func main() {
 				}
 			}
 			result := rox.DynamicAPI().IsEnabled(dynamicFlag.Flag, dynamicFlag.DefaultValue, rCtx)
-			fmt.Println(result)
 			doneStruct := struct{Result bool `json:"result"`}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
@@ -172,10 +168,8 @@ func main() {
 			if err := json.Unmarshal(payload, &dynamicFlag); err != nil{
 				log.Fatal(err)
 			}
-			var contextMap map[string]interface{}
-
+			contextMap := make(map[string]interface{})
 			json.Unmarshal(*dynamicFlag.Context, &contextMap)
-			fmt.Println(dynamicFlag)
 			rCtx := roxContext.NewContext(contextMap)
 
 			for key, value := range contextMap {
@@ -219,11 +213,15 @@ func main() {
 				log.Fatal(err)
 			}
 
+			contextMap := make(map[string]interface{})
+			json.Unmarshal(*staticFlag.Context, &contextMap)
+			rCtx := roxContext.NewContext(contextMap)
+
 			var result bool
 			if strings.Contains(staticFlag.Flag, "boolDefaultFalse") {
-				result = container.BoolDefaultFalse.IsEnabled(nil)
+				result = container.BoolDefaultFalse.IsEnabled(rCtx)
 			} else {
-				result = container.BoolDefaultTrue.IsEnabled(nil)
+				result = container.BoolDefaultTrue.IsEnabled(rCtx)
 			}
 
 			doneStruct := struct{Result bool `json:"result"`}{result}
