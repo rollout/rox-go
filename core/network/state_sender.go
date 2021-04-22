@@ -83,7 +83,7 @@ func (s *StateSender) serializeFeatureFlags() (string, []jsonFlag) {
 		return allFlags[i].Name() < allFlags[j].Name()
 	})
 	for _, f := range allFlags {
-		flags = append(flags, jsonFlag{f.Name(), f.DefaultValue(), f.Options()})
+		flags = append(flags, jsonFlag{f.Name(), f.GetDefaultAsString(), f.GetOptionsAsString()})
 	}
 	result, _ := json.Marshal(flags)
 

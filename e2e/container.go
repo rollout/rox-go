@@ -15,15 +15,15 @@ type Container struct {
 	FlagTargetGroupsAny  server.RoxFlag
 	FlagTargetGroupsNone server.RoxFlag
 
-	VariantWithContext server.RoxVariant
+	VariantWithContext server.RoxString
 
-	Variant            server.RoxVariant
-	VariantOverwritten server.RoxVariant
+	Variant            server.RoxString
+	VariantOverwritten server.RoxString
 
 	FlagForDependency             server.RoxFlag
-	FlagColorsForDependency       server.RoxVariant
+	FlagColorsForDependency       server.RoxString
 	FlagDependent                 server.RoxFlag
-	FlagColorDependentWithContext server.RoxVariant
+	FlagColorDependentWithContext server.RoxString
 }
 
 var container = &Container{
@@ -39,13 +39,13 @@ var container = &Container{
 	FlagTargetGroupsAny:  server.NewRoxFlag(false),
 	FlagTargetGroupsNone: server.NewRoxFlag(false),
 
-	VariantWithContext: server.NewRoxVariant("red", []string{"red", "blue", "green"}),
+	VariantWithContext: server.NewRoxString("red", []string{"red", "blue", "green"}),
 
-	Variant:            server.NewRoxVariant("red", []string{"red", "blue", "green"}),
-	VariantOverwritten: server.NewRoxVariant("red", []string{"red", "blue", "green"}),
+	Variant:            server.NewRoxString("red", []string{"red", "blue", "green"}),
+	VariantOverwritten: server.NewRoxString("red", []string{"red", "blue", "green"}),
 
 	FlagForDependency:             server.NewRoxFlag(false),
-	FlagColorsForDependency:       server.NewRoxVariant("White", []string{"White", "Blue", "Green", "Yellow"}),
+	FlagColorsForDependency:       server.NewRoxString("White", []string{"White", "Blue", "Green", "Yellow"}),
 	FlagDependent:                 server.NewRoxFlag(false),
-	FlagColorDependentWithContext: server.NewRoxVariant("White", []string{"White", "Blue", "Green", "Yellow"}),
+	FlagColorDependentWithContext: server.NewRoxString("White", []string{"White", "Blue", "Green", "Yellow"}),
 }

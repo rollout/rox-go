@@ -154,8 +154,8 @@ func TestParserRegularExpressionEvaluation(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`match("\n", ".", "s")`, nil).Value())
 
 	// Unsupported flags (x)
-	// assert.Equal(t, true, parser.EvaluateExpression(`match("uS", "IL|US#Comment", "xi")`, nil).Value())
-	// assert.Equal(t, true, parser.EvaluateExpression(`match("HELLO\nTeST\n#This is a comment", "^TEST$", "ixm")`, nil).Value())
+	// assert.Equal(t, true, parser.EvaluateExpression(`match("uS", "IL|US#Comment", "xi")`, nil).StringValue())
+	// assert.Equal(t, true, parser.EvaluateExpression(`match("HELLO\nTeST\n#This is a comment", "^TEST$", "ixm")`, nil).StringValue())
 }
 
 func TestParserIfThenExpressionEvaluationString(t *testing.T) {

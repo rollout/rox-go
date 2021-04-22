@@ -14,7 +14,8 @@ type internalVariant interface {
 	ClientExperiment() *model.Experiment
 }
 
-type variant struct {
+type roxString struct {
+	roxVariant
 	defaultValue      string
 	options           []string
 	condition         string
@@ -22,10 +23,9 @@ type variant struct {
 	globalContext     context.Context
 	impressionInvoker model.ImpressionInvoker
 	clientExperiment  *model.Experiment
-	name              string
 }
 
-func NewVariant(defaultValue string, options []string) model.Variant {
+func NewRoxString(defaultValue string, options []string) model.RoxString {
 	if (options == nil) {
 		options = []string {}
 	}
@@ -35,25 +35,34 @@ func NewVariant(defaultValue string, options []string) model.Variant {
 		allOptions = append(allOptions, defaultValue)
 	}
 
-	return &variant{
-		defaultValue: defaultValue,
-		options:      allOptions,
+	roxString := &roxString{
+		roxVariant:        roxVariant{
+			flagType: "stringType",
+		},
+		defaultValue:      defaultValue,
+		options:           allOptions,
 	}
+
+	return roxString
 }
 
-func (v *variant) DefaultValue() string {
+func (v *roxString) GetDefaultAsString() string {
+	return v.DefaultValue()
+}
+
+func (v *roxString) DefaultValue() string {
 	return v.defaultValue
 }
 
-func (v *variant) Options() []string {
+func (v *roxString) GetOptionsAsString() []string {
+	return v.Options()
+}
+
+func (v *roxString) Options() []string {
 	return v.options
 }
 
-func (v *variant) Name() string {
-	return v.name
-}
-
-func (v *variant) SetForEvaluation(parser roxx.Parser, experiment *model.ExperimentModel, impressionInvoker model.ImpressionInvoker) {
+func (v *roxString) SetForEvaluation(parser roxx.Parser, experiment *model.ExperimentModel, impressionInvoker model.ImpressionInvoker) {
 	if experiment != nil {
 		v.clientExperiment = model.NewExperiment(experiment)
 		v.condition = experiment.Condition
@@ -66,20 +75,24 @@ func (v *variant) SetForEvaluation(parser roxx.Parser, experiment *model.Experim
 	v.impressionInvoker = impressionInvoker
 }
 
-func (v *variant) SetContext(globalContext context.Context) {
+func (v *roxString) SetContext(globalContext context.Context) {
 	v.globalContext = globalContext
 }
 
-func (v *variant) SetName(name string) {
+func (v *roxString) SetName(name string) {
 	v.name = name
 }
 
-func (v *variant) GetValue(ctx context.Context) string {
+func (v *roxString) GetValueAsString(ctx context.Context) string {
+	return v.GetValue(ctx)
+}
+
+func (v *roxString) GetValue(ctx context.Context) string {
 	returnValue, _ := v.InternalGetValue(ctx)
 	return returnValue
 }
 
-func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
+func (v *roxString) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
 	mergedContext := context.NewMergedContext(v.globalContext, ctx)
 
@@ -98,18 +111,18 @@ func (v *variant) InternalGetValue(ctx context.Context) (returnValue string, isD
 	return returnValue, isDefault
 }
 
-func (v *variant) Condition() string {
+func (v *roxString) Condition() string {
 	return v.condition
 }
 
-func (v *variant) Parser() roxx.Parser {
+func (v *roxString) Parser() roxx.Parser {
 	return v.parser
 }
 
-func (v *variant) ImpressionInvoker() model.ImpressionInvoker {
+func (v *roxString) ImpressionInvoker() model.ImpressionInvoker {
 	return v.impressionInvoker
 }
 
-func (v *variant) ClientExperiment() *model.Experiment {
+func (v *roxString) ClientExperiment() *model.Experiment {
 	return v.clientExperiment
 }

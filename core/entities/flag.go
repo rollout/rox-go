@@ -7,7 +7,7 @@ import (
 )
 
 type flag struct {
-	*variant
+	*roxString
 }
 
 func NewFlag(defaultValue bool) model.Flag {
@@ -17,8 +17,10 @@ func NewFlag(defaultValue bool) model.Flag {
 	} else {
 		variantDefaultValue = roxx.FlagFalseValue
 	}
+	roxString := NewRoxString(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}).(*roxString)
+	roxString.flagType = "boolType"
 	return &flag{
-		variant: NewVariant(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}).(*variant),
+		roxString,
 	}
 }
 

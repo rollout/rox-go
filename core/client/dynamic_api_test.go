@@ -48,15 +48,15 @@ func TestDynamicAPIGetValue(t *testing.T) {
 	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
 	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
 
-	assert.Equal(t, "A", dynamicAPI.Value("default.newVariant", "A", []string{"A", "B", "C"}, nil))
-	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValue(nil))
-	assert.Equal(t, "B", dynamicAPI.Value("default.newVariant", "B", []string{"A", "B", "C"}, nil))
+	assert.Equal(t, "A", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
+	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValueAsString(nil))
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "B", []string{"A", "B", "C"}, nil))
 	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
 
 	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(true, "B", "A")`, false, []string{"default.newVariant"}, nil)})
 	flagSetter.SetExperiments()
 
-	assert.Equal(t, "B", dynamicAPI.Value("default.newVariant", "A", []string{"A", "B", "C"}, nil))
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
 }
 
 func TestDynamicAPIGetValueWithoutOptions(t *testing.T) {
@@ -66,15 +66,15 @@ func TestDynamicAPIGetValueWithoutOptions(t *testing.T) {
 	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
 	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
 
-	assert.Equal(t, "A", dynamicAPI.Value("default.newVariant", "A", nil, nil))
-	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValue(nil))
-	assert.Equal(t, "B", dynamicAPI.Value("default.newVariant", "B", nil, nil))
+	assert.Equal(t, "A", dynamicAPI.StringValue("default.newVariant", "A", nil, nil))
+	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValueAsString(nil))
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "B", nil, nil))
 	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
 
 	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(true, "B", "A")`, false, []string{"default.newVariant"}, nil)})
 	flagSetter.SetExperiments()
 
-	assert.Equal(t, "B", dynamicAPI.Value("default.newVariant", "A", nil, nil))
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", nil, nil))
 }
 
 type entitiesMockProvider struct {
@@ -84,6 +84,15 @@ func (*entitiesMockProvider) CreateFlag(defaultValue bool) model.Flag {
 	return entities.NewFlag(defaultValue)
 }
 
-func (*entitiesMockProvider) CreateVariant(defaultValue string, options []string) model.Variant {
-	return entities.NewVariant(defaultValue, options)
+func (*entitiesMockProvider) CreateRoxString(defaultValue string, options []string) model.RoxString {
+	return entities.NewRoxString(defaultValue, options)
 }
+
+func (*entitiesMockProvider) CreateRoxInt(defaultValue int, options []int) model.RoxInt {
+	return entities.NewRoxInt(defaultValue, options)
+}
+
+func (*entitiesMockProvider) CreateRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
+	return entities.NewRoxDouble(defaultValue, options)
+}
+
