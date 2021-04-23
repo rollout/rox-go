@@ -43,6 +43,8 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.realPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.customPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.appKey", serverProperties.RolloutKey()))
+	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeAPIVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAPIVersion.Name]))
+	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeLibVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeLibVersion.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty("internal."+consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
 		value, _ := uuid.NewV4()
 		return value.String()
@@ -62,6 +64,10 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 		<-r.core.Setup(sdkSettings, serverProperties, roxOptions)
 	}()
 	return done
+}
+
+func (r *Rox) RegisterWithEmptyNamespace(roxContainer interface{}) {
+	r.Register("", roxContainer)
 }
 
 func (r *Rox) Register(namespace string, roxContainer interface{}) {
