@@ -21,7 +21,7 @@ type roxDouble struct {
 
 func NewRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
 	if options == nil {
-		options = []float64 {}
+		options = []float64{}
 	}
 	allOptions := make([]float64, len(options))
 	copy(allOptions, options)
@@ -30,11 +30,11 @@ func NewRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
 	}
 
 	roxDouble := &roxDouble{
-		roxVariant:        roxVariant{
+		roxVariant: roxVariant{
 			flagType: "doubleType",
 		},
-		defaultValue:      defaultValue,
-		options:           allOptions,
+		defaultValue: defaultValue,
+		options:      allOptions,
 	}
 
 	return roxDouble
@@ -126,4 +126,3 @@ func (v *roxDouble) ImpressionInvoker() model.ImpressionInvoker {
 func (v *roxDouble) ClientExperiment() *model.Experiment {
 	return v.clientExperiment
 }
-

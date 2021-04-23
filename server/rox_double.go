@@ -1,8 +1,8 @@
 package server
 
 import (
-"github.com/rollout/rox-go/core/entities"
-"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/entities"
+	"github.com/rollout/rox-go/core/model"
 )
 
 type RoxDouble = model.RoxDouble

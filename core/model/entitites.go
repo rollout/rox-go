@@ -46,7 +46,6 @@ type EntitiesProvider interface {
 	CreateRoxString(defaultValue string, options []string) RoxString
 	CreateRoxInt(defaultValue int, options []int) RoxInt
 	CreateRoxDouble(defaultValue float64, options []float64) RoxDouble
-
 }
 
 type InternalVariant interface {

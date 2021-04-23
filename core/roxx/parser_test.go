@@ -2,9 +2,9 @@ package roxx_test
 
 import (
 	"fmt"
+	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/extensions"
 	"github.com/rollout/rox-go/core/repositories"
-	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/stretchr/testify/assert"
 	"testing"

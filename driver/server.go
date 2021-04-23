@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/rollout/rox-go/server"
 	roxContext "github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/server"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,38 +18,38 @@ type testRequest struct {
 }
 
 type setupAndAwait struct {
-	Key string `json: "key"`
-	Options serverOptions `json: "options, omitempty"`
+	Key     string        `json:"key"`
+	Options serverOptions `json:"options, omitempty"`
 }
 
 type serverOptions struct {
-	Configuration *json.RawMessage `json: "configuration, omitempty"`
+	Configuration *json.RawMessage `json:"configuration, omitempty"`
 }
 
 type dynamicFlagIsEnabled struct {
-	Flag string `json:"flag"`
-	DefaultValue bool `json:"defaultValue"`
-	Context *json.RawMessage `json: "context, omitempty"`
+	Flag         string           `json:"flag"`
+	DefaultValue bool             `json:"defaultValue"`
+	Context      *json.RawMessage `json:"context, omitempty"`
 }
 
 type dynamicFlagValue struct {
-	Flag string `json:"flag"`
-	DefaultValue string `json:"defaultValue"`
-	Context *json.RawMessage `json: "context, omitempty"`
+	Flag         string           `json:"flag"`
+	DefaultValue string           `json:"defaultValue"`
+	Context      *json.RawMessage `json:"context, omitempty"`
 }
 
 type setCustomString struct {
-	Key string
+	Key   string
 	Value string
 }
 
 type staticFlagIsEnabled struct {
-	Flag string `json:"flag"`
-	Context *json.RawMessage `json "context, omitempty"`
+	Flag    string           `json:"flag"`
+	Context *json.RawMessage `json"context, omitempty"`
 }
 
-
 var srv *http.Server
+
 func main() {
 
 	var rox *server.Rox
@@ -57,7 +57,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	srv = &http.Server{
-		Addr: ":1234",
+		Addr:    ":1234",
 		Handler: mux,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -82,7 +82,7 @@ func main() {
 
 			json.Unmarshal(*setup.Options.Configuration, &configMap)
 
-			if s, ok := configMap["env"] ; ok {
+			if s, ok := configMap["env"]; ok {
 				switch s {
 				case "localhost":
 					os.Setenv("ROLLOUT_MODE", "LOCAL")
@@ -96,7 +96,9 @@ func main() {
 			options := server.NewRoxOptions(server.RoxOptionsBuilder{})
 			<-rox.Setup(setup.Key, options)
 
-			doneStruct := struct{Result string `json:"result"`}{"done"}
+			doneStruct := struct {
+				Result string `json:"result"`
+			}{"done"}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -110,7 +112,9 @@ func main() {
 				log.Fatal(err)
 			}
 			rox.SetCustomStringProperty(setCustom.Key, setCustom.Value)
-			doneStruct := struct{Result string `json:"result"`}{"done"}
+			doneStruct := struct {
+				Result string `json:"result"`
+			}{"done"}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -120,7 +124,7 @@ func main() {
 			return
 		case "dynamicFlagIsEnabled":
 			var dynamicFlag dynamicFlagIsEnabled
-			if err := json.Unmarshal(payload, &dynamicFlag); err != nil{
+			if err := json.Unmarshal(payload, &dynamicFlag); err != nil {
 				log.Fatal(err)
 			}
 
@@ -145,7 +149,9 @@ func main() {
 				}
 			}
 			result := rox.DynamicAPI().IsEnabled(dynamicFlag.Flag, dynamicFlag.DefaultValue, rCtx)
-			doneStruct := struct{Result bool `json:"result"`}{result}
+			doneStruct := struct {
+				Result bool `json:"result"`
+			}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -154,7 +160,9 @@ func main() {
 			w.Write(doneBody)
 			return
 		case "stop":
-			doneStruct := struct{Result string `json:"result"`}{"done"}
+			doneStruct := struct {
+				Result string `json:"result"`
+			}{"done"}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -165,7 +173,7 @@ func main() {
 			return
 		case "dynamicFlagValue":
 			var dynamicFlag dynamicFlagValue
-			if err := json.Unmarshal(payload, &dynamicFlag); err != nil{
+			if err := json.Unmarshal(payload, &dynamicFlag); err != nil {
 				log.Fatal(err)
 			}
 			contextMap := make(map[string]interface{})
@@ -188,8 +196,10 @@ func main() {
 					continue
 				}
 			}
-			result := rox.DynamicAPI().Value(dynamicFlag.Flag, dynamicFlag.DefaultValue, []string{}, rCtx)
-			doneStruct := struct{Result string `json:"result"`}{result}
+			result := rox.DynamicAPI().StringValue(dynamicFlag.Flag, dynamicFlag.DefaultValue, []string{}, rCtx)
+			doneStruct := struct {
+				Result string `json:"result"`
+			}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -199,7 +209,9 @@ func main() {
 			return
 		case "registerStaticContainers":
 			rox.Register("namespace", container)
-			doneStruct := struct{Result string `json:"result"`}{"done"}
+			doneStruct := struct {
+				Result string `json:"result"`
+			}{"done"}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -224,7 +236,9 @@ func main() {
 				result = container.BoolDefaultTrue.IsEnabled(rCtx)
 			}
 
-			doneStruct := struct{Result bool `json:"result"`}{result}
+			doneStruct := struct {
+				Result bool `json:"result"`
+			}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)
@@ -258,4 +272,3 @@ func main() {
 func statusCheck(w http.ResponseWriter, req *http.Request) {
 	return
 }
-

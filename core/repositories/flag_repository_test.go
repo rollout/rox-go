@@ -32,7 +32,7 @@ func TestFlagRepositoryWillAddRoxStringAndSetName(t *testing.T) {
 
 func TestFlagRepositoryWillAddRoxIntAndSetName(t *testing.T) {
 	repo := repositories.NewFlagRepository()
-	flag := entities.NewRoxInt(1, []int{2,3})
+	flag := entities.NewRoxInt(1, []int{2, 3})
 	repo.AddFlag(flag, "harti")
 
 	assert.Equal(t, "harti", repo.GetFlag("harti").Name())

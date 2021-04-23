@@ -1,10 +1,10 @@
 package entities
 
 import (
-"github.com/rollout/rox-go/core/context"
-"github.com/rollout/rox-go/core/model"
-"github.com/rollout/rox-go/core/roxx"
-"github.com/rollout/rox-go/core/utils"
+	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/roxx"
+	"github.com/rollout/rox-go/core/utils"
 	"strconv"
 )
 
@@ -21,7 +21,7 @@ type roxInt struct {
 
 func NewRoxInt(defaultValue int, options []int) model.RoxInt {
 	if options == nil {
-		options = []int {}
+		options = []int{}
 	}
 	allOptions := make([]int, len(options))
 	copy(allOptions, options)
@@ -30,11 +30,11 @@ func NewRoxInt(defaultValue int, options []int) model.RoxInt {
 	}
 
 	roxInt := &roxInt{
-		roxVariant:        roxVariant{
+		roxVariant: roxVariant{
 			flagType: "intType",
 		},
-		defaultValue:      defaultValue,
-		options:           allOptions,
+		defaultValue: defaultValue,
+		options:      allOptions,
 	}
 
 	return roxInt
@@ -126,4 +126,3 @@ func (v *roxInt) ImpressionInvoker() model.ImpressionInvoker {
 func (v *roxInt) ClientExperiment() *model.Experiment {
 	return v.clientExperiment
 }
-

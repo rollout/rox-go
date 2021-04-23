@@ -9,7 +9,7 @@ type FlagRepository struct {
 	mock.Mock
 }
 
-func (m *FlagRepository) AddFlag(flag interface{}, name string) {
+func (m *FlagRepository) AddFlag(flag model.Variant, name string) {
 	m.Called(flag, name)
 }
 

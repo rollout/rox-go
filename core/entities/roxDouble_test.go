@@ -92,4 +92,3 @@ func TestRoxDoubleWillRaiseImpressionInvoker(t *testing.T) {
 	assert.Equal(t, 2.0, roxDouble.GetValue(nil))
 	assert.True(t, isImpressionRaised)
 }
-

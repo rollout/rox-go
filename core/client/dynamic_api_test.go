@@ -41,7 +41,7 @@ func TestDynamicAPIIsEnabledAfterSetup(t *testing.T) {
 	assert.True(t, dynamicAPI.IsEnabled("default.newFlag", false, nil))
 }
 
-func TestDynamicAPIGetValue(t *testing.T) {
+func TestDynamicAPIGetStringValue(t *testing.T) {
 	parser := roxx.NewParser()
 	flagRepo := repositories.NewFlagRepository()
 	expRepo := repositories.NewExperimentRepository()
@@ -57,6 +57,42 @@ func TestDynamicAPIGetValue(t *testing.T) {
 	flagSetter.SetExperiments()
 
 	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
+}
+
+func TestDynamicAPIGetIntValue(t *testing.T) {
+	parser := roxx.NewParser()
+	flagRepo := repositories.NewFlagRepository()
+	expRepo := repositories.NewExperimentRepository()
+	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
+	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
+
+	assert.Equal(t, 1, dynamicAPI.IntValue("default.newVariant", 1, []int{1, 2, 3}, nil))
+	assert.Equal(t, 1, flagRepo.GetFlag("default.newVariant").(model.RoxInt).GetValue(nil))
+	assert.Equal(t, 2, dynamicAPI.IntValue("default.newVariant", 2, []int{3, 4, 5}, nil))
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+
+	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(true, 2, 1)`, false, []string{"default.newVariant"}, nil)})
+	flagSetter.SetExperiments()
+
+	assert.Equal(t, 2, dynamicAPI.IntValue("default.newVariant", 1, []int{1, 2, 3}, nil))
+}
+
+func TestDynamicAPIGetDoubleValue(t *testing.T) {
+	parser := roxx.NewParser()
+	flagRepo := repositories.NewFlagRepository()
+	expRepo := repositories.NewExperimentRepository()
+	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
+	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
+
+	assert.Equal(t, 1, dynamicAPI.IntValue("default.newVariant", 1, []int{1, 2, 3}, nil))
+	assert.Equal(t, 1, flagRepo.GetFlag("default.newVariant").(model.RoxInt).GetValue(nil))
+	assert.Equal(t, 2, dynamicAPI.IntValue("default.newVariant", 2, []int{3, 4, 5}, nil))
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+
+	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(true, 2, 1)`, false, []string{"default.newVariant"}, nil)})
+	flagSetter.SetExperiments()
+
+	assert.Equal(t, 2, dynamicAPI.IntValue("default.newVariant", 1, []int{1, 2, 3}, nil))
 }
 
 func TestDynamicAPIGetValueWithoutOptions(t *testing.T) {
@@ -95,4 +131,3 @@ func (*entitiesMockProvider) CreateRoxInt(defaultValue int, options []int) model
 func (*entitiesMockProvider) CreateRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
 	return entities.NewRoxDouble(defaultValue, options)
 }
-

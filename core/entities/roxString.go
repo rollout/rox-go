@@ -26,8 +26,8 @@ type roxString struct {
 }
 
 func NewRoxString(defaultValue string, options []string) model.RoxString {
-	if (options == nil) {
-		options = []string {}
+	if options == nil {
+		options = []string{}
 	}
 	allOptions := make([]string, len(options))
 	copy(allOptions, options)
@@ -36,11 +36,11 @@ func NewRoxString(defaultValue string, options []string) model.RoxString {
 	}
 
 	roxString := &roxString{
-		roxVariant:        roxVariant{
+		roxVariant: roxVariant{
 			flagType: "stringType",
 		},
-		defaultValue:      defaultValue,
-		options:           allOptions,
+		defaultValue: defaultValue,
+		options:      allOptions,
 	}
 
 	return roxString

@@ -1,7 +1,7 @@
 package entities
 
 type roxVariant struct {
-	name string
+	name     string
 	flagType string
 }
 
