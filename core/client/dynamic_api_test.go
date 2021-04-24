@@ -59,6 +59,24 @@ func TestDynamicAPIGetStringValue(t *testing.T) {
 	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
 }
 
+func TestDynamicAPIGetStringValueWithFlagDependency(t *testing.T) {
+	parser := roxx.NewParser()
+	flagRepo := repositories.NewFlagRepository()
+	expRepo := repositories.NewExperimentRepository()
+	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
+	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
+
+	assert.Equal(t, "A", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
+	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValueAsString(nil))
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "B", []string{"A", "B", "C"}, nil))
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+
+	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(gt("5", 3), "B", "A")`, false, []string{"default.newVariant"}, nil)})
+	flagSetter.SetExperiments()
+
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", []string{"A", "B", "C"}, nil))
+}
+
 func TestDynamicAPIGetIntValue(t *testing.T) {
 	parser := roxx.NewParser()
 	flagRepo := repositories.NewFlagRepository()
