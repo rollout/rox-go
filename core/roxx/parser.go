@@ -2,12 +2,12 @@ package roxx
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/logging"
 	"time"
-	"encoding/base64"
 )
 
 type Parser interface {
@@ -209,7 +209,7 @@ func (p *roxxParser) setBasicOperators() {
 	p.AddOperator("b64d", func(p Parser, stack *CoreStack, context context.Context) {
 		op1, ok1 := stack.Pop().(string)
 		if ok1 {
-			sDec, _ := base64.StdEncoding.DecodeString(op1);
+			sDec, _ := base64.StdEncoding.DecodeString(op1)
 			stack.Push(string(sDec))
 		} else {
 			stack.Push(TokenTypeUndefined)

@@ -18,13 +18,13 @@ func NewDynamicAPI(flagRepository model.FlagRepository, entitiesProvider model.E
 }
 
 func (api *dynamicAPI) IsEnabled(name string, defaultValue bool, ctx context.Context) bool {
-	variant := api.flagRepository.GetFlag(name)
-	if variant == nil {
-		variant = api.entitiesProvider.CreateFlag(defaultValue)
-		api.flagRepository.AddFlag(variant, name)
+	flag := api.flagRepository.GetFlag(name)
+	if flag == nil {
+		flag = api.entitiesProvider.CreateFlag(defaultValue)
+		api.flagRepository.AddFlag(flag, name)
 	}
 
-	if flag, ok := variant.(model.Flag); !ok {
+	if flag, ok := flag.(model.Flag); !ok {
 		return defaultValue
 	} else {
 		isEnabled, isDefaultValue := flag.(model.InternalFlag).InternalIsEnabled(ctx)
@@ -36,14 +36,44 @@ func (api *dynamicAPI) IsEnabled(name string, defaultValue bool, ctx context.Con
 	}
 }
 
-func (api *dynamicAPI) Value(name string, defaultValue string, options []string, ctx context.Context) string {
+func (api *dynamicAPI) StringValue(name string, defaultValue string, options []string, ctx context.Context) string {
+	roxString := api.flagRepository.GetFlag(name)
+	if roxString == nil {
+		roxString = api.entitiesProvider.CreateRoxString(defaultValue, options)
+		api.flagRepository.AddFlag(roxString, name)
+	}
+
+	value, isDefaultValue := roxString.(model.InternalRoxString).InternalGetValue(ctx)
+	if isDefaultValue {
+		return defaultValue
+	} else {
+		return value
+	}
+}
+
+func (api *dynamicAPI) IntValue(name string, defaultValue int, options []int, ctx context.Context) int {
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
-		variant = api.entitiesProvider.CreateVariant(defaultValue, options)
+		variant = api.entitiesProvider.CreateRoxInt(defaultValue, options)
 		api.flagRepository.AddFlag(variant, name)
 	}
 
-	value, isDefaultValue := variant.(model.InternalVariant).InternalGetValue(ctx)
+	value, isDefaultValue := variant.(model.InternalRoxInt).InternalGetValue(ctx)
+	if isDefaultValue {
+		return defaultValue
+	} else {
+		return value
+	}
+}
+
+func (api *dynamicAPI) DoubleValue(name string, defaultValue float64, options []float64, ctx context.Context) float64 {
+	variant := api.flagRepository.GetFlag(name)
+	if variant == nil {
+		variant = api.entitiesProvider.CreateRoxDouble(defaultValue, options)
+		api.flagRepository.AddFlag(variant, name)
+	}
+
+	value, isDefaultValue := variant.(model.InternalRoxDouble).InternalGetValue(ctx)
 	if isDefaultValue {
 		return defaultValue
 	} else {

@@ -34,3 +34,19 @@ func (ev EvaluationResult) StringValue() string {
 
 	return ""
 }
+
+func (ev EvaluationResult) IntValue() int {
+	if value, ok := ev.value.(int); ok {
+		return value
+	} else {
+		return 0
+	}
+}
+
+func (ev EvaluationResult) DoubleValue() float64 {
+	if value, ok := ev.value.(float64); ok {
+		return value
+	} else {
+		return 0
+	}
+}

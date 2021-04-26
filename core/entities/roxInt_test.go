@@ -1,0 +1,94 @@
+package entities
+
+import (
+	"github.com/rollout/rox-go/core/impression"
+	"github.com/rollout/rox-go/core/mocks"
+	"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/roxx"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
+)
+
+func TestRoxIntWithoutOptions(t *testing.T) {
+	roxInt := NewRoxInt(1, nil)
+
+	assert.Equal(t, 1, len(roxInt.Options()))
+}
+
+func TestRoxIntWillNotAddDefaultToOptionsIfExists(t *testing.T) {
+	roxInt := NewRoxInt(1, []int{1, 2, 3})
+
+	assert.Equal(t, 3, len(roxInt.Options()))
+}
+
+func TestRoxIntWillAddDefaultToOptionsIfNotExists(t *testing.T) {
+	roxInt := NewRoxInt(1, []int{1, 2, 3})
+
+	assert.Equal(t, 3, len(roxInt.Options()))
+	assert.Contains(t, roxInt.Options(), 1)
+}
+
+func TestRoxIntWillSetName(t *testing.T) {
+	roxInt := NewRoxInt(1, []int{2, 3})
+
+	assert.Equal(t, "", roxInt.Name())
+
+	roxInt.(model.InternalVariant).SetName("bop")
+
+	assert.Equal(t, "bop", roxInt.Name())
+}
+
+func TestRoxIntWillReturnDefaultValueWhenNoParserOrCondition(t *testing.T) {
+	roxInt := NewRoxInt(1, []int{2, 3})
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+
+	roxInt.(model.InternalVariant).SetForEvaluation(&mocks.Parser{}, nil, nil)
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+
+	parser := &mocks.Parser{}
+	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+}
+
+func TestRoxIntWillReturnDefaultValueWhenResultNotInOptions(t *testing.T) {
+	parser := &mocks.Parser{}
+	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(666))
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+
+	assert.Equal(t, 666, roxInt.GetValue(nil))
+}
+
+func TestRoxIntWillReturnValueWhenOnEvaluation(t *testing.T) {
+	parser := &mocks.Parser{}
+	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(2))
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), nil)
+
+	assert.Equal(t, 2, roxInt.GetValue(nil))
+}
+
+func TestRoxIntWillRaiseImpressionInvoker(t *testing.T) {
+	parser := &mocks.Parser{}
+	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(2))
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 2, roxInt.GetValue(nil))
+	assert.True(t, isImpressionRaised)
+}

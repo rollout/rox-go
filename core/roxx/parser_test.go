@@ -2,9 +2,9 @@ package roxx_test
 
 import (
 	"fmt"
+	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/extensions"
 	"github.com/rollout/rox-go/core/repositories"
-	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -72,13 +72,47 @@ func TestParserComparisonExpressionsEvaluation(t *testing.T) {
 	assert.Equal(t, false, parser.EvaluateExpression(`lt(500, 500)`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`lt(500, 500.54)`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`lte(500, 500)`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`lt("500", "100")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`lt("500", "500")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`lt("500", "500.54")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`lte("500", "500")`, nil).Value())
 
 	assert.Equal(t, true, parser.EvaluateExpression(`gt(500, 100)`, nil).Value())
 	assert.Equal(t, false, parser.EvaluateExpression(`gt(500, 500)`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`gt(500.54, 500)`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`gte(500, 500)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`gt("500", "100")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`gt("500", "500")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`gt("500.54", "500")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`gte("500", "500")`, nil).Value())
 
-	assert.Equal(t, false, parser.EvaluateExpression(`gte("500", 500)`, nil).Value())
+
+	assert.Equal(t, true, parser.EvaluateExpression(`gte("500", 500)`, nil).Value())
+
+}
+
+func TestParserNumEqualityExpressionsEvaluation(t *testing.T) {
+
+	parser := roxx.NewParser()
+
+	assert.Equal(t, true, parser.EvaluateExpression(`numeq(500, 500)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numeq("500", "500")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numeq(500, "500")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numeq("500", 500)`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numeq(500, 501)`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numeq("500", "501")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numeq(500, "501")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numeq("500", 501)`, nil).Value())
+
+	assert.Equal(t, false, parser.EvaluateExpression(`numneq(500, 500)`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numneq("500", "500")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numneq(500, "500")`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`numneq("500", 500)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numneq(500, 501)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numneq("500", "501")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numneq(500, "501")`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`numneq("500", 501)`, nil).Value())
+
 
 }
 
@@ -154,8 +188,8 @@ func TestParserRegularExpressionEvaluation(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`match("\n", ".", "s")`, nil).Value())
 
 	// Unsupported flags (x)
-	// assert.Equal(t, true, parser.EvaluateExpression(`match("uS", "IL|US#Comment", "xi")`, nil).Value())
-	// assert.Equal(t, true, parser.EvaluateExpression(`match("HELLO\nTeST\n#This is a comment", "^TEST$", "ixm")`, nil).Value())
+	// assert.Equal(t, true, parser.EvaluateExpression(`match("uS", "IL|US#Comment", "xi")`, nil).StringValue())
+	// assert.Equal(t, true, parser.EvaluateExpression(`match("HELLO\nTeST\n#This is a comment", "^TEST$", "ixm")`, nil).StringValue())
 }
 
 func TestParserIfThenExpressionEvaluationString(t *testing.T) {
