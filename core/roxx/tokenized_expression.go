@@ -129,7 +129,11 @@ func (te *TokenizedExpression) nodeFromToken(token string) *Node {
 	tokenType := TokenTypeFromToken(token)
 	switch tokenType {
 	case TokenTypeString:
-		return NewNode(NodeTypeRand, token[1:len(token)-2])
+		if len(token) - 2 < 1 {
+			return NewNode(NodeTypeRand, token[1 : len(token) - 1])
+		} else {
+			return NewNode(NodeTypeRand, token[1 : len(token) - 2])
+		}
 	case TokenTypeNumber:
 		intNumber, err := strconv.Atoi(token)
 		if err == nil {
