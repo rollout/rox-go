@@ -2,9 +2,9 @@ package roxx_test
 
 import (
 	"fmt"
+	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/extensions"
 	"github.com/rollout/rox-go/core/repositories"
-	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/roxx"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -43,6 +43,7 @@ func TestParserTokenType(t *testing.T) {
 func TestParserSimpleExpressionEvaluation(t *testing.T) {
 	parser := roxx.NewParser()
 
+	assert.Equal(t, "", parser.EvaluateExpression(`""`, nil).Value())
 	assert.Equal(t, "", parser.EvaluateExpression(`\"\"`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`true`, nil).Value())
 	assert.Equal(t, "red", parser.EvaluateExpression(`"red"`, nil).Value())
