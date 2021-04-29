@@ -131,6 +131,24 @@ func TestDynamicAPIGetValueWithoutOptions(t *testing.T) {
 	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", nil, nil))
 }
 
+func TestDynamicAPIFlagMixUp(t *testing.T) {
+	parser := roxx.NewParser()
+	flagRepo := repositories.NewFlagRepository()
+	expRepo := repositories.NewExperimentRepository()
+	flagSetter := entities.NewFlagSetter(flagRepo, parser, expRepo, nil)
+	dynamicAPI := client.NewDynamicAPI(flagRepo, &entitiesMockProvider{})
+
+	assert.Equal(t, "A", dynamicAPI.StringValue("default.newVariant", "A", nil, nil))
+	assert.Equal(t, "A", flagRepo.GetFlag("default.newVariant").GetValueAsString(nil))
+	assert.Equal(t, 3, dynamicAPI.IntValue("default.newVariant", 3, nil, nil))
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+
+	expRepo.SetExperiments([]*model.ExperimentModel{model.NewExperimentModel("1", "default.newVariant", `ifThen(true, "B", "A")`, false, []string{"default.newVariant"}, nil)})
+	flagSetter.SetExperiments()
+
+	assert.Equal(t, "B", dynamicAPI.StringValue("default.newVariant", "A", nil, nil))
+}
+
 type entitiesMockProvider struct {
 }
 

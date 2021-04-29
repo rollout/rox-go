@@ -7,7 +7,7 @@ import (
 
 type Variant interface {
 	Name() string
-	FlagType() string
+	FlagType() int
 	GetValueAsString(context context.Context) string
 	GetDefaultAsString() string
 	GetOptionsAsString() []string

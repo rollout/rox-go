@@ -136,11 +136,9 @@ func TestExperimentsExtensionsFlagDependencyImpressionHandler(t *testing.T) {
 
 	assert.Equal(t, "green", v.GetValueAsString(nil))
 
-	assert.Equal(t, 2, len(impressions))
-	assert.Equal(t, "f1", impressions[0].ReportingValue.Name)
-	assert.Equal(t, "false", impressions[0].ReportingValue.Value)
-	assert.Equal(t, "v1", impressions[1].ReportingValue.Name)
-	assert.Equal(t, "green", impressions[1].ReportingValue.Value)
+	assert.Equal(t, 1, len(impressions))
+	assert.Equal(t, "v1", impressions[0].ReportingValue.Name)
+	assert.Equal(t, "green", impressions[0].ReportingValue.Value)
 }
 
 func TestExperimentsExtensionsFlagDependency2LevelsBottomNotExists(t *testing.T) {

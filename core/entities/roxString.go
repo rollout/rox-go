@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/roxx"
@@ -37,7 +38,7 @@ func NewRoxString(defaultValue string, options []string) model.RoxString {
 
 	roxString := &roxString{
 		roxVariant: roxVariant{
-			flagType: "stringType",
+			flagType: consts.StringType,
 		},
 		defaultValue: defaultValue,
 		options:      allOptions,
@@ -95,16 +96,28 @@ func (v *roxString) GetValue(ctx context.Context) string {
 func (v *roxString) InternalGetValue(ctx context.Context) (returnValue string, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
 	mergedContext := context.NewMergedContext(v.globalContext, ctx)
+	sendImpression := false
 
 	if v.parser != nil && v.condition != "" {
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
 		value := evaluationResult.StringValue()
 		if value != "" {
-			returnValue, isDefault = value, false
+			switch v.FlagType(){
+			case consts.StringType:
+				if _, ok := evaluationResult.Value().(string); ok {
+					returnValue, isDefault = value, false
+					sendImpression = true
+				}
+			case consts.BoolType:
+				if value == roxx.FlagFalseValue || value == roxx.FlagTrueValue {
+					returnValue, isDefault = value, false
+					sendImpression = true
+				}
+			}
 		}
 	}
 
-	if v.impressionInvoker != nil {
+	if v.impressionInvoker != nil && sendImpression{
 		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, returnValue), v.clientExperiment, mergedContext)
 	}
 
