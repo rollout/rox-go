@@ -36,8 +36,9 @@ func NewExperimentModel(id, name, condition string, isArchived bool, flags, labe
 }
 
 type ReportingValue struct {
-	Name  string
-	Value string
+	Name      string
+	Value     string
+	Targeting bool
 }
 
 func NewReportingValue(name, value string) *ReportingValue {

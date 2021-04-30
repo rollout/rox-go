@@ -21,4 +21,5 @@ func TestReportingValueConstructor(t *testing.T) {
 
 	assert.Equal(t, "pi", reportingValue.Name)
 	assert.Equal(t, "ka", reportingValue.Value)
+	assert.Equal(t, false, reportingValue.Targeting)
 }
