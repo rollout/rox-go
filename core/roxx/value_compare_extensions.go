@@ -72,6 +72,34 @@ func (e *ValueCompareExtensions) Extend() {
 		}
 	})
 
+	e.parser.AddOperator("numeq", func(p Parser, stack *CoreStack, context context.Context) {
+		op1 := stack.Pop()
+		op2 := stack.Pop()
+
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
+
+		if !ok1 || !ok2 {
+			stack.Push(false)
+		} else {
+			stack.Push(number1 == number2)
+		}
+	})
+
+	e.parser.AddOperator("numneq", func(p Parser, stack *CoreStack, context context.Context) {
+		op1 := stack.Pop()
+		op2 := stack.Pop()
+
+		number1, ok1 := utils.ToFloat(op1)
+		number2, ok2 := utils.ToFloat(op2)
+
+		if !ok1 || !ok2 {
+			stack.Push(false)
+		} else {
+			stack.Push(number1 != number2)
+		}
+	})
+
 	e.parser.AddOperator("semverNe", func(p Parser, stack *CoreStack, context context.Context) {
 		op1, ok1 := stack.Pop().(string)
 		op2, ok2 := stack.Pop().(string)

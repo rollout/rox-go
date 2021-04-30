@@ -21,7 +21,7 @@ type Container1 struct {
 func TestRegistererWillThrowWhenNSRegisteredTwice(t *testing.T) {
 	flagRepo := repositories.NewFlagRepository()
 	container := &Container1{
-		Variant1:      entities.NewVariant("1", []string{"1", "2", "3"}),
+		Variant1:      entities.NewRoxString("1", []string{"1", "2", "3"}),
 		Flag1:         entities.NewFlag(false),
 		Flag2:         entities.NewFlag(false),
 		Flag3:         entities.NewFlag(false),
@@ -39,7 +39,7 @@ func TestRegistererWillThrowWhenNSRegisteredTwice(t *testing.T) {
 func TestRegisterWillRegisterVariantAndFlag(t *testing.T) {
 	flagRepo := repositories.NewFlagRepository()
 	container := &Container1{
-		Variant1:      entities.NewVariant("1", []string{"1", "2", "3"}),
+		Variant1:      entities.NewRoxString("1", []string{"1", "2", "3"}),
 		Flag1:         entities.NewFlag(false),
 		Flag2:         entities.NewFlag(false),
 		Flag3:         entities.NewFlag(false),
@@ -49,14 +49,14 @@ func TestRegisterWillRegisterVariantAndFlag(t *testing.T) {
 	registerer.RegisterInstance(container, "ns1")
 
 	assert.Equal(t, 4, len(flagRepo.GetAllFlags()))
-	assert.Equal(t, "1", flagRepo.GetFlag("ns1.Variant1").DefaultValue())
-	assert.Equal(t, "false", flagRepo.GetFlag("ns1.Flag1").DefaultValue())
+	assert.Equal(t, "1", flagRepo.GetFlag("ns1.Variant1").GetDefaultAsString())
+	assert.Equal(t, "false", flagRepo.GetFlag("ns1.Flag1").GetDefaultAsString())
 }
 
 func TestRegistererWillRegisterWithEmptyNS(t *testing.T) {
 	flagRepo := repositories.NewFlagRepository()
 	container := &Container1{
-		Variant1:      entities.NewVariant("1", []string{"1", "2", "3"}),
+		Variant1:      entities.NewRoxString("1", []string{"1", "2", "3"}),
 		Flag1:         entities.NewFlag(false),
 		Flag2:         entities.NewFlag(false),
 		Flag3:         entities.NewFlag(false),
@@ -66,6 +66,6 @@ func TestRegistererWillRegisterWithEmptyNS(t *testing.T) {
 	registerer.RegisterInstance(container, "")
 
 	assert.Equal(t, 4, len(flagRepo.GetAllFlags()))
-	assert.Equal(t, "1", flagRepo.GetFlag("Variant1").DefaultValue())
-	assert.Equal(t, "false", flagRepo.GetFlag("Flag1").DefaultValue())
+	assert.Equal(t, "1", flagRepo.GetFlag("Variant1").GetDefaultAsString())
+	assert.Equal(t, "false", flagRepo.GetFlag("Flag1").GetDefaultAsString())
 }

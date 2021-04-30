@@ -20,7 +20,7 @@ func NewFlagRepository() model.FlagRepository {
 }
 
 func (r *flagRepository) AddFlag(variant model.Variant, name string) {
-	if variant.Name() == "" {
+	if variant.(model.Variant).Name() == "" {
 		variant.(model.InternalVariant).SetName(name)
 	}
 
@@ -32,17 +32,21 @@ func (r *flagRepository) AddFlag(variant model.Variant, name string) {
 }
 
 func (r *flagRepository) GetFlag(name string) model.Variant {
+
 	r.mutex.RLock()
-	variant := r.variants[name]
+	variant, ok := r.variants[name]
 	r.mutex.RUnlock()
-	return variant
+	if !ok {
+		return nil
+	}
+	return variant.(model.Variant)
 }
 
 func (r *flagRepository) GetAllFlags() []model.Variant {
 	r.mutex.RLock()
 	result := make([]model.Variant, 0, len(r.variants))
 	for _, p := range r.variants {
-		result = append(result, p)
+		result = append(result, p.(model.Variant))
 	}
 	r.mutex.RUnlock()
 	return result
