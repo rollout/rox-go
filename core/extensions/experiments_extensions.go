@@ -64,7 +64,7 @@ func (e *ExperimentsExtensions) Extend() {
 		result := roxx.FlagFalseValue
 		variant := e.flagsRepository.GetFlag(featureFlagIdentifier)
 		if variant != nil {
-			result = variant.GetValue(context)
+			result = variant.GetValueAsString(context)
 		} else {
 			flagsExperiment := e.experimentRepository.GetExperimentByFlag(featureFlagIdentifier)
 			if flagsExperiment != nil && flagsExperiment.Condition != "" {
