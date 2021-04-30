@@ -4,13 +4,14 @@ import "github.com/rollout/rox-go/core/context"
 
 type ImpressionArgs struct {
 	ReportingValue *ReportingValue
+	Experiment     *Experiment
 	Context        context.Context
 }
 
 type ImpressionHandler = func(args ImpressionArgs)
 
 type ImpressionInvoker interface {
-	Invoke(value *ReportingValue, context context.Context)
+	Invoke(value *ReportingValue, experiment *Experiment, context context.Context)
 	RegisterImpressionHandler(handler ImpressionHandler)
 }
 
@@ -35,15 +36,14 @@ func NewExperimentModel(id, name, condition string, isArchived bool, flags, labe
 }
 
 type ReportingValue struct {
-	Name  string
-	Value string
+	Name      string
+	Value     string
 	Targeting bool
 }
 
-func NewReportingValue(name, value string, targeting bool) *ReportingValue {
+func NewReportingValue(name, value string) *ReportingValue {
 	return &ReportingValue{
 		Name:  name,
 		Value: value,
-		Targeting: targeting,
 	}
 }
