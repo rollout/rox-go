@@ -92,3 +92,54 @@ func TestRoxIntWillRaiseImpressionInvoker(t *testing.T) {
 	assert.Equal(t, 2, roxInt.GetValue(nil))
 	assert.True(t, isImpressionRaised)
 }
+
+func TestRoxIntForConsistencyWithString(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, "hi","hey")`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestRoxIntForConsistencyWithDouble(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2.5,3.5)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestRoxIntForConsistencyWithBoolean(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxInt := NewRoxInt(1, []int{2, 3})
+	roxInt.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, false, false)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 1, roxInt.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}

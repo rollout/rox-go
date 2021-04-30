@@ -1,6 +1,10 @@
 package entities
 
 import (
+	"github.com/rollout/rox-go/core/impression"
+	"github.com/rollout/rox-go/core/mocks"
+	"github.com/rollout/rox-go/core/model"
+	"github.com/rollout/rox-go/core/roxx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -31,4 +35,56 @@ func TestFlagWillInvokeDisabledAction(t *testing.T) {
 	})
 
 	assert.True(t, isCalled)
+}
+
+
+func TestFlagForConsistencyWithString(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	flag := NewFlag(false)
+	flag.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, "hey", "yo")`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, false, flag.IsEnabled(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestFlagForConsistencyWithInt(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	flag := NewFlag(true)
+	flag.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2, 3)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, true, flag.IsEnabled(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestFlagForConsistencyWithDouble(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	flag := NewFlag(true)
+	flag.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2.5, 3.5)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, true, flag.IsEnabled(nil))
+	assert.False(t, isImpressionRaised)
 }

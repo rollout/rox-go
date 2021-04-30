@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/roxx"
@@ -31,7 +32,7 @@ func NewRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
 
 	roxDouble := &roxDouble{
 		roxVariant: roxVariant{
-			flagType: "doubleType",
+			flagType: consts.DoubleType,
 		},
 		defaultValue: defaultValue,
 		options:      allOptions,
@@ -95,16 +96,18 @@ func (v *roxDouble) GetValue(ctx context.Context) float64 {
 func (v *roxDouble) InternalGetValue(ctx context.Context) (returnValue float64, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
 	mergedContext := context.NewMergedContext(v.globalContext, ctx)
+	sendImpression := false
 
 	if v.parser != nil && v.condition != "" {
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
-		value := evaluationResult.DoubleValue()
-		if value != 0 {
+		value, err := evaluationResult.DoubleValue()
+		if err == nil  {
 			returnValue, isDefault = value, false
+			sendImpression = true
 		}
 	}
 
-	if v.impressionInvoker != nil {
+	if v.impressionInvoker != nil && sendImpression {
 		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.FormatFloat(returnValue, 'F', -1, 64)), v.clientExperiment, mergedContext)
 	}
 
