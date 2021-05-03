@@ -145,7 +145,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 				case <-core.quit:
 					return
 				}
-			}, roxOptions.FetchInterval())
+			}, roxOptions.FetchInterval(), core.quit)
 		}
 	}()
 	return done
