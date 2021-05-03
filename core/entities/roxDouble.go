@@ -101,7 +101,7 @@ func (v *roxDouble) InternalGetValue(ctx context.Context) (returnValue float64, 
 	if v.parser != nil && v.condition != "" {
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
 		value, err := evaluationResult.DoubleValue()
-		if err == nil  {
+		if err == nil {
 			returnValue, isDefault = value, false
 			sendImpression = true
 		}

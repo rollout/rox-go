@@ -93,7 +93,6 @@ func TestRoxDoubleWillRaiseImpressionInvoker(t *testing.T) {
 	assert.True(t, isImpressionRaised)
 }
 
-
 func TestRoxDoubleForConsistencyWithString(t *testing.T) {
 	parser := roxx.NewParser()
 

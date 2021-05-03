@@ -88,7 +88,6 @@ func TestParserComparisonExpressionsEvaluation(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`gt("500.54", "500")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`gte("500", "500")`, nil).Value())
 
-
 	assert.Equal(t, true, parser.EvaluateExpression(`gte("500", 500)`, nil).Value())
 
 }
@@ -114,7 +113,6 @@ func TestParserNumEqualityExpressionsEvaluation(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`numneq("500", "501")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`numneq(500, "501")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`numneq("500", 501)`, nil).Value())
-
 
 }
 

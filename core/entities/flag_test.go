@@ -37,7 +37,6 @@ func TestFlagWillInvokeDisabledAction(t *testing.T) {
 	assert.True(t, isCalled)
 }
 
-
 func TestFlagForConsistencyWithString(t *testing.T) {
 	parser := roxx.NewParser()
 
