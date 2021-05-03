@@ -123,12 +123,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		select {
-		case <-core.Fetch():
-			break
-		case <-core.quit:
-			return
-		}
+		<-core.Fetch()
 
 		if roxOptions != nil && roxOptions.ImpressionHandler() != nil {
 			core.impressionInvoker.RegisterImpressionHandler(roxOptions.ImpressionHandler())
@@ -136,16 +131,11 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
 			go utils.RunPeriodicTask(func() {
-				select {
-				case <-core.Fetch():
-					if core.stateSender != nil {
-						core.stateSender.Send()
-					}
-					return
-				case <-core.quit:
-					return
-				}
+				<-core.Fetch()
 			}, roxOptions.FetchInterval(), core.quit)
+		}
+		if core.stateSender != nil {
+			core.stateSender.Send()
 		}
 	}()
 	return done

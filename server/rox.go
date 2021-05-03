@@ -187,7 +187,7 @@ func (r *Rox) DynamicAPI() model.DynamicAPI {
 
 func reset(r *Rox) {
 	r.state = ShuttingDown
-	r.core.Shutdown()
+	<-r.core.Shutdown()
 	r.core = core.NewCore()
 	r.state = Idle
 }
