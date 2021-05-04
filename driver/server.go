@@ -97,11 +97,19 @@ func main() {
 				}
 			}
 			options := server.NewRoxOptions(server.RoxOptionsBuilder{})
-			<-rox.Setup(setup.Key, options)
+			err := <-rox.Setup(setup.Key, options)
+
+			var result string
+
+			if err != nil {
+				result = err.Error()
+			} else {
+				result = "done"
+			}
 
 			doneStruct := struct {
 				Result string `json:"result"`
-			}{"done"}
+			}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)

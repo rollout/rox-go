@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
@@ -50,7 +51,7 @@ func (r *Rox) Shutdown() <-chan struct{} {
 	return done
 }
 
-func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} {
+func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 	r.setupShutdownMutex.Lock()
 	defer r.setupShutdownMutex.Unlock()
 	defer func() {
@@ -61,8 +62,8 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 
 	if r.state != Idle && r.state != Corrupted {
 		logging.GetLogger().Warn("Rox has already been initialised, skipping setup", nil)
-		done := make(chan struct{})
-		defer close(done)
+		done := make(chan error, 1)
+		done <- fmt.Errorf("Rox has already been initialised, skipping setup")
 		return done
 	}
 
@@ -95,14 +96,16 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 		return value.String()
 	}))
 
-	done := make(chan struct{})
+	done := make(chan error, 1)
 	go func() {
-		defer close(done)
 
 		defer func() {
 			if err := recover(); err != nil {
 				logging.GetLogger().Error("Failed in Rox.Setup", err)
 				r.state = Corrupted
+				done <- fmt.Errorf(err.(string))
+			} else {
+				done <- nil
 			}
 		}()
 		<-r.core.Setup(sdkSettings, serverProperties, roxOptions)
