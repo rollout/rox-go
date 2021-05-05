@@ -31,7 +31,7 @@ func (e *PropertiesExtensions) Extend() {
 					PropName: propName,
 					Context:  context,
 				})
-				if value == "" {
+				if value == nil {
 					stack.Push(roxx.TokenTypeUndefined)
 				} else {
 					stack.Push(value)
