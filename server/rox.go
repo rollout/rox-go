@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
@@ -34,23 +35,23 @@ func NewRox() *Rox {
 	}
 }
 
-func (r *Rox) Shutdown() <-chan struct{} {
-	done := make(chan struct{})
+func (r *Rox) Shutdown() <-chan error {
+	err := make(chan error, 1)
 	go func() {
 		r.setupShutdownMutex.Lock()
 		defer r.setupShutdownMutex.Unlock()
-		defer close(done)
 		if r.state != Set && r.state != Corrupted {
-			logging.GetLogger().Warn("Rox can only be shutdown when it is already in Set or Corrupted state.", nil)
-			return
+			logging.GetLogger().Warn("rox can only be shutdown when it is already in Set or Corrupted state", nil)
+			err <- fmt.Errorf("rox can only be shutdown when it is already in Set or Corrupted state")
 		} else {
 			reset(r)
+			err <- nil
 		}
 	}()
-	return done
+	return err
 }
 
-func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} {
+func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 	r.setupShutdownMutex.Lock()
 	defer r.setupShutdownMutex.Unlock()
 	defer func() {
@@ -60,10 +61,10 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 	}()
 
 	if r.state != Idle && r.state != Corrupted {
-		logging.GetLogger().Warn("Rox has already been initialised, skipping setup", nil)
-		done := make(chan struct{})
-		defer close(done)
-		return done
+		logging.GetLogger().Warn("rox has already been initialised, skipping setup", nil)
+		err := make(chan error, 1)
+		err <- fmt.Errorf("rox has already been initialised, skipping setup")
+		return err
 	}
 
 	if r.state == Corrupted {
@@ -95,20 +96,22 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 		return value.String()
 	}))
 
-	done := make(chan struct{})
+	err := make(chan error, 1)
 	go func() {
-		defer close(done)
 
 		defer func() {
-			if err := recover(); err != nil {
-				logging.GetLogger().Error("Failed in Rox.Setup", err)
+			if pErr := recover(); pErr != nil {
+				logging.GetLogger().Error("Failed in Rox.Setup", pErr)
 				r.state = Corrupted
+				err <- fmt.Errorf(pErr.(string))
+			} else {
+				err <- nil
 			}
 		}()
 		<-r.core.Setup(sdkSettings, serverProperties, roxOptions)
 		r.state = Set
 	}()
-	return done
+	return err
 }
 
 func (r *Rox) RegisterWithEmptyNamespace(roxContainer interface{}) {

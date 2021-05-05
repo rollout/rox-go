@@ -43,7 +43,7 @@ type ReportingValue struct {
 
 func NewReportingValue(name, value string) *ReportingValue {
 	return &ReportingValue{
-		Name:  name,
-		Value: value,
+		Name:      name,
+		Value:     value,
 	}
 }

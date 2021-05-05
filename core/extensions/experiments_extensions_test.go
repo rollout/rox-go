@@ -219,7 +219,7 @@ func TestExperimentsExtensionsFlagDependencyWithContext(t *testing.T) {
 	flagRepository := repositories.NewFlagRepository()
 	propertiesRepository := repositories.NewCustomPropertyRepository()
 
-	extensions.NewPropertiesExtensions(parser, propertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, propertiesRepository, nil).Extend()
 	extensions.NewExperimentsExtensions(parser, targetGroupsRepository, flagRepository, experimentRepository).Extend()
 
 	propertiesRepository.AddCustomProperty(properties.NewComputedBooleanProperty("prop", func(context context.Context) bool {
@@ -248,7 +248,7 @@ func TestExperimentsExtensionsFlagDependencyWithContextUsedOnExperimentWithNoFla
 	flagRepository := repositories.NewFlagRepository()
 	propertiesRepository := repositories.NewCustomPropertyRepository()
 
-	extensions.NewPropertiesExtensions(parser, propertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, propertiesRepository, nil).Extend()
 	extensions.NewExperimentsExtensions(parser, targetGroupsRepository, flagRepository, experimentRepository).Extend()
 
 	propertiesRepository.AddCustomProperty(properties.NewComputedBooleanProperty("prop", func(context context.Context) bool {
@@ -277,7 +277,7 @@ func TestExperimentsExtensionsFlagDependencyWithContext2LevelMidLevelNoFlagEvalE
 	flagRepository := repositories.NewFlagRepository()
 	propertiesRepository := repositories.NewCustomPropertyRepository()
 
-	extensions.NewPropertiesExtensions(parser, propertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, propertiesRepository, nil).Extend()
 	extensions.NewExperimentsExtensions(parser, targetGroupsRepository, flagRepository, experimentRepository).Extend()
 
 	propertiesRepository.AddCustomProperty(properties.NewComputedBooleanProperty("prop", func(context context.Context) bool {

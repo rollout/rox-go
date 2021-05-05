@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	roxContext "github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/server"
 	"io/ioutil"
 	"log"
@@ -73,7 +74,12 @@ func main() {
 
 		switch tr.Action {
 		case "shutdown":
-			rox.Shutdown()
+			err := <-rox.Shutdown()
+			if err != nil {
+				logging.GetLogger().Error(err.Error(), nil)
+			} else {
+				logging.GetLogger().Debug("successful shutdown", nil)
+			}
 			return
 		case "setupAndAwait":
 			var setup setupAndAwait
@@ -97,11 +103,19 @@ func main() {
 				}
 			}
 			options := server.NewRoxOptions(server.RoxOptionsBuilder{})
-			<-rox.Setup(setup.Key, options)
+			err := <-rox.Setup(setup.Key, options)
+
+			var result string
+
+			if err != nil {
+				result = err.Error()
+			} else {
+				result = "done"
+			}
 
 			doneStruct := struct {
 				Result string `json:"result"`
-			}{"done"}
+			}{result}
 			doneBody, err := json.Marshal(doneStruct)
 			if err != nil {
 				log.Println(err)

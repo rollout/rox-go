@@ -2,7 +2,6 @@ package server
 
 import (
 	"time"
-
 	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 )
@@ -26,6 +25,7 @@ type roxOptions struct {
 	configurationFetchedHandler model.ConfigurationFetchedHandler
 	roxyURL                     string
 	selfManagedOptions          model.SelfManagedOptions
+	dynamicPropertyRuleHandler  model.DynamicPropertyRuleHandler
 }
 
 func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
@@ -54,6 +54,16 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		logging.SetLogger(NewServerLogger())
 	}
 
+	var dynamicPropertyRuleHandler model.DynamicPropertyRuleHandler
+	if dynamicPropertyRuleHandler == nil {
+		dynamicPropertyRuleHandler = func(args model.DynamicPropertyRuleHandlerArgs) interface{} {
+			if args.Context != nil {
+				return args.Context.Get(args.PropName)
+			}
+			return nil
+		}
+	}
+
 	return &roxOptions{
 		version:                     version,
 		devModeKey:                  devModeKey,
@@ -62,6 +72,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		configurationFetchedHandler: builder.ConfigurationFetchedHandler,
 		roxyURL:                     builder.RoxyURL,
 		selfManagedOptions:          builder.SelfManagedOptions,
+		dynamicPropertyRuleHandler:  dynamicPropertyRuleHandler,
 	}
 }
 
@@ -91,4 +102,8 @@ func (ro *roxOptions) RoxyURL() string {
 
 func (ro *roxOptions) SelfManagedOptions() model.SelfManagedOptions {
 	return ro.selfManagedOptions
+}
+
+func (ro *roxOptions) DynamicPropertyRuleHandler() model.DynamicPropertyRuleHandler {
+	return ro.dynamicPropertyRuleHandler
 }
