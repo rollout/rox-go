@@ -35,20 +35,20 @@ func NewRox() *Rox {
 	}
 }
 
-func (r *Rox) Shutdown() <-chan struct{} {
-	done := make(chan struct{})
+func (r *Rox) Shutdown() <-chan error {
+	err := make(chan error, 1)
 	go func() {
 		r.setupShutdownMutex.Lock()
 		defer r.setupShutdownMutex.Unlock()
-		defer close(done)
 		if r.state != Set && r.state != Corrupted {
-			logging.GetLogger().Warn("Rox can only be shutdown when it is already in Set or Corrupted state.", nil)
-			return
+			logging.GetLogger().Warn("rox can only be shutdown when it is already in Set or Corrupted state", nil)
+			err <- fmt.Errorf("rox can only be shutdown when it is already in Set or Corrupted state")
 		} else {
 			reset(r)
+			err <- nil
 		}
 	}()
-	return done
+	return err
 }
 
 func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
@@ -61,10 +61,10 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 	}()
 
 	if r.state != Idle && r.state != Corrupted {
-		logging.GetLogger().Warn("Rox has already been initialised, skipping setup", nil)
-		done := make(chan error, 1)
-		done <- fmt.Errorf("Rox has already been initialised, skipping setup")
-		return done
+		logging.GetLogger().Warn("rox has already been initialised, skipping setup", nil)
+		err := make(chan error, 1)
+		err <- fmt.Errorf("rox has already been initialised, skipping setup")
+		return err
 	}
 
 	if r.state == Corrupted {
@@ -96,22 +96,22 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 		return value.String()
 	}))
 
-	done := make(chan error, 1)
+	err := make(chan error, 1)
 	go func() {
 
 		defer func() {
-			if err := recover(); err != nil {
-				logging.GetLogger().Error("Failed in Rox.Setup", err)
+			if pErr := recover(); pErr != nil {
+				logging.GetLogger().Error("Failed in Rox.Setup", pErr)
 				r.state = Corrupted
-				done <- fmt.Errorf(err.(string))
+				err <- fmt.Errorf(pErr.(string))
 			} else {
-				done <- nil
+				err <- nil
 			}
 		}()
 		<-r.core.Setup(sdkSettings, serverProperties, roxOptions)
 		r.state = Set
 	}()
-	return done
+	return err
 }
 
 func (r *Rox) RegisterWithEmptyNamespace(roxContainer interface{}) {
