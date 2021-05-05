@@ -6,6 +6,7 @@ import (
 	"github.com/rollout/rox-go/core/properties"
 	"github.com/rollout/rox-go/core/repositories"
 	"github.com/rollout/rox-go/core/roxx"
+	"github.com/rollout/rox-go/server"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -13,7 +14,7 @@ import (
 func TestPropertiesExtensionsRoxxPropertiesExtensionsString(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("testKey", "test"))
 
@@ -23,7 +24,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsString(t *testing.T) {
 func TestPropertiesExtensionsRoxxPropertiesExtensionsInt(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewIntegerProperty("testKey", 3))
 
@@ -33,7 +34,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsInt(t *testing.T) {
 func TestPropertiesExtensionsRoxxPropertiesExtensionsFloat(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewFloatProperty("testKey", 3.3))
 
@@ -43,7 +44,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsFloat(t *testing.T) {
 func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextString(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewComputedStringProperty("CustomPropertyTestKey", func(context context.Context) string {
 		return context.Get("ContextTestKey").(string)
@@ -56,7 +57,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextString(t *testin
 func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextInt(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
@@ -69,7 +70,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextInt(t *testing.T
 func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntWithString(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
@@ -82,7 +83,7 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntWithString(t 
 func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntNotEqual(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewComputedIntegerProperty("CustomPropertyTestKey", func(context context.Context) int {
 		return context.Get("ContextTestKey").(int)
@@ -95,9 +96,18 @@ func TestPropertiesExtensionsRoxxPropertiesExtensionsWithContextIntNotEqual(t *t
 func TestPropertiesExtensionsUnknownProperty(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, server.NewRoxOptions(server.RoxOptionsBuilder{}).DynamicPropertyRuleHandler()).Extend()
 
 	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("testKey", "test"))
 
 	assert.Equal(t, false, parser.EvaluateExpression(`eq("test", property("testKey1"))`, nil).Value())
+}
+
+
+func TestPropertiesExtensionsDynamicProperty(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, server.NewRoxOptions(server.RoxOptionsBuilder{}).DynamicPropertyRuleHandler()).Extend()
+
+	assert.Equal(t, true, parser.EvaluateExpression(`eq("test", property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":"test"})).Value())
 }

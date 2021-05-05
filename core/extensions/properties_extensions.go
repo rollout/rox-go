@@ -27,14 +27,18 @@ func (e *PropertiesExtensions) Extend() {
 
 		if property == nil {
 			if e.dynamicPropertiesRuleHandler != nil {
-				value := e.dynamicPropertiesRuleHandler(model.DynamicPropertyRuleHandlerArgs(propName, context))
+				value := e.dynamicPropertiesRuleHandler(model.DynamicPropertyRuleHandlerArgs{
+					PropName: propName,
+					Context:  context,
+				})
 				if value == "" {
 					stack.Push(roxx.TokenTypeUndefined)
 				} else {
 					stack.Push(value)
 				}
+			} else {
+				stack.Push(roxx.TokenTypeUndefined)
 			}
-			stack.Push(roxx.TokenTypeUndefined)
 		} else {
 			value := property.Value(context)
 			if value == nil {

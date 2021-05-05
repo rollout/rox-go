@@ -94,7 +94,11 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
 	experimentsExtensions := extensions.NewExperimentsExtensions(core.parser, core.targetGroupRepository, core.flagRepository, core.experimentRepository)
-	propertiesExtensions := extensions.NewPropertiesExtensions(core.parser, core.customPropertyRepository, roxOptions.dynamicPropertyRuleHandler)
+	var dynamicPropertyRuleHandler model.DynamicPropertyRuleHandler
+	if roxOptions != nil {
+		dynamicPropertyRuleHandler = roxOptions.DynamicPropertyRuleHandler()
+	}
+	propertiesExtensions := extensions.NewPropertiesExtensions(core.parser, core.customPropertyRepository, dynamicPropertyRuleHandler)
 	experimentsExtensions.Extend()
 	propertiesExtensions.Extend()
 

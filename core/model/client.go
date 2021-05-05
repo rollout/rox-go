@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"time"
-
 	"github.com/rollout/rox-go/core/context"
 )
 
@@ -53,9 +52,9 @@ type DynamicAPI interface {
 	DoubleValue(name string, defaultValue float64, options []float64, ctx context.Context) float64
 }
 
-type DynamicPropertyRuleHandler = func(args DynamicPropertyRuleHandlerArgs) interface{}
+type DynamicPropertyRuleHandler = func(DynamicPropertyRuleHandlerArgs) interface{}
 
 type DynamicPropertyRuleHandlerArgs struct {
-	propName string
-	context context.Context
+	PropName string
+	Context context.Context
 }

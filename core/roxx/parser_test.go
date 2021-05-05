@@ -252,7 +252,7 @@ func TestParserIfThenExpressionEvaluationBoolean(t *testing.T) {
 func TestParserInArray(t *testing.T) {
 	customPropertiesRepository := repositories.NewCustomPropertyRepository()
 	parser := roxx.NewParser()
-	extensions.NewPropertiesExtensions(parser, customPropertiesRepository).Extend()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
 
 	parser.AddOperator(`mergeSeed`, func(p roxx.Parser, stack *roxx.CoreStack, context context.Context) {
 		seed1 := stack.Pop()

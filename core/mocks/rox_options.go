@@ -58,3 +58,12 @@ func (m *RoxOptions) SelfManagedOptions() model.SelfManagedOptions {
 	}
 	return result.(model.SelfManagedOptions)
 }
+
+func (m *RoxOptions) DynamicPropertyRuleHandler() model.DynamicPropertyRuleHandler {
+	args := m.Called()
+	result := args.Get(0)
+	if result == nil {
+		return nil
+	}
+	return result.(model.DynamicPropertyRuleHandler)
+}
