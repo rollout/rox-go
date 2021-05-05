@@ -111,3 +111,37 @@ func TestPropertiesExtensionsDynamicProperty(t *testing.T) {
 
 	assert.Equal(t, true, parser.EvaluateExpression(`eq("test", property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":"test"})).Value())
 }
+
+func TestPropertiesExtensionsDynamicPropertyBool(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, server.NewRoxOptions(server.RoxOptionsBuilder{}).DynamicPropertyRuleHandler()).Extend()
+
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(true, property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":true})).Value())
+}
+
+func TestPropertiesExtensionsDynamicPropertyInt(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, server.NewRoxOptions(server.RoxOptionsBuilder{}).DynamicPropertyRuleHandler()).Extend()
+
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(5, property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":5})).Value())
+}
+
+func TestPropertiesExtensionsDynamicPropertyDouble(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, server.NewRoxOptions(server.RoxOptionsBuilder{}).DynamicPropertyRuleHandler()).Extend()
+
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(5.0, property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":5.0})).Value())
+}
+
+func TestPropertiesExtensionsDynamicPropertyPrecedence(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
+
+	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("testKey1", "testCustomProperty"))
+
+	assert.Equal(t, true, parser.EvaluateExpression(`eq("testCustomProperty", property("testKey1"))`, context.NewContext(map[string]interface{}{"testKey1":"testDynamicProperty"})).Value())
+}

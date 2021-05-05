@@ -15,7 +15,6 @@ type RoxOptionsBuilder struct {
 	ConfigurationFetchedHandler model.ConfigurationFetchedHandler
 	RoxyURL                     string
 	SelfManagedOptions          model.SelfManagedOptions
-	DynamicPropertyRuleHandler  model.DynamicPropertyRuleHandler
 }
 
 type roxOptions struct {
