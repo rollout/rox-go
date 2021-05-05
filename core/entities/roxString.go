@@ -102,7 +102,7 @@ func (v *roxString) InternalGetValue(ctx context.Context) (returnValue string, i
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
 		value := evaluationResult.StringValue()
 		if value != "" {
-			switch v.FlagType(){
+			switch v.FlagType() {
 			case consts.StringType:
 				if _, ok := evaluationResult.Value().(string); ok {
 					returnValue, isDefault = value, false
@@ -117,7 +117,7 @@ func (v *roxString) InternalGetValue(ctx context.Context) (returnValue string, i
 		}
 	}
 
-	if v.impressionInvoker != nil && sendImpression{
+	if v.impressionInvoker != nil && sendImpression {
 		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, returnValue), v.clientExperiment, mergedContext)
 	}
 

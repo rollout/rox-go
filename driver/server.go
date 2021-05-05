@@ -72,6 +72,9 @@ func main() {
 		}
 
 		switch tr.Action {
+		case "shutdown":
+			rox.Shutdown()
+			return
 		case "setupAndAwait":
 			var setup setupAndAwait
 			if err := json.Unmarshal(payload, &setup); err != nil {

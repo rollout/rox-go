@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/rollout/rox-go/core/security"
 	"net/http"
 	"regexp"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/rollout/rox-go/core/reporting"
 	"github.com/rollout/rox-go/core/repositories"
 	"github.com/rollout/rox-go/core/roxx"
-	"github.com/rollout/rox-go/core/security"
 	"github.com/rollout/rox-go/core/utils"
 )
 
@@ -40,6 +40,7 @@ type Core struct {
 	internalFlags               model.InternalFlags
 	pushUpdatesListener         *notifications.NotificationListener
 	environment                 model.Environment
+	quit                        chan struct{}
 }
 
 const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
@@ -64,6 +65,7 @@ func NewCore() *Core {
 		parser:                      parser,
 		configurationFetchedInvoker: configuration.NewFetchedInvoker(),
 		registerer:                  register.NewRegisterer(flagRepository),
+		quit:                        make(chan struct{}),
 	}
 }
 
@@ -121,7 +123,6 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-
 		<-core.Fetch()
 
 		if roxOptions != nil && roxOptions.ImpressionHandler() != nil {
@@ -131,9 +132,8 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
 			go utils.RunPeriodicTask(func() {
 				<-core.Fetch()
-			}, roxOptions.FetchInterval())
+			}, roxOptions.FetchInterval(), core.quit)
 		}
-
 		if core.stateSender != nil {
 			core.stateSender.Send()
 		}
@@ -145,26 +145,31 @@ func (core *Core) Fetch() <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
+		select {
+		default:
+			if core.configurationFetcher == nil {
+				return
+			}
 
-		if core.configurationFetcher == nil {
+			result := core.configurationFetcher.Fetch()
+			if result == nil {
+				return
+			}
+
+			configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
+			config := configurationParser.Parse(result, core.sdkSettings)
+			if config != nil {
+				core.experimentRepository.SetExperiments(config.Experiments)
+				core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
+				core.flagSetter.SetExperiments()
+
+				hasChanges := core.lastConfigurations == nil || *core.lastConfigurations != *result
+				core.lastConfigurations = result
+				core.configurationFetchedInvoker.Invoke(model.FetcherStatusAppliedFromNetwork, config.SignatureDate, hasChanges)
+			}
 			return
-		}
-
-		result := core.configurationFetcher.Fetch()
-		if result == nil {
+		case <-core.quit:
 			return
-		}
-
-		configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
-		config := configurationParser.Parse(result, core.sdkSettings)
-		if config != nil {
-			core.experimentRepository.SetExperiments(config.Experiments)
-			core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
-			core.flagSetter.SetExperiments()
-
-			hasChanges := core.lastConfigurations == nil || *core.lastConfigurations != *result
-			core.lastConfigurations = result
-			core.configurationFetchedInvoker.Invoke(model.FetcherStatusAppliedFromNetwork, config.SignatureDate, hasChanges)
 		}
 	}()
 	return done
@@ -219,4 +224,19 @@ func (core *Core) startOrStopPushUpdatesListener() {
 
 func (core *Core) DynamicAPI(entitiesProvider model.EntitiesProvider) model.DynamicAPI {
 	return client.NewDynamicAPI(core.flagRepository, entitiesProvider)
+}
+
+func (core *Core) Shutdown() <-chan struct{} {
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+
+		if core.pushUpdatesListener != nil {
+			core.pushUpdatesListener.Stop()
+			core.pushUpdatesListener = nil
+		}
+		close(core.quit)
+	}()
+
+	return done
 }

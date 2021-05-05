@@ -37,7 +37,7 @@ func (ev EvaluationResult) StringValue() string {
 	return ""
 }
 
-func (ev EvaluationResult) IntValue() (int,error) {
+func (ev EvaluationResult) IntValue() (int, error) {
 	if value, ok := ev.value.(int); ok {
 		return value, nil
 	} else {
