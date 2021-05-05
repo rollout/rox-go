@@ -1,5 +1,7 @@
 package roxx
 
+import "fmt"
+
 type EvaluationResult struct {
 	value interface{}
 }
@@ -33,4 +35,22 @@ func (ev EvaluationResult) StringValue() string {
 	}
 
 	return ""
+}
+
+func (ev EvaluationResult) IntValue() (int, error) {
+	if value, ok := ev.value.(int); ok {
+		return value, nil
+	} else {
+		return 0, fmt.Errorf("evaluation result is not an int")
+	}
+}
+
+func (ev EvaluationResult) DoubleValue() (float64, error) {
+	if value, ok := ev.value.(float64); ok {
+		return value, nil
+	} else if value, ok := ev.value.(int); ok {
+		return float64(value), nil
+	} else {
+		return 0, fmt.Errorf("evaluation result is not a number")
+	}
 }

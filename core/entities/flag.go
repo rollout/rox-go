@@ -1,13 +1,14 @@
 package entities
 
 import (
+	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/roxx"
 )
 
 type flag struct {
-	*variant
+	*roxString
 }
 
 func NewFlag(defaultValue bool) model.Flag {
@@ -17,8 +18,10 @@ func NewFlag(defaultValue bool) model.Flag {
 	} else {
 		variantDefaultValue = roxx.FlagFalseValue
 	}
+	roxString := NewRoxString(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}).(*roxString)
+	roxString.flagType = consts.BoolType
 	return &flag{
-		variant: NewVariant(variantDefaultValue, []string{roxx.FlagFalseValue, roxx.FlagTrueValue}).(*variant),
+		roxString,
 	}
 }
 
