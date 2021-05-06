@@ -2,9 +2,18 @@ package model
 
 import "github.com/rollout/rox-go/core/context"
 
+type ImpressionError int
+
+const (
+	ImpressionErrorNoError ImpressionError = iota
+	ImpressionErrorCausedByHandler
+)
+
+
 type ImpressionArgs struct {
 	ReportingValue *ReportingValue
 	Experiment     *Experiment
+	ErrorDetails ImpressionError
 	Context        context.Context
 }
 

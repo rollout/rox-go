@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"sync"
 )
@@ -63,6 +64,12 @@ func (r *flagRepository) raiseFlagAddedEvent(flag model.Variant) {
 	handlers := make([]model.FlagAddedHandler, len(r.flagAddedHandlers))
 	copy(handlers, r.flagAddedHandlers)
 	r.handlersMutex.RUnlock()
+
+	defer func() {
+		if r := recover(); r != nil {
+			logging.GetLogger().Error("Failed to execute flag added handler, panic", r)
+		}
+	}()
 
 	for _, handler := range handlers {
 		handler(flag)

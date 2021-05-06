@@ -56,3 +56,18 @@ func TestCustomPropertyRepositoryWillRaisePropAddedEvent(t *testing.T) {
 
 	assert.Equal(t, "prop1", propFromEvent.Name)
 }
+
+func TestCustomPropertyRepositoryRecoversFromPanic(t *testing.T) {
+	repo := repositories.NewCustomPropertyRepository()
+	cp := properties.NewStringProperty("prop1", "123")
+
+	var propFromEvent *properties.CustomProperty
+	repo.RegisterPropertyAddedHandler(func(property *properties.CustomProperty) {
+		propFromEvent = property
+		panic("mwahahahahaEvilUser")
+	})
+
+	repo.AddCustomProperty(cp)
+
+	assert.Equal(t, "prop1", propFromEvent.Name)
+}

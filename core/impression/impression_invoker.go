@@ -2,6 +2,7 @@ package impression
 
 import (
 	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"sync"
 )
@@ -43,6 +44,11 @@ func (ii *impressionInvoker) raiseImpressionEvent(args model.ImpressionArgs) {
 	copy(handlers, ii.impressionHandlers)
 	ii.handlersMutex.RUnlock()
 
+	defer func() {
+		if r := recover(); r != nil {
+			logging.GetLogger().Error("Failed to execute impression handler, panic", r)
+		}
+	}()
 	for _, handler := range handlers {
 		handler(args)
 	}

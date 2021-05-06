@@ -51,3 +51,18 @@ func TestFlagRepositoryWillRaiseFlagAddedEvent(t *testing.T) {
 
 	assert.Equal(t, "harti", variantFromEvent.Name())
 }
+
+func TestFlagRepositoryRecoversFromPanic(t *testing.T) {
+	repo := repositories.NewFlagRepository()
+	flag := entities.NewFlag(false)
+
+	var variantFromEvent model.Variant
+	repo.RegisterFlagAddedHandler(func(variant model.Variant) {
+		variantFromEvent = variant
+		panic("mwahahahaha evil user")
+	})
+
+	repo.AddFlag(flag, "harti")
+
+	assert.Equal(t, "harti", variantFromEvent.Name())
+}
