@@ -38,6 +38,25 @@ func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 	assert.True(t, isImpressionRaised)
 }
 
+func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
+	internalFlags := &mocks.InternalFlags{}
+	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+
+	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
+	reportingValue := model.NewReportingValue("name", "value")
+	originalExperiment := model.NewExperimentModel("id", "name", "cond", true, nil, nil)
+	experiment := model.NewExperiment(originalExperiment)
+
+	isImpressionRaised := false
+	impressionInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		panic("mwahahahahaEvilUser")
+	})
+
+	impressionInvoker.Invoke(reportingValue, experiment, ctx)
+
+	assert.False(t, isImpressionRaised)
+}
+
 func TestImpressionInvokerWillNotInvokeAnalyticsWhenFlagIsOff(t *testing.T) {
 	// TODO
 }
