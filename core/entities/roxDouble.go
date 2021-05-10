@@ -42,7 +42,7 @@ func NewRoxDouble(defaultValue float64, options []float64) model.RoxDouble {
 }
 
 func (v *roxDouble) GetDefaultAsString() string {
-	return strconv.FormatFloat(v.DefaultValue(), 'F', -1, 64)
+	return strconv.FormatFloat(v.DefaultValue(), 'f', -1, 64)
 }
 
 func (v *roxDouble) DefaultValue() float64 {
@@ -53,7 +53,7 @@ func (v *roxDouble) GetOptionsAsString() []string {
 	options := make([]string, len(v.options))
 
 	for _, option := range v.options {
-		options = append(options, strconv.FormatFloat(option, 'F', -1, 64))
+		options = append(options, strconv.FormatFloat(option, 'f', -1, 64))
 	}
 
 	return options
@@ -85,7 +85,7 @@ func (v *roxDouble) SetName(name string) {
 }
 
 func (v *roxDouble) GetValueAsString(ctx context.Context) string {
-	return strconv.FormatFloat(v.GetValue(ctx), 'F', -1, 64)
+	return strconv.FormatFloat(v.GetValue(ctx), 'f', -1, 64)
 }
 
 func (v *roxDouble) GetValue(ctx context.Context) float64 {
@@ -108,7 +108,7 @@ func (v *roxDouble) InternalGetValue(ctx context.Context) (returnValue float64, 
 	}
 
 	if v.impressionInvoker != nil && sendImpression {
-		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.FormatFloat(returnValue, 'F', -1, 64)), v.clientExperiment, mergedContext)
+		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.FormatFloat(returnValue, 'f', -1, 64)), v.clientExperiment, mergedContext)
 	}
 
 	return returnValue, isDefault
