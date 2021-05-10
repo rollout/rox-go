@@ -2,25 +2,15 @@ package model
 
 import "github.com/rollout/rox-go/core/context"
 
-type ImpressionError int
-
-const (
-	ImpressionErrorNoError ImpressionError = iota
-	ImpressionErrorCausedByHandler
-)
-
-
 type ImpressionArgs struct {
 	ReportingValue *ReportingValue
-	Experiment     *Experiment
-	ErrorDetails ImpressionError
 	Context        context.Context
 }
 
 type ImpressionHandler = func(args ImpressionArgs)
 
 type ImpressionInvoker interface {
-	Invoke(value *ReportingValue, experiment *Experiment, context context.Context)
+	Invoke(value *ReportingValue, context context.Context)
 	RegisterImpressionHandler(handler ImpressionHandler)
 }
 
@@ -50,9 +40,10 @@ type ReportingValue struct {
 	Targeting bool
 }
 
-func NewReportingValue(name, value string) *ReportingValue {
+func NewReportingValue(name, value string, targeting bool) *ReportingValue {
 	return &ReportingValue{
 		Name:      name,
 		Value:     value,
+		Targeting: targeting,
 	}
 }

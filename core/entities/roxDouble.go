@@ -108,7 +108,11 @@ func (v *roxDouble) InternalGetValue(ctx context.Context) (returnValue float64, 
 	}
 
 	if v.impressionInvoker != nil && sendImpression {
-		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.FormatFloat(returnValue, 'f', -1, 64)), v.clientExperiment, mergedContext)
+		targeting := false
+		if v.clientExperiment != nil {
+			targeting = true
+		}
+		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.FormatFloat(returnValue, 'f', -1, 64), targeting), mergedContext)
 	}
 
 	return returnValue, isDefault

@@ -108,7 +108,13 @@ func (v *roxInt) InternalGetValue(ctx context.Context) (returnValue int, isDefau
 	}
 
 	if v.impressionInvoker != nil && sendImpression {
-		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.Itoa(returnValue)), v.clientExperiment, mergedContext)
+
+		targeting := false
+		if v.clientExperiment != nil {
+			targeting = true
+		}
+
+		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.Itoa(returnValue), targeting), mergedContext)
 	}
 
 	return returnValue, isDefault
