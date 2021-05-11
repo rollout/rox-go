@@ -42,9 +42,18 @@ func (ev EvaluationResult) StringValue() string {
 
 func (ev EvaluationResult) IntValue() (int, error) {
 	if value, ok := ev.value.(int); ok {
-		return value, nil
+		return int(value), nil
+	} else if _, ok := ev.value.(float64); ok {
+		return 0, fmt.Errorf("evaluation result is not an integer")
+	} else if value, ok := ev.value.(string); ok{
+		returnValue, err := strconv.Atoi(value)
+		if err != nil {
+			return 0, fmt.Errorf("evaluation result is not an integer")
+		} else {
+			return returnValue, nil
+		}
 	} else {
-		return 0, fmt.Errorf("evaluation result is not an int")
+		return 0, fmt.Errorf("evaluation result is not an integer")
 	}
 }
 
