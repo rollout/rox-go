@@ -37,7 +37,7 @@ func (api *dynamicAPI) IsEnabled(name string, defaultValue bool, ctx context.Con
 	}
 }
 
-func (api *dynamicAPI) StringValue(name string, defaultValue string, options []string, ctx context.Context) string {
+func (api *dynamicAPI) Value(name string, defaultValue string, options []string, ctx context.Context) string {
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxString(defaultValue, options)
@@ -58,7 +58,7 @@ func (api *dynamicAPI) StringValue(name string, defaultValue string, options []s
 	return defaultValue
 }
 
-func (api *dynamicAPI) IntValue(name string, defaultValue int, options []int, ctx context.Context) int {
+func (api *dynamicAPI) GetInt(name string, defaultValue int, options []int, ctx context.Context) int {
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxInt(defaultValue, options)
@@ -79,7 +79,7 @@ func (api *dynamicAPI) IntValue(name string, defaultValue int, options []int, ct
 	return defaultValue
 }
 
-func (api *dynamicAPI) DoubleValue(name string, defaultValue float64, options []float64, ctx context.Context) float64 {
+func (api *dynamicAPI) GetDouble(name string, defaultValue float64, options []float64, ctx context.Context) float64 {
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxDouble(defaultValue, options)

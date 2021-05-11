@@ -47,9 +47,9 @@ type InternalFlags interface {
 
 type DynamicAPI interface {
 	IsEnabled(name string, defaultValue bool, ctx context.Context) bool
-	StringValue(name string, defaultValue string, options []string, ctx context.Context) string
-	IntValue(name string, defaultValue int, options []int, ctx context.Context) int
-	DoubleValue(name string, defaultValue float64, options []float64, ctx context.Context) float64
+	Value(name string, defaultValue string, options []string, ctx context.Context) string
+	GetInt(name string, defaultValue int, options []int, ctx context.Context) int
+	GetDouble(name string, defaultValue float64, options []float64, ctx context.Context) float64
 }
 
 type DynamicPropertyRuleHandler = func(DynamicPropertyRuleHandlerArgs) interface{}
