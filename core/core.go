@@ -131,6 +131,11 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 		if roxOptions != nil && roxOptions.ImpressionHandler() != nil {
 			core.impressionInvoker.RegisterImpressionHandler(roxOptions.ImpressionHandler())
+		}  else {
+			var impressions []model.ImpressionArgs
+			core.impressionInvoker.RegisterImpressionHandler(func(args model.ImpressionArgs) {
+				impressions = append(impressions, args)
+			})
 		}
 
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
@@ -210,7 +215,7 @@ func (core *Core) wrapConfigurationFetchedHandler(handler model.ConfigurationFet
 }
 
 func (core *Core) startOrStopPushUpdatesListener() {
-	if core.internalFlags.IsEnabled("rox.internal.pushUpdates") {
+
 		if core.pushUpdatesListener == nil {
 			core.pushUpdatesListener = notifications.NewNotificationListener(core.environment.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
 			core.pushUpdatesListener.On("changed", func(event notifications.Event) {
@@ -218,12 +223,6 @@ func (core *Core) startOrStopPushUpdatesListener() {
 			})
 			core.pushUpdatesListener.Start()
 		}
-	} else {
-		if core.pushUpdatesListener != nil {
-			core.pushUpdatesListener.Stop()
-			core.pushUpdatesListener = nil
-		}
-	}
 }
 
 func (core *Core) DynamicAPI(entitiesProvider model.EntitiesProvider) model.DynamicAPI {
