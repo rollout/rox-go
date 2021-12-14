@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"sync"
 	"time"
@@ -35,6 +36,12 @@ func (cfi *FetchedInvoker) raiseFetchedEvent(args model.ConfigurationFetchedArgs
 	copy(handlers, cfi.fetchedHandlers)
 	cfi.handlersMutex.RUnlock()
 
+
+	defer func() {
+		if r := recover(); r != nil {
+			logging.GetLogger().Error("Failed to execute fetched handler, panic", r)
+		}
+	}()
 	for _, handler := range handlers {
 		handler(&args)
 	}

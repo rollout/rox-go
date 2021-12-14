@@ -74,3 +74,20 @@ func TestConfigurationFetchedInvokerInvokeOK(t *testing.T) {
 
 	assert.True(t, isConfigurationHandlerInvokerRaised)
 }
+
+func TestConfigurationFetchedInvokerPanicHandler(t *testing.T) {
+	isConfigurationHandlerInvokerRaised := false
+	configurationFetchedInvoker := NewFetchedInvoker()
+
+	now := time.Now()
+	status := model.FetcherStatusAppliedFromNetwork
+	hasChanges := true
+
+	configurationFetchedInvoker.RegisterFetchedHandler(func(e *model.ConfigurationFetchedArgs) {
+		panic(nil)
+	})
+
+	configurationFetchedInvoker.Invoke(status, now, hasChanges)
+
+	assert.False(t, isConfigurationHandlerInvokerRaised)
+}

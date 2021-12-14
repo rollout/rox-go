@@ -7,14 +7,16 @@ import (
 )
 
 type PropertiesExtensions struct {
-	parser               roxx.Parser
-	propertiesRepository model.CustomPropertyRepository
+	parser               			roxx.Parser
+	propertiesRepository 			model.CustomPropertyRepository
+	dynamicPropertiesRuleHandler 	model.DynamicPropertyRuleHandler
 }
 
-func NewPropertiesExtensions(parser roxx.Parser, propertiesRepository model.CustomPropertyRepository) *PropertiesExtensions {
+func NewPropertiesExtensions(parser roxx.Parser, propertiesRepository model.CustomPropertyRepository, dynamicPropertiesRuleHandler model.DynamicPropertyRuleHandler) *PropertiesExtensions {
 	return &PropertiesExtensions{
 		parser:               parser,
 		propertiesRepository: propertiesRepository,
+		dynamicPropertiesRuleHandler: dynamicPropertiesRuleHandler,
 	}
 }
 
@@ -24,7 +26,19 @@ func (e *PropertiesExtensions) Extend() {
 		property := e.propertiesRepository.GetCustomProperty(propName)
 
 		if property == nil {
-			stack.Push(roxx.TokenTypeUndefined)
+			if e.dynamicPropertiesRuleHandler != nil {
+				value := e.dynamicPropertiesRuleHandler(model.DynamicPropertyRuleHandlerArgs{
+					PropName: propName,
+					Context:  context,
+				})
+				if value == nil {
+					stack.Push(roxx.TokenTypeUndefined)
+				} else {
+					stack.Push(value)
+				}
+			} else {
+				stack.Push(roxx.TokenTypeUndefined)
+			}
 		} else {
 			value := property.Value(context)
 			if value == nil {

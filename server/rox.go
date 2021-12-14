@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/rollout/rox-go/core"
 	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
@@ -8,24 +9,69 @@ import (
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/properties"
 	uuid "github.com/satori/go.uuid"
+	"sync"
+)
+
+type RoxState int
+
+const (
+	Idle RoxState = iota
+	SettingUp
+	Set
+	ShuttingDown
+	Corrupted
 )
 
 type Rox struct {
-	core *core.Core
+	core               *core.Core
+	state              RoxState
+	setupShutdownMutex sync.RWMutex
 }
 
 func NewRox() *Rox {
 	return &Rox{
-		core: core.NewCore(),
+		core:  core.NewCore(),
+		state: Idle,
 	}
 }
 
-func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} {
+func (r *Rox) Shutdown() <-chan error {
+	err := make(chan error, 1)
+	go func() {
+		r.setupShutdownMutex.Lock()
+		defer r.setupShutdownMutex.Unlock()
+		if r.state != Set && r.state != Corrupted {
+			logging.GetLogger().Warn("rox can only be shutdown when it is already in Set or Corrupted state", nil)
+			err <- fmt.Errorf("rox can only be shutdown when it is already in Set or Corrupted state")
+		} else {
+			reset(r)
+			err <- nil
+		}
+	}()
+	return err
+}
+
+func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
+	r.setupShutdownMutex.Lock()
+	defer r.setupShutdownMutex.Unlock()
 	defer func() {
 		if r := recover(); r != nil {
 			logging.GetLogger().Error("Failed in Rox.Setup", r)
 		}
 	}()
+
+	if r.state != Idle && r.state != Corrupted {
+		logging.GetLogger().Warn("rox has already been initialised, skipping setup", nil)
+		err := make(chan error, 1)
+		err <- fmt.Errorf("rox has already been initialised, skipping setup")
+		return err
+	}
+
+	if r.state == Corrupted {
+		reset(r)
+	}
+
+	r.state = SettingUp
 
 	if roxOptions == nil {
 		roxOptions = NewRoxOptions(RoxOptionsBuilder{})
@@ -43,25 +89,33 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.realPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.customPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.appKey", serverProperties.RolloutKey()))
+	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeAPIVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAPIVersion.Name]))
+	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeLibVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeLibVersion.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty("internal."+consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
 		value, _ := uuid.NewV4()
 		return value.String()
 	}))
 
-	done := make(chan struct{})
+	err := make(chan error, 1)
 	go func() {
-		defer close(done)
 
 		defer func() {
-			if err := recover(); err != nil {
-				logging.GetLogger().Error("Failed in Rox.Setup", err)
-				panic(err)
+			if pErr := recover(); pErr != nil {
+				logging.GetLogger().Error("Failed in Rox.Setup", pErr)
+				r.state = Corrupted
+				err <- fmt.Errorf(pErr.(string))
+			} else {
+				err <- nil
 			}
 		}()
-
 		<-r.core.Setup(sdkSettings, serverProperties, roxOptions)
+		r.state = Set
 	}()
-	return done
+	return err
+}
+
+func (r *Rox) RegisterWithEmptyNamespace(roxContainer interface{}) {
+	r.Register("", roxContainer)
 }
 
 func (r *Rox) Register(namespace string, roxContainer interface{}) {
@@ -132,4 +186,11 @@ func (r *Rox) SetCustomComputedSemverProperty(name string, value properties.Cust
 
 func (r *Rox) DynamicAPI() model.DynamicAPI {
 	return r.core.DynamicAPI(&ServerEntitiesProvider{})
+}
+
+func reset(r *Rox) {
+	r.state = ShuttingDown
+	<-r.core.Shutdown()
+	r.core = core.NewCore()
+	r.state = Idle
 }

@@ -51,6 +51,20 @@ func (te *TokenizedExpression) pushNode(node *Node) {
 	}
 }
 
+func (te *TokenizedExpression) normalize(expression string) string {
+	if strings.EqualFold(expression, `\"\"`) {
+		return strings.Replace(expression, escapedQuote, stringDelimiter, -1)
+	}
+	return strings.Replace(expression, escapedQuote, escapedQuotePlaceholder, -1)
+}
+
+func (te *TokenizedExpression) unnormalize(expression string) string {
+	if strings.EqualFold(expression, `\RO_Q\RO_Q`) {
+		return ""
+	}
+	return strings.Replace(expression, escapedQuotePlaceholder, escapedQuote, -1)
+}
+
 func (te *TokenizedExpression) tokenize(expression string) []*Node {
 	te.resultList = nil
 	te.dictAccumulator = nil
@@ -58,7 +72,7 @@ func (te *TokenizedExpression) tokenize(expression string) []*Node {
 	te.dictKey = ""
 
 	delimitersToUse := tokenDelimiters
-	normalizedExpression := strings.Replace(expression, escapedQuote, escapedQuotePlaceholder, -1)
+	normalizedExpression := te.normalize(expression)
 	tokenizer := NewStringTokenizer(normalizedExpression, delimitersToUse, true)
 
 	var prevToken, token string
@@ -90,8 +104,8 @@ func (te *TokenizedExpression) tokenize(expression string) []*Node {
 				delimitersToUse = stringDelimiter
 			}
 		} else {
-			if delimitersToUse == stringDelimiter {
-				te.pushNode(NewNode(NodeTypeRand, strings.Replace(token, escapedQuotePlaceholder, escapedQuote, -1)))
+			if delimitersToUse == stringDelimiter || strings.HasPrefix(token, escapedQuotePlaceholder) {
+				te.pushNode(NewNode(NodeTypeRand, te.unnormalize(token)))
 			} else if !strings.Contains(tokenDelimiters, token) && token != prePostStringChar {
 				te.pushNode(te.nodeFromToken(token))
 			}
@@ -129,7 +143,11 @@ func (te *TokenizedExpression) nodeFromToken(token string) *Node {
 	tokenType := TokenTypeFromToken(token)
 	switch tokenType {
 	case TokenTypeString:
-		return NewNode(NodeTypeRand, token[1:len(token)-1])
+		if len(token)-2 < 1 {
+			return NewNode(NodeTypeRand, token[1:len(token)-1])
+		} else {
+			return NewNode(NodeTypeRand, token[1:len(token)-2])
+		}
 	case TokenTypeNumber:
 		intNumber, err := strconv.Atoi(token)
 		if err == nil {

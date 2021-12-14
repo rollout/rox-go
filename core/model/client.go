@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"time"
-
 	"github.com/rollout/rox-go/core/context"
 )
 
@@ -34,6 +33,7 @@ type RoxOptions interface {
 	ConfigurationFetchedHandler() ConfigurationFetchedHandler
 	RoxyURL() string
 	SelfManagedOptions() SelfManagedOptions
+	DynamicPropertyRuleHandler() DynamicPropertyRuleHandler
 }
 
 type SdkSettings interface {
@@ -48,4 +48,13 @@ type InternalFlags interface {
 type DynamicAPI interface {
 	IsEnabled(name string, defaultValue bool, ctx context.Context) bool
 	Value(name string, defaultValue string, options []string, ctx context.Context) string
+	GetInt(name string, defaultValue int, options []int, ctx context.Context) int
+	GetDouble(name string, defaultValue float64, options []float64, ctx context.Context) float64
+}
+
+type DynamicPropertyRuleHandler = func(DynamicPropertyRuleHandlerArgs) interface{}
+
+type DynamicPropertyRuleHandlerArgs struct {
+	PropName string
+	Context context.Context
 }

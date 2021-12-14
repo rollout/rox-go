@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"sort"
 
 	"github.com/rollout/rox-go/core/configuration"
@@ -83,11 +84,61 @@ func (s *StateSender) serializeFeatureFlags() (string, []jsonFlag) {
 		return allFlags[i].Name() < allFlags[j].Name()
 	})
 	for _, f := range allFlags {
-		flags = append(flags, jsonFlag{f.Name(), f.DefaultValue(), f.Options()})
+		switch f.FlagType() {
+		case consts.BoolType:
+			options := optionsToInterface(f.(model.Flag).Options(), consts.BoolType)
+			flags = append(flags, jsonFlag{Name: f.Name(), DefaultValue: f.(model.Flag).DefaultValue(), Options: options})
+		case consts.StringType:
+			options := optionsToInterface(f.(model.RoxString).Options(), consts.StringType)
+			flags = append(flags, jsonFlag{f.Name(), f.GetDefaultAsString(), options})
+		case consts.IntType:
+			options := optionsToInterface(f.(model.RoxInt).Options(), consts.IntType)
+			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxInt).DefaultValue(), options})
+		case consts.DoubleType:
+			options := optionsToInterface(f.(model.RoxDouble).Options(), consts.DoubleType)
+			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxDouble).DefaultValue(), options})
+
+		}
 	}
 	result, _ := json.Marshal(flags)
 
 	return string(result), flags
+}
+
+func optionsToInterface(options interface{}, flagType int) []interface{} {
+
+	var result []interface{}
+
+	switch reflect.TypeOf(options).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(options)
+		result = make([]interface{}, s.Len())
+		for i := 0; i < s.Len(); i++ {
+			switch flagType {
+			case consts.BoolType:
+				result[i] = s.Index(i).String()
+			case consts.StringType:
+				result[i] = s.Index(i).String()
+			case consts.IntType:
+				result[i] = s.Index(i).Int()
+			case consts.DoubleType:
+				result[i] = s.Index(i).Float()
+
+			}
+		}
+	}
+	return result
+}
+
+func test(t interface{}) {
+	switch reflect.TypeOf(t).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(t)
+
+		for i := 0; i < s.Len(); i++ {
+			fmt.Println(s.Index(i))
+		}
+	}
 }
 
 func (s *StateSender) serializeCustomProperties() (string, []jsonProperty) {
@@ -205,9 +256,9 @@ func (s *StateSender) logSendStateError(source configuration.Source, err error) 
 }
 
 type jsonFlag struct {
-	Name         string   `json:"name"`
-	DefaultValue string   `json:"defaultValue"`
-	Options      []string `json:"options"`
+	Name         string      `json:"name"`
+	DefaultValue interface{} `json:"defaultValue"`
+	Options      []interface{} `json:"options"`
 }
 
 type jsonProperty struct {
