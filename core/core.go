@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/rollout/rox-go/core/security"
 	"net/http"
 	"regexp"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/rollout/rox-go/core/reporting"
 	"github.com/rollout/rox-go/core/repositories"
 	"github.com/rollout/rox-go/core/roxx"
-	"github.com/rollout/rox-go/core/security"
 	"github.com/rollout/rox-go/core/utils"
 )
 
@@ -40,6 +40,7 @@ type Core struct {
 	internalFlags               model.InternalFlags
 	pushUpdatesListener         *notifications.NotificationListener
 	environment                 model.Environment
+	quit                        chan struct{}
 }
 
 const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
@@ -51,11 +52,6 @@ func NewCore() *Core {
 	experimentRepository := repositories.NewExperimentRepository()
 	customPropertyRepository := repositories.NewCustomPropertyRepository()
 
-	experimentsExtensions := extensions.NewExperimentsExtensions(parser, targetGroupRepository, flagRepository, experimentRepository)
-	propertiesExtensions := extensions.NewPropertiesExtensions(parser, customPropertyRepository)
-	experimentsExtensions.Extend()
-	propertiesExtensions.Extend()
-
 	return &Core{
 		flagRepository:              flagRepository,
 		customPropertyRepository:    customPropertyRepository,
@@ -64,6 +60,7 @@ func NewCore() *Core {
 		parser:                      parser,
 		configurationFetchedInvoker: configuration.NewFetchedInvoker(),
 		registerer:                  register.NewRegisterer(flagRepository),
+		quit:                        make(chan struct{}),
 	}
 }
 
@@ -96,6 +93,15 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
+	experimentsExtensions := extensions.NewExperimentsExtensions(core.parser, core.targetGroupRepository, core.flagRepository, core.experimentRepository)
+	var dynamicPropertyRuleHandler model.DynamicPropertyRuleHandler
+	if roxOptions != nil {
+		dynamicPropertyRuleHandler = roxOptions.DynamicPropertyRuleHandler()
+	}
+	propertiesExtensions := extensions.NewPropertiesExtensions(core.parser, core.customPropertyRepository, dynamicPropertyRuleHandler)
+	experimentsExtensions.Extend()
+	propertiesExtensions.Extend()
+
 	requestConfigBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProperties, roxyPath, core.environment)
 
 	// TODO http client
@@ -121,19 +127,22 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-
 		<-core.Fetch()
 
 		if roxOptions != nil && roxOptions.ImpressionHandler() != nil {
 			core.impressionInvoker.RegisterImpressionHandler(roxOptions.ImpressionHandler())
+		}  else {
+			var impressions []model.ImpressionArgs
+			core.impressionInvoker.RegisterImpressionHandler(func(args model.ImpressionArgs) {
+				impressions = append(impressions, args)
+			})
 		}
 
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
 			go utils.RunPeriodicTask(func() {
 				<-core.Fetch()
-			}, roxOptions.FetchInterval())
+			}, roxOptions.FetchInterval(), core.quit)
 		}
-
 		if core.stateSender != nil {
 			core.stateSender.Send()
 		}
@@ -145,26 +154,31 @@ func (core *Core) Fetch() <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
+		select {
+		default:
+			if core.configurationFetcher == nil {
+				return
+			}
 
-		if core.configurationFetcher == nil {
+			result := core.configurationFetcher.Fetch()
+			if result == nil {
+				return
+			}
+
+			configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
+			config := configurationParser.Parse(result, core.sdkSettings)
+			if config != nil {
+				core.experimentRepository.SetExperiments(config.Experiments)
+				core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
+				core.flagSetter.SetExperiments()
+
+				hasChanges := core.lastConfigurations == nil || *core.lastConfigurations != *result
+				core.lastConfigurations = result
+				core.configurationFetchedInvoker.Invoke(model.FetcherStatusAppliedFromNetwork, config.SignatureDate, hasChanges)
+			}
 			return
-		}
-
-		result := core.configurationFetcher.Fetch()
-		if result == nil {
+		case <-core.quit:
 			return
-		}
-
-		configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
-		config := configurationParser.Parse(result, core.sdkSettings)
-		if config != nil {
-			core.experimentRepository.SetExperiments(config.Experiments)
-			core.targetGroupRepository.SetTargetGroups(config.TargetGroups)
-			core.flagSetter.SetExperiments()
-
-			hasChanges := core.lastConfigurations == nil || *core.lastConfigurations != *result
-			core.lastConfigurations = result
-			core.configurationFetchedInvoker.Invoke(model.FetcherStatusAppliedFromNetwork, config.SignatureDate, hasChanges)
 		}
 	}()
 	return done
@@ -201,7 +215,7 @@ func (core *Core) wrapConfigurationFetchedHandler(handler model.ConfigurationFet
 }
 
 func (core *Core) startOrStopPushUpdatesListener() {
-	if core.internalFlags.IsEnabled("rox.internal.pushUpdates") {
+
 		if core.pushUpdatesListener == nil {
 			core.pushUpdatesListener = notifications.NewNotificationListener(core.environment.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
 			core.pushUpdatesListener.On("changed", func(event notifications.Event) {
@@ -209,14 +223,23 @@ func (core *Core) startOrStopPushUpdatesListener() {
 			})
 			core.pushUpdatesListener.Start()
 		}
-	} else {
-		if core.pushUpdatesListener != nil {
-			core.pushUpdatesListener.Stop()
-			core.pushUpdatesListener = nil
-		}
-	}
 }
 
 func (core *Core) DynamicAPI(entitiesProvider model.EntitiesProvider) model.DynamicAPI {
 	return client.NewDynamicAPI(core.flagRepository, entitiesProvider)
+}
+
+func (core *Core) Shutdown() <-chan struct{} {
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+
+		if core.pushUpdatesListener != nil {
+			core.pushUpdatesListener.Stop()
+			core.pushUpdatesListener = nil
+		}
+		close(core.quit)
+	}()
+
+	return done
 }

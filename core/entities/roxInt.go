@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"github.com/rollout/rox-go/core/consts"
 	"github.com/rollout/rox-go/core/context"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/roxx"
@@ -31,7 +32,7 @@ func NewRoxInt(defaultValue int, options []int) model.RoxInt {
 
 	roxInt := &roxInt{
 		roxVariant: roxVariant{
-			flagType: "intType",
+			flagType: consts.IntType,
 		},
 		defaultValue: defaultValue,
 		options:      allOptions,
@@ -95,17 +96,25 @@ func (v *roxInt) GetValue(ctx context.Context) int {
 func (v *roxInt) InternalGetValue(ctx context.Context) (returnValue int, isDefault bool) {
 	returnValue, isDefault = v.defaultValue, true
 	mergedContext := context.NewMergedContext(v.globalContext, ctx)
+	sendImpression := false
 
 	if v.parser != nil && v.condition != "" {
 		evaluationResult := v.parser.EvaluateExpression(v.condition, mergedContext)
-		value := evaluationResult.IntValue()
-		if value != 0 {
+		value, err := evaluationResult.IntValue()
+		if err == nil {
 			returnValue, isDefault = value, false
+			sendImpression = true
 		}
 	}
 
-	if v.impressionInvoker != nil {
-		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.Itoa(returnValue)), v.clientExperiment, mergedContext)
+	if v.impressionInvoker != nil && sendImpression {
+
+		targeting := false
+		if v.clientExperiment != nil {
+			targeting = true
+		}
+
+		v.impressionInvoker.Invoke(model.NewReportingValue(v.name, strconv.Itoa(returnValue), targeting), mergedContext)
 	}
 
 	return returnValue, isDefault

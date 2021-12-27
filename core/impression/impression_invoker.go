@@ -2,6 +2,7 @@ package impression
 
 import (
 	"github.com/rollout/rox-go/core/context"
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"sync"
 )
@@ -25,10 +26,10 @@ func NewImpressionInvoker(internalFlags model.InternalFlags, customPropertyRepos
 	}
 }
 
-func (ii *impressionInvoker) Invoke(value *model.ReportingValue, experiment *model.Experiment, context context.Context) {
+func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context.Context) {
 	// TODO Implement analytics logic
 
-	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Experiment: experiment, Context: context})
+	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Context: context})
 }
 
 func (ii *impressionInvoker) RegisterImpressionHandler(handler model.ImpressionHandler) {
@@ -43,6 +44,11 @@ func (ii *impressionInvoker) raiseImpressionEvent(args model.ImpressionArgs) {
 	copy(handlers, ii.impressionHandlers)
 	ii.handlersMutex.RUnlock()
 
+	defer func() {
+		if r := recover(); r != nil {
+			logging.GetLogger().Error("Failed to execute impression handler, panic", r)
+		}
+	}()
 	for _, handler := range handlers {
 		handler(args)
 	}

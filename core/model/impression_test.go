@@ -17,8 +17,9 @@ func TestExperimentConstructor(t *testing.T) {
 }
 
 func TestReportingValueConstructor(t *testing.T) {
-	reportingValue := model.NewReportingValue("pi", "ka")
+	reportingValue := model.NewReportingValue("pi", "ka", false)
 
 	assert.Equal(t, "pi", reportingValue.Name)
 	assert.Equal(t, "ka", reportingValue.Value)
+	assert.Equal(t, false, reportingValue.Targeting)
 }

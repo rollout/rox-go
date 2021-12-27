@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/rollout/rox-go/core/logging"
 	"github.com/rollout/rox-go/core/model"
 	"github.com/rollout/rox-go/core/properties"
 	"sync"
@@ -77,6 +78,12 @@ func (r *customPropertyRepository) raisePropertyAddedEvent(property *properties.
 	handlers := make([]model.CustomPropertyAddedHandler, len(r.propertyAddedHandlers))
 	copy(handlers, r.propertyAddedHandlers)
 	r.handlersMutex.RUnlock()
+
+	defer func() {
+		if r := recover(); r != nil {
+			logging.GetLogger().Error("Failed to execute custom property handler, panic", r)
+		}
+	}()
 
 	for _, handler := range handlers {
 		handler(property)

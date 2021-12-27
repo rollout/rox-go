@@ -87,8 +87,59 @@ func TestRoxStringWillRaiseImpression(t *testing.T) {
 	})
 
 	roxString := NewRoxString("1", []string{"2", "3"})
-	roxString.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", "123", false, []string{"1"}, nil), impInvoker)
+	roxString.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, "hi","hey")`, false, []string{"1"}, nil), impInvoker)
 
 	assert.Equal(t, "2", roxString.GetValueAsString(nil))
 	assert.True(t, isImpressionRaised)
+}
+
+func TestRoxStringForConsistencyWithInt(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxString := NewRoxString("a", []string{"b", "c"})
+	roxString.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2, 3)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, "a", roxString.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestRoxStringForConsistencyWithDouble(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxString := NewRoxString("a", []string{"b", "c"})
+	roxString.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2.5, 3.5)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, "a", roxString.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestRoxStringForConsistencyWithBool(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxString := NewRoxString("a", []string{"b", "c"})
+	roxString.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, false, false)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, "a", roxString.GetValue(nil))
+	assert.False(t, isImpressionRaised)
 }

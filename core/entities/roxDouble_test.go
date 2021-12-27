@@ -92,3 +92,54 @@ func TestRoxDoubleWillRaiseImpressionInvoker(t *testing.T) {
 	assert.Equal(t, 2.0, roxDouble.GetValue(nil))
 	assert.True(t, isImpressionRaised)
 }
+
+func TestRoxDoubleForConsistencyWithString(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxDouble := NewRoxDouble(1, []float64{2, 3})
+	roxDouble.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, "hi","hey")`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 1.0, roxDouble.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}
+
+func TestRoxDoubleForConsistencyWithInt(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxDouble := NewRoxDouble(1.5, []float64{2, 3})
+	roxDouble.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, 2, 3)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, float64(2), roxDouble.GetValue(nil))
+	assert.True(t, isImpressionRaised)
+}
+
+func TestRoxDoubleForConsistencyWithBoolean(t *testing.T) {
+	parser := roxx.NewParser()
+
+	isImpressionRaised := false
+	internalFlags := &mocks.InternalFlags{}
+	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
+		isImpressionRaised = true
+	})
+
+	roxDouble := NewRoxDouble(1, []float64{2, 3})
+	roxDouble.(model.InternalVariant).SetForEvaluation(parser, model.NewExperimentModel("id", "name", `ifThen(true, false, false)`, false, []string{"1"}, nil), impInvoker)
+
+	assert.Equal(t, 1.0, roxDouble.GetValue(nil))
+	assert.False(t, isImpressionRaised)
+}

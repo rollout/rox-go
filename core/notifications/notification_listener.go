@@ -55,7 +55,7 @@ func (nl *NotificationListener) On(eventName string, handler EventHandler) {
 }
 
 func (nl *NotificationListener) run(sseURL string) {
-	for {
+
 		sseClient := sse.NewClientWithoutRetry(sseURL)
 		events := make(chan *sse.Event)
 		sseCloser, err := sseClient.SubscribeChan("", events)
@@ -71,7 +71,7 @@ func (nl *NotificationListener) run(sseURL string) {
 		} else {
 			nl.readEvents(events, sseCloser)
 		}
-	}
+
 }
 
 func (nl *NotificationListener) readEvents(events <-chan *sse.Event, sseCloser io.Closer) {
