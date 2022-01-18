@@ -55,7 +55,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		logging.SetLogger(NewServerLogger())
 	}
 
-	var dynamicPropertyRuleHandler model.DynamicPropertyRuleHandler = builder.DynamicPropertyRuleHandler
+	var dynamicPropertyRuleHandler = builder.DynamicPropertyRuleHandler
 	if dynamicPropertyRuleHandler == nil {
 		dynamicPropertyRuleHandler = func(args model.DynamicPropertyRuleHandlerArgs) interface{} {
 			if args.Context != nil {
