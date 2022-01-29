@@ -3,7 +3,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd -P "$DIR"
 DIR=`pwd`
 go get -u github.com/rollout/rox-go/...
-export PORT=1234
+export PORT=$1
 go get
 go build
 nohup ./driver 1>"$DIR"/log_"$PORT".out 2>&1 &

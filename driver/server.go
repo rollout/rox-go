@@ -23,6 +23,7 @@ type setupAndAwait struct {
 }
 
 type serverOptions struct {
+	Env           string           `json:"env"`
 	Configuration *json.RawMessage `json:"configuration, omitempty"`
 }
 
@@ -43,6 +44,10 @@ type setCustomString struct {
 	Value string
 }
 
+type setCustomPropertyToThrow struct {
+	Key string `json:"key"`
+}
+
 type staticFlagIsEnabled struct {
 	Flag    string           `json:"flag"`
 	Context *json.RawMessage `json"context, omitempty"`
@@ -55,9 +60,14 @@ func main() {
 	var rox *server.Rox
 	rox = server.NewRox()
 
+	var port = os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "1234"
+	}
+
 	mux := http.NewServeMux()
 	srv = &http.Server{
-		Addr:    ":1234",
+		Addr:    ":" + port,
 		Handler: mux,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -82,29 +92,18 @@ func main() {
 
 			json.Unmarshal(*setup.Options.Configuration, &configMap)
 
-			if s, ok := configMap["env"]; ok {
-				switch s {
-				case "localhost":
-					os.Setenv("ROLLOUT_MODE", "LOCAL")
-				case "qa":
-					os.Setenv("ROLLOUT_MODE", "QA")
-				default:
-					os.Setenv("ROLLOUT_MODE", "")
-
-				}
+			switch setup.Options.Env {
+			case "localhost":
+				os.Setenv("ROLLOUT_MODE", "LOCAL")
+			case "qa":
+				os.Setenv("ROLLOUT_MODE", "QA")
+			default:
+				os.Setenv("ROLLOUT_MODE", "")
 			}
 			options := server.NewRoxOptions(server.RoxOptionsBuilder{})
 			<-rox.Setup(setup.Key, options)
 
-			doneStruct := struct {
-				Result string `json:"result"`
-			}{"done"}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			sendDone(w)
 			return
 		case "setCustomStringProperty":
 			var setCustom setCustomString
@@ -112,15 +111,7 @@ func main() {
 				log.Fatal(err)
 			}
 			rox.SetCustomStringProperty(setCustom.Key, setCustom.Value)
-			doneStruct := struct {
-				Result string `json:"result"`
-			}{"done"}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			sendDone(w)
 			return
 		case "dynamicFlagIsEnabled":
 			var dynamicFlag dynamicFlagIsEnabled
@@ -149,26 +140,12 @@ func main() {
 				}
 			}
 			result := rox.DynamicAPI().IsEnabled(dynamicFlag.Flag, dynamicFlag.DefaultValue, rCtx)
-			doneStruct := struct {
+			sendResult(w, struct {
 				Result bool `json:"result"`
-			}{result}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			}{result})
 			return
 		case "stop":
-			doneStruct := struct {
-				Result string `json:"result"`
-			}{"done"}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			sendResult(w, "done")
 			cancel()
 			return
 		case "dynamicFlagValue":
@@ -197,27 +174,14 @@ func main() {
 				}
 			}
 			result := rox.DynamicAPI().Value(dynamicFlag.Flag, dynamicFlag.DefaultValue, []string{}, rCtx)
-			doneStruct := struct {
+			sendResult(w, struct {
 				Result string `json:"result"`
-			}{result}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			}{result})
 			return
 		case "registerStaticContainers":
 			rox.Register("namespace", container)
-			doneStruct := struct {
-				Result string `json:"result"`
-			}{"done"}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			log.Println("Registered static container in namespace \"namespace\"")
+			sendDone(w)
 			return
 		case "staticFlagIsEnabled":
 			var staticFlag staticFlagIsEnabled
@@ -230,21 +194,28 @@ func main() {
 			rCtx := roxContext.NewContext(contextMap)
 
 			var result bool
-			if strings.Contains(staticFlag.Flag, "boolDefaultFalse") {
+			if strings.Contains(staticFlag.Flag, "BoolDefaultFalse") {
 				result = container.BoolDefaultFalse.IsEnabled(rCtx)
 			} else {
 				result = container.BoolDefaultTrue.IsEnabled(rCtx)
 			}
 
-			doneStruct := struct {
+			sendResult(w, struct {
 				Result bool `json:"result"`
-			}{result}
-			doneBody, err := json.Marshal(doneStruct)
-			if err != nil {
-				log.Println(err)
+			}{result})
+			return
+
+		case "setCustomPropertyToThrow":
+			var prop setCustomPropertyToThrow
+			if err := json.Unmarshal(payload, &prop); err != nil {
+				log.Fatal(err)
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(doneBody)
+			rox.SetCustomComputedStringProperty(prop.Key, func(context roxContext.Context) string {
+				panic("")
+				return ""
+			})
+			sendDone(w)
+			return
 
 		default:
 			return
@@ -267,6 +238,22 @@ func main() {
 
 	log.Println("server stopped")
 
+}
+
+func sendResult(w http.ResponseWriter, doneStruct interface{}) {
+	doneBody, err := json.Marshal(doneStruct)
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(doneBody)
+}
+
+func sendDone(w http.ResponseWriter) {
+	doneStruct := struct {
+		Result string `json:"result"`
+	}{"done"}
+	sendResult(w, doneStruct)
 }
 
 func statusCheck(w http.ResponseWriter, req *http.Request) {
