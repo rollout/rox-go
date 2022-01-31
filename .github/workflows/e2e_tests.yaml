@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: rox-dotnet-sdk
+          path: rox-go
       - name: Checkout e2e tests
         uses: actions/checkout@v2
         with:
