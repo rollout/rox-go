@@ -122,23 +122,6 @@ func main() {
 			contextMap := make(map[string]interface{})
 			json.Unmarshal(*dynamicFlag.Context, &contextMap)
 			rCtx := roxContext.NewContext(contextMap)
-			for key, value := range contextMap {
-
-				switch value.(type) {
-				case int:
-					rox.SetCustomIntegerProperty(key, value.(int))
-					continue
-				case float64:
-					rox.SetCustomFloatProperty(key, value.(float64))
-					continue
-				case string:
-					rox.SetCustomStringProperty(key, value.(string))
-					continue
-				case bool:
-					rox.SetCustomBooleanProperty(key, value.(bool))
-					continue
-				}
-			}
 			result := rox.DynamicAPI().IsEnabled(dynamicFlag.Flag, dynamicFlag.DefaultValue, rCtx)
 			sendResult(w, struct {
 				Result bool `json:"result"`
@@ -156,23 +139,6 @@ func main() {
 			contextMap := make(map[string]interface{})
 			json.Unmarshal(*dynamicFlag.Context, &contextMap)
 			rCtx := roxContext.NewContext(contextMap)
-
-			for key, value := range contextMap {
-				switch value.(type) {
-				case int:
-					rox.SetCustomIntegerProperty(key, value.(int))
-					continue
-				case float64:
-					rox.SetCustomFloatProperty(key, value.(float64))
-					continue
-				case string:
-					rox.SetCustomStringProperty(key, value.(string))
-					continue
-				case bool:
-					rox.SetCustomBooleanProperty(key, value.(bool))
-					continue
-				}
-			}
 			result := rox.DynamicAPI().Value(dynamicFlag.Flag, dynamicFlag.DefaultValue, []string{}, rCtx)
 			sendResult(w, struct {
 				Result string `json:"result"`
