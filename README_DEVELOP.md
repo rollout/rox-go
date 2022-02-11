@@ -4,10 +4,5 @@
 
 ### Unit tests
 ```
-go test ./v5/core/...
-```
-
-### E2E tests
-```
-go test ./v5/e2e/...
+cd v5 && go test ./core/...
 ```
