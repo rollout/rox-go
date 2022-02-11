@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+
+    runs-on: macos-11
+
+    steps:
+      - name: Set version
+        id: vars
+        uses: battila7/get-version-action@v2
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.version }}
+          release_name: ${{ steps.vars.outputs.version }}
+          body: Release ${{ steps.vars.outputs.version }}
+          draft: false
+          prerelease: false
