@@ -1,0 +1,14 @@
+name: Unit Tests
+
+on: [push]
+
+jobs:
+  unit_tests:
+
+    runs-on: macos-11
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: go test ./core/...
+        working-directory: ./v5

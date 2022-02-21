@@ -26,7 +26,7 @@ jobs:
           path: sdk-end-2-end-tests
       - name: link driver
         working-directory: ./sdk-end-2-end-tests/drivers
-        run: ln -s $GITHUB_WORKSPACE/rox-go/driver go
+        run: ln -s $GITHUB_WORKSPACE/rox-go/v5/driver go
       - name: build e2e node driver
         working-directory: ./sdk-end-2-end-tests/drivers/nodejs
         run: |
