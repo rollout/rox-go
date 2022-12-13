@@ -21,7 +21,7 @@ type ExperimentRepository interface {
 type FlagAddedHandler = func(variant Variant)
 
 type FlagRepository interface {
-	AddFlag(roxFlag Variant, name string)
+	AddFlag(roxFlag Variant, name string, tag string)
 	GetFlag(name string) Variant
 	GetAllFlags() []Variant
 

@@ -84,6 +84,10 @@ func (v *roxString) SetName(name string) {
 	v.name = name
 }
 
+func (v *roxString) SetTag(tag string) {
+	v.tag = tag
+}
+
 func (v *roxString) GetValueAsString(ctx context.Context) string {
 	return v.GetValue(ctx)
 }

@@ -108,14 +108,14 @@ func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
 		requestData = args.Get(0).(model.RequestData)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag1")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag1", "flag1")
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "C1C65A5AC8A732EAB7FCD81017BF5A87"), requestData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag2")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag2", "flag2")
 	stateSender.Send()
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
 }
@@ -160,8 +160,8 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 		requestData = args.Get(0).(model.RequestData)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag1")
-	flagRepo.AddFlag(entities.NewFlag(false), "flag2")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag1", "flag1")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag2", "flag2")
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
@@ -169,8 +169,8 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
 	flagRepo2 := repositories.NewFlagRepository()
-	flagRepo2.AddFlag(entities.NewFlag(false), "flag2")
-	flagRepo2.AddFlag(entities.NewFlag(false), "flag1")
+	flagRepo2.AddFlag(entities.NewFlag(false), "flag2", "flag2")
+	flagRepo2.AddFlag(entities.NewFlag(false), "flag1", "flag1")
 	stateSender = NewStateSender(request, dp, flagRepo2, cpRepo, environment)
 	stateSender.Send()
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
@@ -223,7 +223,7 @@ func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
 		reqAPIData = args.Get(0).(model.RequestData)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
@@ -251,7 +251,7 @@ func TestWillReturnNullWhenCDNSucceedWithEmptyResponse(t *testing.T) {
 		reqAPIData = args.Get(0).(string)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
@@ -279,7 +279,7 @@ func TestWillReturnNullWhenCDNSucceedWithNotJsonResponse(t *testing.T) {
 		reqAPIData = args.Get(0).(string)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
 
@@ -307,7 +307,7 @@ func TestWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
 		reqAPIData = args.Get(0).(string)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
@@ -336,7 +336,7 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 		reqAPIData = args.Get(0).(string)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()
@@ -365,7 +365,7 @@ func TestWillReturnAPIDataWhenWhenSelfManaged(t *testing.T) {
 		reqAPIData = args.Get(0).(string)
 	})
 
-	flagRepo.AddFlag(entities.NewFlag(false), "flag")
+	flagRepo.AddFlag(entities.NewFlag(false), "flag", "flag")
 	cpRepo.AddCustomProperty(properties.NewStringProperty("id", "1111"))
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment)
 	stateSender.Send()

@@ -17,7 +17,7 @@ func TestFlagRepositoryWillReturnNullWhenFlagNotFound(t *testing.T) {
 func TestFlagRepositoryWillAddFlagAndSetName(t *testing.T) {
 	repo := repositories.NewFlagRepository()
 	flag := entities.NewFlag(false)
-	repo.AddFlag(flag, "harti")
+	repo.AddFlag(flag, "harti", "harti")
 
 	assert.Equal(t, "harti", repo.GetFlag("harti").Name())
 }
@@ -25,7 +25,7 @@ func TestFlagRepositoryWillAddFlagAndSetName(t *testing.T) {
 func TestFlagRepositoryWillAddRoxStringAndSetName(t *testing.T) {
 	repo := repositories.NewFlagRepository()
 	flag := entities.NewRoxString("1", []string{"2", "3"})
-	repo.AddFlag(flag, "harti")
+	repo.AddFlag(flag, "harti", "harti")
 
 	assert.Equal(t, "harti", repo.GetFlag("harti").Name())
 }
@@ -33,7 +33,7 @@ func TestFlagRepositoryWillAddRoxStringAndSetName(t *testing.T) {
 func TestFlagRepositoryWillAddRoxIntAndSetName(t *testing.T) {
 	repo := repositories.NewFlagRepository()
 	flag := entities.NewRoxInt(1, []int{2, 3})
-	repo.AddFlag(flag, "harti")
+	repo.AddFlag(flag, "harti", "harti")
 
 	assert.Equal(t, "harti", repo.GetFlag("harti").Name())
 }
@@ -47,7 +47,7 @@ func TestFlagRepositoryWillRaiseFlagAddedEvent(t *testing.T) {
 		variantFromEvent = variant
 	})
 
-	repo.AddFlag(flag, "harti")
+	repo.AddFlag(flag, "harti", "harti")
 
 	assert.Equal(t, "harti", variantFromEvent.Name())
 }
@@ -62,7 +62,7 @@ func TestFlagRepositoryRecoversFromPanic(t *testing.T) {
 		panic("mwahahahaha evil user")
 	})
 
-	repo.AddFlag(flag, "harti")
+	repo.AddFlag(flag, "harti", "harti")
 
 	assert.Equal(t, "harti", variantFromEvent.Name())
 }

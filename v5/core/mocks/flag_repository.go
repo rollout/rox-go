@@ -9,8 +9,8 @@ type FlagRepository struct {
 	mock.Mock
 }
 
-func (m *FlagRepository) AddFlag(flag model.Variant, name string) {
-	m.Called(flag, name)
+func (m *FlagRepository) AddFlag(flag model.Variant, name string, tag string) {
+	m.Called(flag, name, tag)
 }
 
 func (m *FlagRepository) GetFlag(name string) model.Variant {

@@ -86,7 +86,7 @@ func TestExperimentsExtensionsFlagValueFlagEvaluationDefault(t *testing.T) {
 	experimentsExtensions.Extend()
 
 	v := entities.NewRoxString("op1", []string{"op2"})
-	flagRepository.AddFlag(v, "f1")
+	flagRepository.AddFlag(v, "f1", "f1")
 
 	assert.Equal(t, "op1", parser.EvaluateExpression(`flagValue("f1")`, nil).Value())
 }
@@ -100,10 +100,10 @@ func TestExperimentsExtensionsFlagDependencyValue(t *testing.T) {
 	experimentsExtensions.Extend()
 
 	f := entities.NewFlag(false)
-	flagRepository.AddFlag(f, "f1")
+	flagRepository.AddFlag(f, "f1", "f1")
 
 	v := entities.NewRoxString("blue", []string{"red", "green"})
-	flagRepository.AddFlag(v, "v1")
+	flagRepository.AddFlag(v, "v1", "v1")
 	exp := model.NewExperimentModel("id", "name", `ifThen(eq("true", flagValue("f1")), "red", "green")`, false, nil, nil)
 	v.(model.InternalVariant).SetForEvaluation(parser, exp, nil)
 
@@ -121,11 +121,11 @@ func TestExperimentsExtensionsFlagDependencyImpressionHandler(t *testing.T) {
 	experimentsExtensions.Extend()
 
 	f := entities.NewFlag(false)
-	flagRepository.AddFlag(f, "f1")
+	flagRepository.AddFlag(f, "f1", "f1")
 	f.(model.InternalVariant).SetForEvaluation(parser, nil, ii)
 
 	v := entities.NewRoxString("blue", []string{"red", "green"})
-	flagRepository.AddFlag(v, "v1")
+	flagRepository.AddFlag(v, "v1", "v1")
 	exp := model.NewExperimentModel("id", "name", `ifThen(eq("true", flagValue("f1")), "red", "green")`, false, nil, nil)
 	v.(model.InternalVariant).SetForEvaluation(parser, exp, ii)
 
@@ -150,12 +150,12 @@ func TestExperimentsExtensionsFlagDependency2LevelsBottomNotExists(t *testing.T)
 	experimentsExtensions.Extend()
 
 	f := entities.NewFlag(false)
-	flagRepository.AddFlag(f, "f1")
+	flagRepository.AddFlag(f, "f1", "f1")
 	exp1 := model.NewExperimentModel("id1", "name1", `flagValue("someFlag")`, false, nil, nil)
 	f.(model.InternalVariant).SetForEvaluation(parser, exp1, nil)
 
 	v := entities.NewRoxString("blue", []string{"red", "green"})
-	flagRepository.AddFlag(v, "v1")
+	flagRepository.AddFlag(v, "v1", "f1")
 	exp2 := model.NewExperimentModel("id2", "name2", `ifThen(eq("true", flagValue("f1")), "red", "green")`, false, nil, nil)
 	v.(model.InternalVariant).SetForEvaluation(parser, exp2, nil)
 
@@ -182,7 +182,7 @@ func TestExperimentsExtensionsFlagDependencyUnexistingFlagButExistingExperiment(
 
 	colorVar := entities.NewRoxString("red", []string{"red", "green", "blue"})
 	colorVar.(model.InternalVariant).SetForEvaluation(parser, nil, nil)
-	flagRepository.AddFlag(colorVar, "colorVar")
+	flagRepository.AddFlag(colorVar, "colorVar", "colorVar")
 
 	assert.Equal(t, "blue", colorVar.GetValueAsString(nil))
 }
@@ -207,7 +207,7 @@ func TestExperimentsExtensionsFlagDependencyUnexistingFlagAndExperimentUndefined
 
 	colorVar := entities.NewRoxString("red", []string{"red", "green", "blue"})
 	colorVar.(model.InternalVariant).SetForEvaluation(parser, nil, nil)
-	flagRepository.AddFlag(colorVar, "colorVar")
+	flagRepository.AddFlag(colorVar, "colorVar", "colorVar")
 
 	assert.Equal(t, "green", colorVar.GetValueAsString(nil))
 }
@@ -229,12 +229,12 @@ func TestExperimentsExtensionsFlagDependencyWithContext(t *testing.T) {
 	flag1 := entities.NewFlag(false)
 	exp1 := model.NewExperimentModel("id1", "name1", `property("prop")`, false, nil, nil)
 	flag1.(model.InternalVariant).SetForEvaluation(parser, exp1, nil)
-	flagRepository.AddFlag(flag1, "flag1")
+	flagRepository.AddFlag(flag1, "flag1", "flag1")
 
 	flag2 := entities.NewFlag(false)
 	exp2 := model.NewExperimentModel("id2", "name2", `flagValue("flag1")`, false, nil, nil)
 	flag2.(model.InternalVariant).SetForEvaluation(parser, exp2, nil)
-	flagRepository.AddFlag(flag2, "flag2")
+	flagRepository.AddFlag(flag2, "flag2", "flag2")
 
 	flagValue := flag2.GetValueAsString(context.NewContext(map[string]interface{}{"isPropOn": true}))
 
@@ -258,7 +258,7 @@ func TestExperimentsExtensionsFlagDependencyWithContextUsedOnExperimentWithNoFla
 	flag3 := entities.NewFlag(false)
 	exp3 := model.NewExperimentModel("id3", "name3", `flagValue("flag2")`, false, nil, nil)
 	flag3.(model.InternalVariant).SetForEvaluation(parser, exp3, nil)
-	flagRepository.AddFlag(flag3, "flag3")
+	flagRepository.AddFlag(flag3, "flag3", "flag3")
 
 	experimentModels := []*model.ExperimentModel{
 		model.NewExperimentModel("exp1id", "exp1name", `property("prop")`, false, []string{"flag2"}, nil),
@@ -287,12 +287,12 @@ func TestExperimentsExtensionsFlagDependencyWithContext2LevelMidLevelNoFlagEvalE
 	flag1 := entities.NewFlag(false)
 	exp1 := model.NewExperimentModel("id1", "name1", `property("prop")`, false, nil, nil)
 	flag1.(model.InternalVariant).SetForEvaluation(parser, exp1, nil)
-	flagRepository.AddFlag(flag1, "flag1")
+	flagRepository.AddFlag(flag1, "flag1", "flag1")
 
 	flag3 := entities.NewFlag(false)
 	exp2 := model.NewExperimentModel("id3", "name3", `flagValue("flag2")`, false, nil, nil)
 	flag3.(model.InternalVariant).SetForEvaluation(parser, exp2, nil)
-	flagRepository.AddFlag(flag3, "flag3")
+	flagRepository.AddFlag(flag3, "flag3", "flag3")
 
 	experimentModels := []*model.ExperimentModel{
 		model.NewExperimentModel("exp1id", "exp1name", `flagValue("flag1")`, false, []string{"flag2"}, nil),

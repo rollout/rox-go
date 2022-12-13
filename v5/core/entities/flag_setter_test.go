@@ -21,7 +21,7 @@ func TestFlagSetterWillSetFlagData(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
 
-	flagRepo.AddFlag(NewFlag(false), "f1")
+	flagRepo.AddFlag(NewFlag(false), "f1", "f1")
 	expRepo.SetExperiments([]*model.ExperimentModel{
 		model.NewExperimentModel("33", "1", "1", false, []string{"f1"}, nil),
 	})
@@ -45,8 +45,8 @@ func TestFlagSetterWillNotSetForOtherFlag(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
 
-	flagRepo.AddFlag(NewFlag(false), "f1")
-	flagRepo.AddFlag(NewFlag(false), "f2")
+	flagRepo.AddFlag(NewFlag(false), "f1", "f1")
+	flagRepo.AddFlag(NewFlag(false), "f2", "f2")
 	expRepo.SetExperiments([]*model.ExperimentModel{
 		model.NewExperimentModel("1", "1", "1", false, []string{"f1"}, nil),
 	})
@@ -71,7 +71,7 @@ func TestFlagSetterWillSetExperimentForFlagAndWillRemoveIt(t *testing.T) {
 	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
 
 	flagSetter := NewFlagSetter(flagRepo, parser, expRepo, impInvoker)
-	flagRepo.AddFlag(NewFlag(false), "f2")
+	flagRepo.AddFlag(NewFlag(false), "f2", "f2")
 
 	expRepo.SetExperiments([]*model.ExperimentModel{
 		model.NewExperimentModel("id1", "1", "con", false, []string{"f2"}, nil),
@@ -103,7 +103,7 @@ func TestFlagSetterWillSetFlagWithoutExperimentAndThenAddExperiment(t *testing.T
 	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
 
 	flagSetter := NewFlagSetter(flagRepo, parser, expRepo, impInvoker)
-	flagRepo.AddFlag(NewFlag(false), "f2")
+	flagRepo.AddFlag(NewFlag(false), "f2", "f2")
 	flagSetter.SetExperiments()
 
 	assert.Equal(t, "", flagRepo.GetFlag("f2").(internalVariant).Condition())
@@ -138,8 +138,8 @@ func TestFlagSetterWillSetDataForAddedFlag(t *testing.T) {
 	flagSetter := NewFlagSetter(flagRepo, parser, expRepo, impInvoker)
 	flagSetter.SetExperiments()
 
-	flagRepo.AddFlag(NewFlag(false), "f1")
-	flagRepo.AddFlag(NewFlag(false), "f2")
+	flagRepo.AddFlag(NewFlag(false), "f1", "f1")
+	flagRepo.AddFlag(NewFlag(false), "f2", "f2")
 
 	assert.Equal(t, "1", flagRepo.GetFlag("f1").(internalVariant).Condition())
 	assert.Equal(t, "", flagRepo.GetFlag("f2").(internalVariant).Condition())

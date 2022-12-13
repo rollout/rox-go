@@ -8,6 +8,7 @@ import (
 type Variant interface {
 	Name() string
 	FlagType() int
+	Tag() string
 	GetValueAsString(context context.Context) string
 	GetDefaultAsString() string
 	GetOptionsAsString() []string
@@ -50,6 +51,7 @@ type EntitiesProvider interface {
 
 type InternalVariant interface {
 	SetName(name string)
+	SetTag(tag string)
 	SetContext(globalContext context.Context)
 	SetForEvaluation(parser roxx.Parser, experiment *ExperimentModel, impressionInvoker ImpressionInvoker)
 }

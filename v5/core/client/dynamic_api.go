@@ -22,7 +22,7 @@ func (api *dynamicAPI) IsEnabled(name string, defaultValue bool, ctx context.Con
 	flag := api.flagRepository.GetFlag(name)
 	if flag == nil {
 		flag = api.entitiesProvider.CreateFlag(defaultValue)
-		api.flagRepository.AddFlag(flag, name)
+		api.flagRepository.AddFlag(flag, name, name)
 	}
 
 	if flag, ok := flag.(model.Flag); !ok {
@@ -41,7 +41,7 @@ func (api *dynamicAPI) Value(name string, defaultValue string, options []string,
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxString(defaultValue, options)
-		api.flagRepository.AddFlag(variant, name)
+		api.flagRepository.AddFlag(variant, name, name)
 	}
 
 	switch variant.FlagType() {
@@ -62,7 +62,7 @@ func (api *dynamicAPI) GetInt(name string, defaultValue int, options []int, ctx 
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxInt(defaultValue, options)
-		api.flagRepository.AddFlag(variant, name)
+		api.flagRepository.AddFlag(variant, name, name)
 	}
 
 	switch variant.FlagType() {
@@ -83,7 +83,7 @@ func (api *dynamicAPI) GetDouble(name string, defaultValue float64, options []fl
 	variant := api.flagRepository.GetFlag(name)
 	if variant == nil {
 		variant = api.entitiesProvider.CreateRoxDouble(defaultValue, options)
-		api.flagRepository.AddFlag(variant, name)
+		api.flagRepository.AddFlag(variant, name, name)
 	}
 
 	switch variant.FlagType() {

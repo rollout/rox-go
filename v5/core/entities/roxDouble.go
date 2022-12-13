@@ -84,6 +84,10 @@ func (v *roxDouble) SetName(name string) {
 	v.name = name
 }
 
+func (v *roxDouble) SetTag(tag string) {
+	v.tag = tag
+}
+
 func (v *roxDouble) GetValueAsString(ctx context.Context) string {
 	return strconv.FormatFloat(v.GetValue(ctx), 'f', -1, 64)
 }

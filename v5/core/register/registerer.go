@@ -7,6 +7,9 @@ import (
 	"sync"
 )
 
+//The name of the tag we use to set the actual flag name in flag structs
+const flagStructTagName = "fflag"
+
 type Registerer struct {
 	flagRepository model.FlagRepository
 	namespaces     map[string]bool
@@ -41,10 +44,18 @@ func (r *Registerer) RegisterInstance(container interface{}, ns string) {
 		}
 
 		name := v.Type().Field(i).Name
-		if ns != "" {
-			name = fmt.Sprintf("%s.%s", ns, name)
+		//check for our tag in struct definition
+		tag := v.Type().Field(i).Tag.Get(flagStructTagName)
+		if tag == "" {
+			//always set the tag
+			tag = name
 		}
 
-		r.flagRepository.AddFlag(variant, name)
+		if ns != "" {
+			name = fmt.Sprintf("%s.%s", ns, name)
+			tag = fmt.Sprintf("%s.%s", ns, tag)
+		}
+
+		r.flagRepository.AddFlag(variant, name, tag)
 	}
 }

@@ -84,6 +84,10 @@ func (v *roxInt) SetName(name string) {
 	v.name = name
 }
 
+func (v *roxInt) SetTag(tag string) {
+	v.tag = tag
+}
+
 func (v *roxInt) GetValueAsString(ctx context.Context) string {
 	return strconv.Itoa(v.GetValue(ctx))
 }
