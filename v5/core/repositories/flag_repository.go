@@ -1,9 +1,10 @@
 package repositories
 
 import (
+	"sync"
+
 	"github.com/rollout/rox-go/v5/core/logging"
 	"github.com/rollout/rox-go/v5/core/model"
-	"sync"
 )
 
 type flagRepository struct {
