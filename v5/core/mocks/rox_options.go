@@ -67,3 +67,7 @@ func (m *RoxOptions) DynamicPropertyRuleHandler() model.DynamicPropertyRuleHandl
 	}
 	return result.(model.DynamicPropertyRuleHandler)
 }
+
+func (m *RoxOptions) NetworkConfigurationsOptions() model.NetworkConfigurationsOptions {
+	return nil
+}

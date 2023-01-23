@@ -3,13 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
-	roxContext "github.com/rollout/rox-go/v5/core/context"
-	"github.com/rollout/rox-go/v5/server"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/rollout/rox-go/v5/core/client"
+	roxContext "github.com/rollout/rox-go/v5/core/context"
+	"github.com/rollout/rox-go/v5/core/model"
+	"github.com/rollout/rox-go/v5/server"
 )
 
 type testRequest struct {
@@ -89,18 +92,30 @@ func main() {
 			}
 
 			var configMap map[string]string
-
 			json.Unmarshal(*setup.Options.Configuration, &configMap)
 
-			switch setup.Options.Env {
-			case "localhost":
-				os.Setenv("ROLLOUT_MODE", "LOCAL")
-			case "qa":
-				os.Setenv("ROLLOUT_MODE", "QA")
-			default:
-				os.Setenv("ROLLOUT_MODE", "")
+			var networkConfig model.NetworkConfigurationsOptions = nil
+
+			if (setup.Options.Env == "container") {
+				networkConfig = client.NewNetworkConfigurationsOptions(client.NetworkConfigurationsBuilder{
+					GetConfigApiEndpoint:     configMap["CD_API_ENDPOINT"],
+					GetConfigCloudEndpoint:   configMap["CD_S3_ENDPOINT"],
+					SendStateApiEndpoint:     configMap["SS_API_ENDPOINT"],
+					SendStateCloudEndpoint:   configMap["SS_S3_ENDPOINT"],
+					AnalyticsEndpoint:        configMap["ANALYTICS_ENDPOINT"],
+					PushNotificationEndpoint: configMap["NOTIFICATIONS_ENDPOINT"],
+				})
+			} else {
+				switch setup.Options.Env {
+				case "localhost":
+					os.Setenv("ROLLOUT_MODE", "LOCAL")
+				case "qa":
+					os.Setenv("ROLLOUT_MODE", "QA")
+				default:
+					os.Setenv("ROLLOUT_MODE", "")
+				}
 			}
-			options := server.NewRoxOptions(server.RoxOptionsBuilder{})
+			options := server.NewRoxOptions(server.RoxOptionsBuilder{NetworkConfigurationsOptions: networkConfig})
 			<-rox.Setup(setup.Key, options)
 
 			sendDone(w)

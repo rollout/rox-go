@@ -35,7 +35,7 @@ jobs:
         working-directory: ./sdk-end-2-end-tests
         run: |
           yarn install --frozen-lockfile
-          QA_E2E_BEARER=$QA_E2E_BEARER SDK_LANG=go NODE_ENV=qa yarn test
+          QA_E2E_BEARER=$TEST_E2E_BEARER API_HOST=https://api.test.rollout.io CD_API_ENDPOINT=https://api.test.rollout.io/device/get_configuration CD_S3_ENDPOINT=https://rox-conf.test.rollout.io/ SS_API_ENDPOINT=https://api.test.rollout.io/device/update_state_store/ SS_S3_ENDPOINT=https://rox-state.test.rollout.io/ CLIENT_DATA_CACHE_KEY=client_data ANALYTICS_ENDPOINT=https://analytic.test.rollout.io/ NOTIFICATIONS_ENDPOINT=https://push.test.rollout.io/sse SDK_LANG=go NODE_ENV=container yarn test:env
         env:
           QA_E2E_BEARER: ${{ secrets.QA_E2E_BEARER }}
 #          TODO: implement EU hosting support
