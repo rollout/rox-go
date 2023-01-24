@@ -8,28 +8,28 @@ import (
 )
 
 type RoxOptionsBuilder struct {
-	Version                     	string
-	DevModeKey                  	string
-	FetchInterval               	time.Duration
-	Logger                      	logging.Logger
-	ImpressionHandler           	model.ImpressionHandler
-	ConfigurationFetchedHandler 	model.ConfigurationFetchedHandler
-	RoxyURL                     	string
-	SelfManagedOptions          	model.SelfManagedOptions
-	DynamicPropertyRuleHandler  	model.DynamicPropertyRuleHandler
-	NetworkConfigurationsOptions	model.NetworkConfigurationsOptions
+	Version                      string
+	DevModeKey                   string
+	FetchInterval                time.Duration
+	Logger                       logging.Logger
+	ImpressionHandler            model.ImpressionHandler
+	ConfigurationFetchedHandler  model.ConfigurationFetchedHandler
+	RoxyURL                      string
+	SelfManagedOptions           model.SelfManagedOptions
+	DynamicPropertyRuleHandler   model.DynamicPropertyRuleHandler
+	NetworkConfigurationsOptions model.NetworkConfigurationsOptions
 }
 
 type roxOptions struct {
-	version				string
-	devModeKey			string
-	fetchInterval			time.Duration
-	impressionHandler		model.ImpressionHandler
-	configurationFetchedHandler	model.ConfigurationFetchedHandler
-	roxyURL				string
-	selfManagedOptions		model.SelfManagedOptions
-	dynamicPropertyRuleHandler	model.DynamicPropertyRuleHandler
-	networkConfigurationsOptions	model.NetworkConfigurationsOptions
+	version                      string
+	devModeKey                   string
+	fetchInterval                time.Duration
+	impressionHandler            model.ImpressionHandler
+	configurationFetchedHandler  model.ConfigurationFetchedHandler
+	roxyURL                      string
+	selfManagedOptions           model.SelfManagedOptions
+	dynamicPropertyRuleHandler   model.DynamicPropertyRuleHandler
+	networkConfigurationsOptions model.NetworkConfigurationsOptions
 }
 
 func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
@@ -69,15 +69,15 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 	}
 
 	return &roxOptions{
-		version:                     	version,
-		devModeKey:                  	devModeKey,
-		fetchInterval:               	fetchInterval,
-		impressionHandler:           	builder.ImpressionHandler,
-		configurationFetchedHandler: 	builder.ConfigurationFetchedHandler,
-		roxyURL:                     	builder.RoxyURL,
-		selfManagedOptions:          	builder.SelfManagedOptions,
-		dynamicPropertyRuleHandler:  	dynamicPropertyRuleHandler,
-		networkConfigurationsOptions:	builder.NetworkConfigurationsOptions,
+		version:                      version,
+		devModeKey:                   devModeKey,
+		fetchInterval:                fetchInterval,
+		impressionHandler:            builder.ImpressionHandler,
+		configurationFetchedHandler:  builder.ConfigurationFetchedHandler,
+		roxyURL:                      builder.RoxyURL,
+		selfManagedOptions:           builder.SelfManagedOptions,
+		dynamicPropertyRuleHandler:   dynamicPropertyRuleHandler,
+		networkConfigurationsOptions: builder.NetworkConfigurationsOptions,
 	}
 }
 
