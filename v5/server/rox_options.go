@@ -21,14 +21,14 @@ type RoxOptionsBuilder struct {
 }
 
 type roxOptions struct {
-	version							string
-	devModeKey						string
-	fetchInterval					time.Duration
-	impressionHandler				model.ImpressionHandler
-	configurationFetchedHandler		model.ConfigurationFetchedHandler
-	roxyURL							string
-	selfManagedOptions				model.SelfManagedOptions
-	dynamicPropertyRuleHandler		model.DynamicPropertyRuleHandler
+	version				string
+	devModeKey			string
+	fetchInterval			time.Duration
+	impressionHandler		model.ImpressionHandler
+	configurationFetchedHandler	model.ConfigurationFetchedHandler
+	roxyURL				string
+	selfManagedOptions		model.SelfManagedOptions
+	dynamicPropertyRuleHandler	model.DynamicPropertyRuleHandler
 	networkConfigurationsOptions	model.NetworkConfigurationsOptions
 }
 
