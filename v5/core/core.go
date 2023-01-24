@@ -84,7 +84,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	if roxOptions != nil && roxOptions.SelfManagedOptions() != nil {
 		core.environment = client.NewSelfManagedEnvironment(roxOptions.SelfManagedOptions())
 	} else if roxOptions != nil && roxOptions.NetworkConfigurationsOptions() != nil {
-		core.environment = client.NewCustomSaasEnvironment(roxOptions.NetworkConfigurationsOptions())
+		core.environment = client.NewCustomEnvironment(roxOptions.NetworkConfigurationsOptions())
 	} else {
 		core.environment = client.NewSaasEnvironment()
 	}

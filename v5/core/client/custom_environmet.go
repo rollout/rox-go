@@ -6,7 +6,7 @@ import (
 	"github.com/rollout/rox-go/v5/core/model"
 )
 
-type CustomSaasEnvironment struct{
+type CustomEnvironment struct{
 	getConfigApiURL string
 	getConfigCloudURL string
 	sendStateApiURL string
@@ -22,8 +22,8 @@ func TrimSuffix(s, suffix string) string {
     return s
 }
 
-func NewCustomSaasEnvironment(options model.NetworkConfigurationsOptions) CustomSaasEnvironment {
-	return CustomSaasEnvironment{
+func NewCustomEnvironment(options model.NetworkConfigurationsOptions) CustomEnvironment {
+	return CustomEnvironment{
 		getConfigApiURL:    TrimSuffix(options.GetConfigApiEndpoint(), "/"),
 		getConfigCloudURL: 	TrimSuffix(options.GetConfigCloudEndpoint(), "/"),
 		sendStateApiURL: 	TrimSuffix(options.SendStateApiEndpoint(), "/"),
@@ -33,34 +33,34 @@ func NewCustomSaasEnvironment(options model.NetworkConfigurationsOptions) Custom
 	}
 }
 
-func (e CustomSaasEnvironment) EnvironmentRoxyInternalPath() string {
+func (e CustomEnvironment) EnvironmentRoxyInternalPath() string {
 	return "device/request_configuration"
 }
 
-func (e CustomSaasEnvironment) EnvironmentCDNPath() string {
+func (e CustomEnvironment) EnvironmentCDNPath() string {
 	return e.getConfigCloudURL
 }
 
-func (e CustomSaasEnvironment) EnvironmentAPIPath() string {
+func (e CustomEnvironment) EnvironmentAPIPath() string {
 	return e.getConfigApiURL
 }
 
-func (e CustomSaasEnvironment) EnvironmentStateCDNPath() string {
+func (e CustomEnvironment) EnvironmentStateCDNPath() string {
 	return e.sendStateCloudURL
 }
 
-func (e CustomSaasEnvironment) EnvironmentStateAPIPath() string {
+func (e CustomEnvironment) EnvironmentStateAPIPath() string {
 	return e.sendStateApiURL
 }
 
-func (e CustomSaasEnvironment) EnvironmentAnalyticsPath() string {
+func (e CustomEnvironment) EnvironmentAnalyticsPath() string {
 	return e.analyticsURL
 }
 
-func (e CustomSaasEnvironment) EnvironmentNotificationsPath() string {
+func (e CustomEnvironment) EnvironmentNotificationsPath() string {
 	return e.pushNotificationURL
 }
 
-func (e CustomSaasEnvironment) IsSelfManaged() bool {
+func (e CustomEnvironment) IsSelfManaged() bool {
 	return false
 }
