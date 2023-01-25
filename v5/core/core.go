@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/rollout/rox-go/v5/core/security"
 	"net/http"
 	"regexp"
+
+	"github.com/rollout/rox-go/v5/core/security"
 
 	"github.com/rollout/rox-go/v5/core/client"
 	"github.com/rollout/rox-go/v5/core/configuration"
@@ -82,6 +83,8 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 	if roxOptions != nil && roxOptions.SelfManagedOptions() != nil {
 		core.environment = client.NewSelfManagedEnvironment(roxOptions.SelfManagedOptions())
+	} else if roxOptions != nil && roxOptions.NetworkConfigurationsOptions() != nil {
+		core.environment = client.NewCustomEnvironment(roxOptions.NetworkConfigurationsOptions())
 	} else {
 		core.environment = client.NewSaasEnvironment()
 	}
