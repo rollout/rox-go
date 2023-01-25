@@ -41,7 +41,7 @@ func (*deviceProperties) RolloutEnvironment() string {
 }
 
 func (*deviceProperties) LibVersion() string {
-	return "5.0.3"
+	return "5.0.4"
 }
 
 func (dp *deviceProperties) RolloutKey() string {
