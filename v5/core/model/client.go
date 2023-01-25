@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/rollout/rox-go/v5/core/context"
 	"time"
+
+	"github.com/rollout/rox-go/v5/core/context"
 )
 
 type BUID interface {
@@ -25,6 +26,15 @@ type SelfManagedOptions interface {
 	AnalyticsURL() string
 }
 
+type NetworkConfigurationsOptions interface {
+	GetConfigApiEndpoint() string
+	GetConfigCloudEndpoint() string
+	SendStateApiEndpoint() string
+	SendStateCloudEndpoint() string
+	AnalyticsEndpoint() string
+	PushNotificationEndpoint() string
+}
+
 type RoxOptions interface {
 	DevModeKey() string
 	Version() string
@@ -34,6 +44,7 @@ type RoxOptions interface {
 	RoxyURL() string
 	SelfManagedOptions() SelfManagedOptions
 	DynamicPropertyRuleHandler() DynamicPropertyRuleHandler
+	NetworkConfigurationsOptions() NetworkConfigurationsOptions
 }
 
 type SdkSettings interface {
