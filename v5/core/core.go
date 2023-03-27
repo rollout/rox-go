@@ -142,7 +142,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		}
 
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
-			go utils.RunPeriodicTask(func() {
+			utils.RunPeriodicTask(func() {
 				<-core.Fetch()
 			}, roxOptions.FetchInterval(), core.quit)
 		}
