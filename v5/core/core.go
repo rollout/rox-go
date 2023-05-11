@@ -1,6 +1,7 @@
 package core
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"regexp"
 
@@ -74,10 +75,15 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	}
 
 	if roxyPath == "" {
-		validAPIKeyPattern := "^[a-f\\d]{24}$"
-		matched, err := regexp.Match(validAPIKeyPattern, []byte(sdkSettings.APIKey()))
+		validMongoIdPattern := "^[a-f\\d]{24}$"
+		// Try to parse it as a mongo ID (rollout.io)
+		matched, err := regexp.Match(validMongoIdPattern, []byte(sdkSettings.APIKey()))
 		if err != nil || !matched {
-			panic(invalidAPIKeyErrorMessage)
+			// try to parse it as a UUID (platform)
+			_, err = uuid.FromString(sdkSettings.APIKey())
+			if err != nil {
+				panic(invalidAPIKeyErrorMessage)
+			}
 		}
 	}
 
