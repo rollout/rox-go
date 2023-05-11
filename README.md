@@ -1,6 +1,6 @@
 ![Rollout](https://1ko9923xosh2dsbjsxpwqp45-wpengine.netdna-ssl.com/wp-content/themes/rollout/images/rollout_white_logo1.png)
 
-Rollout is a Secure Feature Managment Solution for the Enterprise.
+Rollout is a Secure Feature Management Solution for the Enterprise.
 
 > Accelerate development and minimize the risk of deploying new code with simple to create feature flags, controlled rollouts, advanced target groups & deployment rules.
 
