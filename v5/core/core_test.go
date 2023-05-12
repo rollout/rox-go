@@ -3,6 +3,7 @@ package core_test
 import (
 	"fmt"
 	"github.com/rollout/rox-go/v5/core"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
@@ -59,9 +60,55 @@ func TestInvalidAPIKey(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 
+	defer func() {
+		assert.Equal(t, "Invalid rollout apikey", recover())
+	}()
 	<-c.Setup(sdkSettings, deviceProperties, nil)
-	// We should never reach this point because the API key is invalid
-	t.FailNow()
+	assert.Fail(t, "We should never reach this point because the API key is invalid")
+}
+
+func TestValidAPIKey_MongoId(t *testing.T) {
+	c := core.NewCore()
+
+	defer func() {
+		if err := recover(); err != nil {
+			// Due to the panic() generated but the Setup,
+			// we should reach here and not the t.FailNow() underneath
+		}
+	}()
+	sdkSettings := &mocks.SdkSettings{}
+	sdkSettings.On("APIKey").Return("12345678901234567890abcd") // Valid Mongo ID
+
+	deviceProperties := &mocks.DeviceProperties{}
+	deviceProperties.On("GetAllProperties").Return(map[string]string{})
+
+	defer func() {
+		assert.Nil(t, recover(), "we should not have panicked as the API key was valid")
+	}()
+	<-c.Setup(sdkSettings, deviceProperties, nil)
+	// Success
+}
+
+func TestValidAPIKey_Uuid(t *testing.T) {
+	c := core.NewCore()
+
+	defer func() {
+		if err := recover(); err != nil {
+			// Due to the panic() generated but the Setup,
+			// we should reach here and not the t.FailNow() underneath
+		}
+	}()
+	sdkSettings := &mocks.SdkSettings{}
+	sdkSettings.On("APIKey").Return("a9faa59e-f005-11ed-abc0-00155d7746b3") // Valid Mongo ID
+
+	deviceProperties := &mocks.DeviceProperties{}
+	deviceProperties.On("GetAllProperties").Return(map[string]string{})
+
+	defer func() {
+		assert.Nil(t, recover(), "we should not have panicked as the API key was valid")
+	}()
+	<-c.Setup(sdkSettings, deviceProperties, nil)
+	// Success
 }
 
 func TestEmptyAPIKey(t *testing.T) {
@@ -76,7 +123,9 @@ func TestEmptyAPIKey(t *testing.T) {
 	deviceProperties := &mocks.DeviceProperties{}
 
 	c := core.NewCore()
+	defer func() {
+		assert.Equal(t, "Invalid rollout apikey", recover())
+	}()
 	<-c.Setup(sdkSettings, deviceProperties, nil)
-	// We should never reach this point because the API key is invalid
-	t.FailNow()
+	assert.Fail(t, "We should never reach this point because the API key is invalid")
 }
