@@ -38,10 +38,10 @@ func TestWillTestDebouncerSkipDoubleInvoke(t *testing.T) {
 	assert.Equal(t, 0, counter)
 	debouncer.Invoke()
 	assert.Equal(t, 0, counter)
-	timer = time.NewTimer(600 * time.Millisecond)
+	timer = time.NewTimer(700 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 1, counter)
-	timer = time.NewTimer(600 * time.Millisecond)
+	timer = time.NewTimer(500 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 1, counter)
 }
@@ -55,12 +55,12 @@ func TestWillTestDebouncerInvokeAfterInvoke(t *testing.T) {
 	assert.Equal(t, 0, counter)
 	debouncer.Invoke()
 	assert.Equal(t, 0, counter)
-	timer := time.NewTimer(1100 * time.Millisecond)
+	timer := time.NewTimer(1200 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 1, counter)
 	debouncer.Invoke()
 	assert.Equal(t, 1, counter)
-	timer = time.NewTimer(800 * time.Millisecond)
+	timer = time.NewTimer(700 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 1, counter)
 	timer = time.NewTimer(300 * time.Millisecond)
