@@ -71,3 +71,7 @@ func (m *RoxOptions) DynamicPropertyRuleHandler() model.DynamicPropertyRuleHandl
 func (m *RoxOptions) NetworkConfigurationsOptions() model.NetworkConfigurationsOptions {
 	return nil
 }
+
+func (m *RoxOptions) IsSignatureVerificationDisabled() bool {
+	return false
+}
