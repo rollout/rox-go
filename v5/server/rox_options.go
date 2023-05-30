@@ -18,6 +18,7 @@ type RoxOptionsBuilder struct {
 	SelfManagedOptions           model.SelfManagedOptions
 	DynamicPropertyRuleHandler   model.DynamicPropertyRuleHandler
 	NetworkConfigurationsOptions model.NetworkConfigurationsOptions
+	DisableSignatureVerification bool
 }
 
 type roxOptions struct {
@@ -30,6 +31,7 @@ type roxOptions struct {
 	selfManagedOptions           model.SelfManagedOptions
 	dynamicPropertyRuleHandler   model.DynamicPropertyRuleHandler
 	networkConfigurationsOptions model.NetworkConfigurationsOptions
+	disableSignatureVerification bool
 }
 
 func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
@@ -78,6 +80,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		selfManagedOptions:           builder.SelfManagedOptions,
 		dynamicPropertyRuleHandler:   dynamicPropertyRuleHandler,
 		networkConfigurationsOptions: builder.NetworkConfigurationsOptions,
+		disableSignatureVerification: builder.DisableSignatureVerification,
 	}
 }
 
@@ -115,4 +118,8 @@ func (ro *roxOptions) DynamicPropertyRuleHandler() model.DynamicPropertyRuleHand
 
 func (ro *roxOptions) NetworkConfigurationsOptions() model.NetworkConfigurationsOptions {
 	return ro.networkConfigurationsOptions
+}
+
+func (ro *roxOptions) IsSignatureVerificationDisabled() bool {
+	return ro.disableSignatureVerification
 }

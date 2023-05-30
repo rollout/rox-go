@@ -48,3 +48,13 @@ func (sv *signatureVerifier) Verify(data, signatureBase64 string) bool {
 	err = cert.CheckSignature(x509.SHA256WithRSA, []byte(data), signature)
 	return err == nil
 }
+
+type disabledSignatureVerifier struct{}
+
+func NewDisabledSignatureVerifier() SignatureVerifier {
+	return &disabledSignatureVerifier{}
+}
+
+func (dsv *disabledSignatureVerifier) Verify(data, signatureBase64 string) bool {
+	return true
+}

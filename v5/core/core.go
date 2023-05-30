@@ -25,24 +25,25 @@ import (
 )
 
 type Core struct {
-	registerer                  *register.Registerer
-	flagRepository              model.FlagRepository
-	customPropertyRepository    model.CustomPropertyRepository
-	experimentRepository        model.ExperimentRepository
-	targetGroupRepository       model.TargetGroupRepository
-	flagSetter                  *entities.FlagSetter
-	parser                      roxx.Parser
-	impressionInvoker           model.ImpressionInvoker
-	configurationFetchedInvoker *configuration.FetchedInvoker
-	stateSender                 *network.StateSender
-	sdkSettings                 model.SdkSettings
-	configurationFetcher        network.ConfigurationFetcher
-	errorReporter               model.ErrorReporter
-	lastConfigurations          *configuration.FetchResult
-	internalFlags               model.InternalFlags
-	pushUpdatesListener         *notifications.NotificationListener
-	environment                 model.Environment
-	quit                        chan struct{}
+	registerer                   *register.Registerer
+	flagRepository               model.FlagRepository
+	customPropertyRepository     model.CustomPropertyRepository
+	experimentRepository         model.ExperimentRepository
+	targetGroupRepository        model.TargetGroupRepository
+	flagSetter                   *entities.FlagSetter
+	parser                       roxx.Parser
+	impressionInvoker            model.ImpressionInvoker
+	configurationFetchedInvoker  *configuration.FetchedInvoker
+	stateSender                  *network.StateSender
+	sdkSettings                  model.SdkSettings
+	configurationFetcher         network.ConfigurationFetcher
+	errorReporter                model.ErrorReporter
+	lastConfigurations           *configuration.FetchResult
+	internalFlags                model.InternalFlags
+	pushUpdatesListener          *notifications.NotificationListener
+	environment                  model.Environment
+	disableSignatureVerification bool
+	quit                         chan struct{}
 }
 
 const invalidAPIKeyErrorMessage = "Invalid rollout apikey"
@@ -130,6 +131,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	var configurationFetchedHandler model.ConfigurationFetchedHandler
 	if roxOptions != nil {
 		configurationFetchedHandler = roxOptions.ConfigurationFetchedHandler()
+		core.disableSignatureVerification = roxOptions.IsSignatureVerificationDisabled()
 	}
 	core.configurationFetchedInvoker.RegisterFetchedHandler(core.wrapConfigurationFetchedHandler(configurationFetchedHandler))
 
@@ -174,7 +176,13 @@ func (core *Core) Fetch() <-chan struct{} {
 				return
 			}
 
-			configurationParser := configuration.NewParser(security.NewSignatureVerifier(core.environment), core.errorReporter, core.configurationFetchedInvoker)
+			var signatureVerifier security.SignatureVerifier
+			if core.disableSignatureVerification {
+				signatureVerifier = security.NewDisabledSignatureVerifier()
+			} else {
+				signatureVerifier = security.NewSignatureVerifier(core.environment)
+			}
+			configurationParser := configuration.NewParser(signatureVerifier, core.errorReporter, core.configurationFetchedInvoker)
 			config := configurationParser.Parse(result, core.sdkSettings)
 			if config != nil {
 				core.experimentRepository.SetExperiments(config.Experiments)

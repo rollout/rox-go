@@ -45,6 +45,7 @@ type RoxOptions interface {
 	SelfManagedOptions() SelfManagedOptions
 	DynamicPropertyRuleHandler() DynamicPropertyRuleHandler
 	NetworkConfigurationsOptions() NetworkConfigurationsOptions
+	IsSignatureVerificationDisabled() bool
 }
 
 type SdkSettings interface {
