@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"time"
+
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/logging"
-	"time"
 )
 
 type Parser interface {
@@ -211,6 +212,16 @@ func (p *roxxParser) setBasicOperators() {
 		if ok1 {
 			sDec, _ := base64.StdEncoding.DecodeString(op1)
 			stack.Push(string(sDec))
+		} else {
+			stack.Push(TokenTypeUndefined)
+		}
+	})
+	
+	p.AddOperator("tsToNum", func(p Parser, stack *CoreStack, context context.Context) {
+		op1, ok1 := stack.Pop().(time.Time)
+		if ok1 {
+			// for better precision using milli
+			stack.Push(float64(op1.UnixMilli()) / 1000)
 		} else {
 			stack.Push(TokenTypeUndefined)
 		}

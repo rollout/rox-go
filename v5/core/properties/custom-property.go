@@ -1,11 +1,16 @@
 package properties
 
-import "github.com/rollout/rox-go/v5/core/context"
+import (
+	"time"
+
+	"github.com/rollout/rox-go/v5/core/context"
+)
 
 type CustomPropertyGenerator = func(context context.Context) interface{}
 type CustomStringPropertyGenerator = func(context context.Context) string
 type CustomIntegerPropertyGenerator = func(context context.Context) int
 type CustomFloatPropertyGenerator = func(context context.Context) float64
+type CustomTimePropertyGenerator = func(context context.Context) time.Time
 type CustomBooleanPropertyGenerator = func(context context.Context) bool
 type CustomSemverPropertyGenerator = func(context context.Context) string
 
@@ -29,6 +34,12 @@ func NewIntegerProperty(name string, value int) *CustomProperty {
 
 func NewFloatProperty(name string, value float64) *CustomProperty {
 	return NewComputedFloatProperty(name, func(context context.Context) float64 {
+		return value
+	})
+}
+
+func NewTimeProperty(name string, value time.Time) *CustomProperty {
+	return NewComputedTimeProperty(name, func(context context.Context) time.Time {
 		return value
 	})
 }
@@ -69,6 +80,16 @@ func NewComputedFloatProperty(name string, value CustomFloatPropertyGenerator) *
 	return &CustomProperty{
 		Name: name,
 		Type: CustomPropertyTypeFloat,
+		Value: func(context context.Context) interface{} {
+			return value(context)
+		},
+	}
+}
+
+func NewComputedTimeProperty(name string, value CustomTimePropertyGenerator) *CustomProperty {
+	return &CustomProperty{
+		Name: name,
+		Type: CustomPropertyTypeTime,
 		Value: func(context context.Context) interface{} {
 			return value(context)
 		},
