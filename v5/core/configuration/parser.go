@@ -43,9 +43,11 @@ func (cp *Parser) Parse(fetchResult *FetchResult, sdkSettings model.SdkSettings)
 
 	signatureDate, err := time.Parse(time.RFC3339, jsonConf.SignedDate)
 	if err != nil {
-		cp.fetchedInvoker.InvokeError(model.FetcherErrorCorruptedJSON)
-		cp.errorReporter.Report("Failed to parse signature date", fmt.Errorf("Signature date : %s", jsonConf.SignedDate))
-		return nil
+		signatureDate = time.Unix(0, 0)
+		// temporarily ignore signature date (see: https://cloudbees.atlassian.net/browse/SDP-6554)
+		//cp.fetchedInvoker.InvokeError(model.FetcherErrorCorruptedJSON)
+		//cp.errorReporter.Report("Failed to parse signature date", fmt.Errorf("Signature date : %s", jsonConf.SignedDate))
+		//return nil
 	}
 
 	var internalJSONConf jsonInternalConfiguration
