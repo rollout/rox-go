@@ -2,12 +2,15 @@ package roxx_test
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/extensions"
+	"github.com/rollout/rox-go/v5/core/properties"
 	"github.com/rollout/rox-go/v5/core/repositories"
 	"github.com/rollout/rox-go/v5/core/roxx"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestParserSimpleTokenization(t *testing.T) {
@@ -282,8 +285,28 @@ func TestParserInArray(t *testing.T) {
 	assert.Equal(t, `stamstam2`, parser.EvaluateExpression(`concat("stam","stam2")`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`inArray(md5(concat("st","am")), ["07915255d64730d06d2349d11ac3bfd8"]`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`eq(md5(concat("st",property("am"))), undefined)`, nil).Value())
+}
 
+func TestB64d(t *testing.T) {
+	parser := roxx.NewParser()
 	assert.Equal(t, `stam`, parser.EvaluateExpression(`b64d("c3RhbQ==")`, nil).Value())
 	assert.Equal(t, `𩸽`, parser.EvaluateExpression(`b64d("8Km4vQ==")`, nil).Value())
 	assert.Equal(t, "", parser.EvaluateExpression(`b64d(\"\")`, nil).Value())
+}
+
+func TestTsToNum(t *testing.T) {
+	customPropertiesRepository := repositories.NewCustomPropertyRepository()
+	parser := roxx.NewParser()
+	now := time.Now()
+	extensions.NewPropertiesExtensions(parser, customPropertiesRepository, nil).Extend()
+	customPropertiesRepository.AddCustomProperty(properties.NewTimeProperty("cp1", now))
+
+	assert.Equal(t, float64(now.UnixMilli()) / 1000, parser.EvaluateExpression(`tsToNum(property("cp1"))`, nil).Value())
+
+	// wrong type property
+	customPropertiesRepository.AddCustomProperty(properties.NewStringProperty("cp2", "notADateTime"))
+	assert.Equal(t, nil, parser.EvaluateExpression(`tsToNum(property("cp2"))`, nil).Value())
+
+	// non existent custom property
+	assert.Equal(t, nil, parser.EvaluateExpression(`tsToNum(property("cp3"))`, nil).Value())
 }

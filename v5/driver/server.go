@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rollout/rox-go/v5/core/client"
 	roxContext "github.com/rollout/rox-go/v5/core/context"
@@ -22,24 +23,25 @@ type testRequest struct {
 
 type setupAndAwait struct {
 	Key     string        `json:"key"`
-	Options serverOptions `json:"options, omitempty"`
+	Options serverOptions `json:"options,omitempty"`
 }
 
 type serverOptions struct {
-	Env           string           `json:"env"`
-	Configuration *json.RawMessage `json:"configuration, omitempty"`
+	DisableSignatureVerification bool			  `json:"disableSignatureVerification"`
+	Env           				 string			  `json:"env"`
+	Configuration 				 *json.RawMessage `json:"configuration,omitempty"`
 }
 
 type dynamicFlagIsEnabled struct {
 	Flag         string           `json:"flag"`
 	DefaultValue bool             `json:"defaultValue"`
-	Context      *json.RawMessage `json:"context, omitempty"`
+	Context      *json.RawMessage `json:"context,omitempty"`
 }
 
 type dynamicFlagValue struct {
 	Flag         string           `json:"flag"`
 	DefaultValue string           `json:"defaultValue"`
-	Context      *json.RawMessage `json:"context, omitempty"`
+	Context      *json.RawMessage `json:"context,omitempty"`
 }
 
 type setCustomString struct {
@@ -96,6 +98,8 @@ func main() {
 
 			var networkConfig model.NetworkConfigurationsOptions = nil
 
+			disableSignature := setup.Options.DisableSignatureVerification
+
 			if (setup.Options.Env == "container") {
 				networkConfig = client.NewNetworkConfigurationsOptions(client.NetworkConfigurationsBuilder{
 					GetConfigApiEndpoint:     configMap["CD_API_ENDPOINT"],
@@ -115,7 +119,9 @@ func main() {
 					os.Setenv("ROLLOUT_MODE", "")
 				}
 			}
-			options := server.NewRoxOptions(server.RoxOptionsBuilder{NetworkConfigurationsOptions: networkConfig})
+			options := server.NewRoxOptions(server.RoxOptionsBuilder{
+				NetworkConfigurationsOptions: networkConfig,
+				DisableSignatureVerification: disableSignature})
 			<-rox.Setup(setup.Key, options)
 
 			sendDone(w)
@@ -126,6 +132,18 @@ func main() {
 				log.Fatal(err)
 			}
 			rox.SetCustomStringProperty(setCustom.Key, setCustom.Value)
+			sendDone(w)
+			return
+		case "setCustomDateProperty":
+			var setCustom setCustomString
+			if err = json.Unmarshal(payload, &setCustom); err != nil {
+				log.Fatal(err)
+			}
+			timeValue, error := time.Parse(time.RFC3339, setCustom.Value)
+			if (error != nil) {
+				log.Println("Error setting time custom property", error)
+			}
+			rox.SetCustomTimeProperty(setCustom.Key, timeValue)
 			sendDone(w)
 			return
 		case "dynamicFlagIsEnabled":

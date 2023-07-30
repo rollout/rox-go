@@ -39,15 +39,17 @@ type StateSender struct {
 	request                  model.Request
 	stateDebouncer           utils.Debouncer
 	environment              model.Environment
+	useNewPlatformFormat     bool
 }
 
-func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, flagRepository model.FlagRepository, customPropertyRepository model.CustomPropertyRepository, environment model.Environment) *StateSender {
+func NewStateSender(r model.Request, deviceProperties model.DeviceProperties, flagRepository model.FlagRepository, customPropertyRepository model.CustomPropertyRepository, environment model.Environment, useNewPlatformFormat bool) *StateSender {
 	stateSender := &StateSender{
 		customPropertyRepository: customPropertyRepository,
 		deviceProperties:         deviceProperties,
 		flagRepository:           flagRepository,
 		request:                  r,
 		environment:              environment,
+		useNewPlatformFormat:	  useNewPlatformFormat,
 	}
 	stateSender.stateDebouncer = *utils.NewDebouncer(3000, func() {
 		stateSender.Send()
@@ -84,19 +86,32 @@ func (s *StateSender) serializeFeatureFlags() (string, []jsonFlag) {
 		return allFlags[i].Name() < allFlags[j].Name()
 	})
 	for _, f := range allFlags {
+		externalType := ""
 		switch f.FlagType() {
 		case consts.BoolType:
 			options := optionsToInterface(f.(model.Flag).Options(), consts.BoolType)
-			flags = append(flags, jsonFlag{Name: f.Name(), DefaultValue: f.(model.Flag).DefaultValue(), Options: options})
+			if (s.useNewPlatformFormat) {
+				externalType = "Boolean"
+			}			
+			flags = append(flags, jsonFlag{Name: f.Name(), DefaultValue: f.(model.Flag).DefaultValue(), Options: options, ExternalType: externalType})
 		case consts.StringType:
 			options := optionsToInterface(f.(model.RoxString).Options(), consts.StringType)
-			flags = append(flags, jsonFlag{f.Name(), f.GetDefaultAsString(), options})
+			if (s.useNewPlatformFormat) {
+				externalType = "String"
+			}	
+			flags = append(flags, jsonFlag{f.Name(), f.GetDefaultAsString(), options, externalType})
 		case consts.IntType:
 			options := optionsToInterface(f.(model.RoxInt).Options(), consts.IntType)
-			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxInt).DefaultValue(), options})
+			if (s.useNewPlatformFormat) {
+				externalType = "Number"
+			}	
+			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxInt).DefaultValue(), options, externalType})
 		case consts.DoubleType:
 			options := optionsToInterface(f.(model.RoxDouble).Options(), consts.DoubleType)
-			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxDouble).DefaultValue(), options})
+			if (s.useNewPlatformFormat) {
+				externalType = "Number"
+			}	
+			flags = append(flags, jsonFlag{f.Name(), f.(model.RoxDouble).DefaultValue(), options, externalType})
 
 		}
 	}
@@ -130,6 +145,7 @@ func optionsToInterface(options interface{}, flagType int) []interface{} {
 	return result
 }
 
+/*
 func test(t interface{}) {
 	switch reflect.TypeOf(t).Kind() {
 	case reflect.Slice:
@@ -140,6 +156,7 @@ func test(t interface{}) {
 		}
 	}
 }
+*/
 
 func (s *StateSender) serializeCustomProperties() (string, []jsonProperty) {
 	var properties []jsonProperty
@@ -148,7 +165,11 @@ func (s *StateSender) serializeCustomProperties() (string, []jsonProperty) {
 		return customProperties[i].Name < customProperties[j].Name
 	})
 	for _, p := range customProperties {
-		properties = append(properties, jsonProperty{p.Name, p.Type.Type, p.Type.ExternalType})
+		propertyType := p.Type.Type
+		if s.useNewPlatformFormat {
+			propertyType = ""
+		}
+		properties = append(properties, jsonProperty{p.Name, propertyType, p.Type.ExternalType})
 	}
 	result, _ := json.Marshal(properties)
 	return string(result), properties
@@ -259,10 +280,11 @@ type jsonFlag struct {
 	Name         string        `json:"name"`
 	DefaultValue interface{}   `json:"defaultValue"`
 	Options      []interface{} `json:"options"`
+	ExternalType string 	   `json:"externalType,omitempty"`
 }
 
 type jsonProperty struct {
 	Name         string `json:"name"`
-	Type         string `json:"type"`
+	Type         string `json:"type,omitempty"`
 	ExternalType string `json:"externalType"`
 }
