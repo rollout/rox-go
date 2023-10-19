@@ -22,7 +22,7 @@ jobs:
         with:
           repository: rollout/sdk-end-2-end-tests
           ref: master
-          token: ${{ secrets.E2E_PAT }}
+          ssh-key: ${{ secrets.SDK_E2E_TESTS_DEPLOY_KEY }}
           path: sdk-end-2-end-tests
       - name: link driver
         working-directory: ./sdk-end-2-end-tests/drivers
