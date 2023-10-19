@@ -9,17 +9,17 @@ import (
 
 func TestWillTestDebouncerCalledAfterInterval(t *testing.T) {
 	counter := 0
-	debouncer := NewDebouncer(1000, func() {
+	debouncer := NewDebouncer(2000, func() {
 		counter++
 	})
 
 	assert.Equal(t, 0, counter)
 	debouncer.Invoke()
 	assert.Equal(t, 0, counter)
-	timer := time.NewTimer(500 * time.Millisecond)
+	timer := time.NewTimer(1000 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 0, counter)
-	timer = time.NewTimer(600 * time.Millisecond)
+	timer = time.NewTimer(1500 * time.Millisecond)
 	<-timer.C
 	assert.Equal(t, 1, counter)
 }
