@@ -2,14 +2,15 @@ package server
 
 import (
 	"fmt"
+	"sync"
+
+	uuid "github.com/google/uuid"
 	"github.com/rollout/rox-go/v5/core"
 	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/logging"
 	"github.com/rollout/rox-go/v5/core/model"
 	"github.com/rollout/rox-go/v5/core/properties"
-	uuid "github.com/satori/go.uuid"
-	"sync"
 )
 
 type RoxState int
@@ -83,7 +84,7 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty(consts.PropertyTypePlatform.Name, serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceSemverProperty(consts.PropertyTypeAppRelease.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAppRelease.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty(consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
-		value, _ := uuid.NewV4()
+		value := uuid.New()
 		return value.String()
 	}))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.realPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
@@ -92,7 +93,7 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeAPIVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAPIVersion.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewSemverProperty("internal."+consts.PropertyTypeLibVersion.Name, serverProperties.GetAllProperties()[consts.PropertyTypeLibVersion.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty("internal."+consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
-		value, _ := uuid.NewV4()
+		value := uuid.New()
 		return value.String()
 	}))
 

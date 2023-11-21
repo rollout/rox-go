@@ -1,9 +1,10 @@
 package core
 
 import (
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"regexp"
+
+	uuid "github.com/google/uuid"
 
 	"github.com/rollout/rox-go/v5/core/security"
 
@@ -81,7 +82,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		matched, err := regexp.Match(validMongoIdPattern, []byte(sdkSettings.APIKey()))
 		if err != nil || !matched {
 			// try to parse it as a UUID (platform)
-			_, err = uuid.FromString(sdkSettings.APIKey())
+			_, err = uuid.Parse(sdkSettings.APIKey())
 			if err != nil {
 				panic(invalidAPIKeyErrorMessage)
 			}

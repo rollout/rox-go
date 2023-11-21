@@ -1,9 +1,9 @@
 package server
 
 import (
+	"github.com/google/uuid"
 	"github.com/rollout/rox-go/v5/core/client"
 	"github.com/rollout/rox-go/v5/core/model"
-	"github.com/satori/go.uuid"
 )
 
 type serverProperties struct {
@@ -12,7 +12,7 @@ type serverProperties struct {
 }
 
 func NewServerProperties(sdkSettings model.SdkSettings, roxOptions model.RoxOptions) model.DeviceProperties {
-	distinctID, _ := uuid.NewV4()
+	distinctID := uuid.New()
 	return &serverProperties{
 		DeviceProperties: client.NewDeviceProperties(sdkSettings, roxOptions),
 		distinctID:       distinctID.String(),

@@ -99,7 +99,7 @@ func TestValidAPIKey_Uuid(t *testing.T) {
 		}
 	}()
 	sdkSettings := &mocks.SdkSettings{}
-	sdkSettings.On("APIKey").Return("a9faa59e-f005-11ed-abc0-00155d7746b3") // Valid Mongo ID
+	sdkSettings.On("APIKey").Return("c3e5bd1d-1cc9-40ed-b1ca-5ce522ff235f") // valid Google UUID
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
