@@ -89,6 +89,28 @@ func TestValidAPIKey_MongoId(t *testing.T) {
 	// Success
 }
 
+func TestValidAPIKey_GoogleUUID(t *testing.T) {
+	c := core.NewCore()
+
+	defer func() {
+		if err := recover(); err != nil {
+			// Due to the panic() generated but the Setup,
+			// we should reach here and not the t.FailNow() underneath
+		}
+	}()
+	sdkSettings := &mocks.SdkSettings{}
+	sdkSettings.On("APIKey").Return("12345678901234567890abcd") // Valid Mongo ID
+
+	deviceProperties := &mocks.DeviceProperties{}
+	deviceProperties.On("GetAllProperties").Return(map[string]string{})
+
+	defer func() {
+		assert.Nil(t, recover(), "we should not have panicked as the API key was valid")
+	}()
+	<-c.Setup(sdkSettings, deviceProperties, nil)
+	// Success
+}
+
 func TestValidAPIKey_Uuid(t *testing.T) {
 	c := core.NewCore()
 
@@ -99,7 +121,7 @@ func TestValidAPIKey_Uuid(t *testing.T) {
 		}
 	}()
 	sdkSettings := &mocks.SdkSettings{}
-	sdkSettings.On("APIKey").Return("a9faa59e-f005-11ed-abc0-00155d7746b3") // Valid Mongo ID
+	sdkSettings.On("APIKey").Return("c3e5bd1d-1cc9-40ed-b1ca-5ce522ff235f") // valid Google UUID
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})

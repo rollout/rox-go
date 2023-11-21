@@ -1,13 +1,13 @@
 package server
 
 import (
+	uuid "github.com/google/uuid"
 	"github.com/rollout/rox-go/v4/core"
 	"github.com/rollout/rox-go/v4/core/consts"
 	"github.com/rollout/rox-go/v4/core/context"
 	"github.com/rollout/rox-go/v4/core/logging"
 	"github.com/rollout/rox-go/v4/core/model"
 	"github.com/rollout/rox-go/v4/core/properties"
-	uuid "github.com/satori/go.uuid"
 )
 
 type Rox struct {
@@ -37,14 +37,14 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan struct{} 
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty(consts.PropertyTypePlatform.Name, serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceSemverProperty(consts.PropertyTypeAppRelease.Name, serverProperties.GetAllProperties()[consts.PropertyTypeAppRelease.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty(consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
-		value, _ := uuid.NewV4()
+		value := uuid.New()
 		return value.String()
 	}))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.realPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.customPlatform", serverProperties.GetAllProperties()[consts.PropertyTypePlatform.Name]))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceStringProperty("internal.appKey", serverProperties.RolloutKey()))
 	r.core.AddCustomPropertyIfNotExists(properties.NewDeviceComputedStringProperty("internal."+consts.PropertyTypeDistinctID.Name, func(ctx context.Context) string {
-		value, _ := uuid.NewV4()
+		value := uuid.New()
 		return value.String()
 	}))
 
