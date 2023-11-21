@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	uuid "github.com/google/uuid"
 	"github.com/rollout/rox-go/v5/core"
@@ -96,7 +97,9 @@ func (r *Rox) Setup(apiKey string, roxOptions model.RoxOptions) <-chan error {
 		value := uuid.New()
 		return value.String()
 	}))
-
+	r.core.AddCustomPropertyIfNotExists(properties.NewComputedTimeProperty("rox.now", func(ctx context.Context) time.Time {
+		return time.Now()
+	}))
 	err := make(chan error, 1)
 	go func() {
 
@@ -173,8 +176,16 @@ func (r *Rox) SetCustomFloatProperty(name string, value float64) {
 	r.core.AddCustomProperty(properties.NewFloatProperty(name, value))
 }
 
+func (r *Rox) SetCustomTimeProperty(name string, value time.Time) {
+	r.core.AddCustomProperty(properties.NewTimeProperty(name, value))
+}
+
 func (r *Rox) SetCustomComputedFloatProperty(name string, value properties.CustomFloatPropertyGenerator) {
 	r.core.AddCustomProperty(properties.NewComputedFloatProperty(name, value))
+}
+
+func (r *Rox) SetCustomComputedTimeProperty(name string, value properties.CustomTimePropertyGenerator) {
+	r.core.AddCustomProperty(properties.NewComputedTimeProperty(name, value))
 }
 
 func (r *Rox) SetCustomSemverProperty(name string, value string) {

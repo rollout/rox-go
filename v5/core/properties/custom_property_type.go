@@ -11,4 +11,5 @@ var (
 	CustomPropertyTypeInt    = &CustomPropertyType{"int", "Number"}
 	CustomPropertyTypeFloat  = &CustomPropertyType{"double", "Number"}
 	CustomPropertyTypeSemver = &CustomPropertyType{"semver", "Semver"}
+	CustomPropertyTypeTime   = &CustomPropertyType{"time", "DateTime"}
 )

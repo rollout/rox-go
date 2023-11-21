@@ -125,7 +125,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	if roxyPath != "" {
 		core.configurationFetcher = network.NewConfigurationFetcherRoxy(requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	} else {
-		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository, core.environment)
+		core.stateSender = network.NewStateSender(clientRequest, deviceProperties, core.flagRepository, core.customPropertyRepository, core.environment, core.disableSignatureVerification)
 		core.configurationFetcher = network.NewConfigurationFetcher(core.environment, requestConfigBuilder, clientRequest, core.configurationFetchedInvoker)
 	}
 
