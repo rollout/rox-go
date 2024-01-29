@@ -41,7 +41,7 @@ func TestWillSerializeFlags(t *testing.T) {
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flag})
 	flagRepo.On("RegisterFlagAddedHandler", mock.Anything).Return()
 	cpRepo := repositories.NewCustomPropertyRepository()
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 
@@ -85,7 +85,7 @@ func TestWillSerializeFlagsNewPlatformFormat(t *testing.T) {
 	flagRepo.On("GetAllFlags").Return([]model.Variant{flagStr, flagBln, flagInt, flagFlt})
 	flagRepo.On("RegisterFlagAddedHandler", mock.Anything).Return()
 	cpRepo := repositories.NewCustomPropertyRepository()
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, true)
 
@@ -167,7 +167,7 @@ func TestWillSerializeProps(t *testing.T) {
 	cpRepo := &mocks.CustomPropertyRepository{}
 	cpRepo.On("GetAllCustomProperties").Return([]*properties.CustomProperty{cp})
 	cpRepo.On("RegisterPropertyAddedHandler", mock.Anything).Return()
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 
@@ -202,7 +202,7 @@ func TestWillSerializePropsInNewPlatformFormat(t *testing.T) {
 	cpRepo := &mocks.CustomPropertyRepository{}
 	cpRepo.On("GetAllCustomProperties").Return([]*properties.CustomProperty{cpStr, cpBln, cpFlt, cpInt, cpSmv, cpDt})
 	cpRepo.On("RegisterPropertyAddedHandler", mock.Anything).Return()
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, true)
 
@@ -251,7 +251,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -277,7 +277,7 @@ func TestWillCallOnlyCDNStateMD5ChangesForCustomProperty(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -303,7 +303,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -333,7 +333,7 @@ func TestWillCallOnlyCDNStateMD5CustomPropertyOrderNotImportant(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var requestData model.RequestData
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"result\": 200}")}
@@ -362,7 +362,7 @@ func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var reqCDNData model.RequestData
 	var reqAPIData model.RequestData
@@ -390,7 +390,7 @@ func TestWillReturnNullWhenCDNSucceedWithEmptyResponse(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -418,7 +418,7 @@ func TestWillReturnNullWhenCDNSucceedWithNotJsonResponse(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -446,7 +446,7 @@ func TestWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var reqCDNData model.RequestData
 	var reqAPIData string
@@ -475,7 +475,7 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 	cpRepo := repositories.NewCustomPropertyRepository()
 	dp := &mocks.DeviceProperties{}
 	dp.On("GetAllProperties").Return(createNewDeviceProp())
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 
 	var reqCDNData model.RequestData
 	var reqAPIData string

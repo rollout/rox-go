@@ -29,7 +29,7 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment())
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment(consts.ROLLOUT_API))
 	result := requestConfigurationBuilder.BuildForCDN()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentCDNPath(), appKey), result.URL)
@@ -56,7 +56,7 @@ func TestRequestConfigurationBuilderRoxyRequestDataWillHaveServerData(t *testing
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon", client.NewSaasEnvironment())
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "http://bimba.bobi.o.ponpon", client.NewSaasEnvironment(consts.ROLLOUT_API))
 	result := requestConfigurationBuilder.BuildForRoxy()
 
 	assert.Equal(t, "http://bimba.bobi.o.ponpon/device/request_configuration", result.URL)
@@ -88,7 +88,7 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 	appKey := "ABCD"
 	deviceProps.On("RolloutKey").Return(appKey)
 
-	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment())
+	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment(consts.ROLLOUT_API))
 	result := requestConfigurationBuilder.BuildForAPI()
 
 	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentAPIPath(), appKey), result.URL)

@@ -4,10 +4,14 @@ import (
 	"github.com/rollout/rox-go/v5/core/consts"
 )
 
-type SaasEnvironment struct{}
+type SaasEnvironment struct {
+	EnvironmentAPI consts.EnvironmentAPI
+}
 
-func NewSaasEnvironment() SaasEnvironment {
-	return SaasEnvironment{}
+func NewSaasEnvironment(envAPI consts.EnvironmentAPI) SaasEnvironment {
+	return SaasEnvironment{
+		EnvironmentAPI: envAPI,
+	}
 }
 
 func (e SaasEnvironment) EnvironmentRoxyInternalPath() string {
@@ -31,7 +35,7 @@ func (e SaasEnvironment) EnvironmentStateAPIPath() string {
 }
 
 func (e SaasEnvironment) EnvironmentAnalyticsPath() string {
-	return consts.EnvironmentAnalyticsPath()
+	return consts.EnvironmentAnalyticsPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) EnvironmentNotificationsPath() string {

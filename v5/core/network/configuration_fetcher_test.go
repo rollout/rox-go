@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rollout/rox-go/v5/core/client"
 	"github.com/rollout/rox-go/v5/core/configuration"
+	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/mocks"
 	"github.com/rollout/rox-go/v5/core/model"
 	"github.com/rollout/rox-go/v5/core/network"
@@ -25,7 +26,7 @@ func TestConfigurationFetcherWillReturnCDNDataWhenSuccessful(t *testing.T) {
 	response := &model.Response{StatusCode: http.StatusOK, Content: []byte("{\"data\": \"harti\"}")}
 	request.On("SendGet", requestData).Return(response, nil)
 
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestData)
 
@@ -51,7 +52,7 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFailsWithException(t *testing.
 	request.On("SendGet", requestDataCDN).Return(nil, errors.New("not found"))
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
@@ -77,7 +78,7 @@ func TestConfigurationFetcherWillReturnNullWhenCDNFails404APIWithException(t *te
 	request.On("SendGet", requestDataCDN).Return(response, nil)
 	request.On("SendGet", requestDataAPI).Return(nil, errors.New("exception"))
 
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
@@ -104,7 +105,7 @@ func TestConfigurationFetcherWillReturnAPIDataWhenCDNFails404APIOK(t *testing.T)
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendPost", requestDataAPI.URL, requestDataAPI.QueryParams).Return(response, nil)
 
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
@@ -132,7 +133,7 @@ func TestConfigurationFetcherWillReturnNullDataWhenBothNotFound(t *testing.T) {
 	request.On("SendGet", requestDataCDN).Return(responseCDN, nil)
 	request.On("SendGet", requestDataAPI).Return(response, nil)
 
-	environment := client.NewSaasEnvironment()
+	environment := client.NewSaasEnvironment(consts.ROLLOUT_API)
 	requestBuilder := &mocks.RequestConfigurationBuilder{}
 	requestBuilder.On("BuildForCDN").Return(requestDataCDN)
 	requestBuilder.On("BuildForAPI").Return(requestDataAPI)
