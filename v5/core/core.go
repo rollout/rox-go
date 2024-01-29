@@ -6,6 +6,7 @@ import (
 
 	uuid "github.com/google/uuid"
 
+	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/security"
 
 	"github.com/rollout/rox-go/v5/core/client"
@@ -76,6 +77,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		roxyPath = roxOptions.RoxyURL()
 	}
 
+	envApi := consts.ROLLOUT_API
 	if roxyPath == "" {
 		validMongoIdPattern := "^[a-f\\d]{24}$"
 		// Try to parse it as a mongo ID (rollout.io)
@@ -86,6 +88,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 			if err != nil {
 				panic(invalidAPIKeyErrorMessage)
 			}
+			envApi = consts.PLATFORM_API
 		}
 	}
 
@@ -94,7 +97,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	} else if roxOptions != nil && roxOptions.NetworkConfigurationsOptions() != nil {
 		core.environment = client.NewCustomEnvironment(roxOptions.NetworkConfigurationsOptions())
 	} else {
-		core.environment = client.NewSaasEnvironment()
+		core.environment = client.NewSaasEnvironment(envApi)
 	}
 
 	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)

@@ -2,6 +2,13 @@ package consts
 
 import "os"
 
+type EnvironmentAPI int
+
+const (
+	PLATFORM_API EnvironmentAPI = iota // SDK will utilitze Platform API endpoints
+	ROLLOUT_API                        // SDK will utilitze Rollout API endpoints
+)
+
 func EnvironmentRoxyInternalPath() string {
 	return "device/request_configuration"
 }
@@ -54,8 +61,20 @@ func EnvironmentStateAPIPath() string {
 	return "https://x-api.rollout.io/device/update_state_store"
 }
 
-func EnvironmentAnalyticsPath() string {
+// EnvironmentAnalyticsPath returns the URL for the analytics endpoint.
+// envApi: PLATFORM_API or ROLLOUT_API (default) identifies if the SDK should use the Platform API or Rollout API endpoints.
+func EnvironmentAnalyticsPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
+
+	if envApi == PLATFORM_API {
+		switch rolloutMode {
+		case "QA":
+			return "https://api-staging.saas-dev.beescloud.com/events/flag-impressions"
+		case "LOCAL":
+			return "http://127.0.0.1:8097/events/flag-impressions"
+		}
+		return "https://api.cloudbees.io/events/flag-impressions"
+	}
 
 	switch rolloutMode {
 	case "QA":
