@@ -5,6 +5,7 @@ import "os"
 type EnvironmentAPI int
 
 const (
+	// API providers for the SDK endpoints
 	PLATFORM_API EnvironmentAPI = iota // SDK will utilitze Platform API endpoints
 	ROLLOUT_API                        // SDK will utilitze Rollout API endpoints
 )
@@ -13,7 +14,7 @@ func EnvironmentRoxyInternalPath() string {
 	return "device/request_configuration"
 }
 
-func EnvironmentCDNPath() string {
+func EnvironmentCDNPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
 
 	switch rolloutMode {
@@ -22,10 +23,14 @@ func EnvironmentCDNPath() string {
 	case "LOCAL":
 		return "https://development-conf.rollout.io"
 	}
+
+	if envApi == PLATFORM_API {
+		return "https://rox-conf.cloudbees.io"
+	}
 	return "https://conf.rollout.io"
 }
 
-func EnvironmentAPIPath() string {
+func EnvironmentAPIPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
 
 	switch rolloutMode {
@@ -34,10 +39,14 @@ func EnvironmentAPIPath() string {
 	case "LOCAL":
 		return "http://127.0.0.1:8557/device/get_configuration"
 	}
+
+	if envApi == PLATFORM_API {
+		return "https://api.cloudbees.io/device/get_configuration"
+	}
 	return "https://x-api.rollout.io/device/get_configuration"
 }
 
-func EnvironmentStateCDNPath() string {
+func EnvironmentStateCDNPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
 
 	switch rolloutMode {
@@ -46,10 +55,14 @@ func EnvironmentStateCDNPath() string {
 	case "LOCAL":
 		return "https://development-statestore.rollout.io"
 	}
+
+	if envApi == PLATFORM_API {
+		return "https://rox-state.cloudbees.io"
+	}
 	return "https://statestore.rollout.io"
 }
 
-func EnvironmentStateAPIPath() string {
+func EnvironmentStateAPIPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
 
 	switch rolloutMode {
@@ -58,23 +71,16 @@ func EnvironmentStateAPIPath() string {
 	case "LOCAL":
 		return "http://127.0.0.1:8557/device/update_state_store"
 	}
-	return "https://x-api.rollout.io/device/update_state_store"
+
+	if envApi == PLATFORM_API {
+		return "https://api.cloudbees.io/device/update_state_store"
+	}
+	return "https://api.cloudbees.io/device/update_state_store"
 }
 
 // EnvironmentAnalyticsPath returns the URL for the analytics endpoint.
-// envApi: PLATFORM_API or ROLLOUT_API (default) identifies if the SDK should use the Platform API or Rollout API endpoints.
 func EnvironmentAnalyticsPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
-
-	if envApi == PLATFORM_API {
-		switch rolloutMode {
-		case "QA":
-			return "https://api-staging.saas-dev.beescloud.com/events/flag-impressions"
-		case "LOCAL":
-			return "http://127.0.0.1:8097/events/flag-impressions"
-		}
-		return "https://api.cloudbees.io/events/flag-impressions"
-	}
 
 	switch rolloutMode {
 	case "QA":
@@ -82,10 +88,14 @@ func EnvironmentAnalyticsPath(envApi EnvironmentAPI) string {
 	case "LOCAL":
 		return "http://127.0.0.1:8787"
 	}
+
+	if envApi == PLATFORM_API {
+		return "https://api.cloudbees.io/events/flag-impressions"
+	}
 	return "https://analytic.rollout.io"
 }
 
-func EnvironmentNotificationsPath() string {
+func EnvironmentNotificationsPath(envApi EnvironmentAPI) string {
 	rolloutMode := os.Getenv("ROLLOUT_MODE")
 
 	switch rolloutMode {
@@ -93,6 +103,10 @@ func EnvironmentNotificationsPath() string {
 		return "https://qax-push.rollout.io/sse"
 	case "LOCAL":
 		return "http://127.0.0.1:8887/sse"
+	}
+
+	if envApi == PLATFORM_API {
+		return "http://api.cloudbees.io/sse"
 	}
 	return "https://push.rollout.io/sse"
 }

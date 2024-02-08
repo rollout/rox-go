@@ -19,19 +19,19 @@ func (e SaasEnvironment) EnvironmentRoxyInternalPath() string {
 }
 
 func (e SaasEnvironment) EnvironmentCDNPath() string {
-	return consts.EnvironmentCDNPath()
+	return consts.EnvironmentCDNPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) EnvironmentAPIPath() string {
-	return consts.EnvironmentAPIPath()
+	return consts.EnvironmentAPIPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) EnvironmentStateCDNPath() string {
-	return consts.EnvironmentStateCDNPath()
+	return consts.EnvironmentStateCDNPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) EnvironmentStateAPIPath() string {
-	return consts.EnvironmentStateAPIPath()
+	return consts.EnvironmentStateAPIPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) EnvironmentAnalyticsPath() string {
@@ -39,7 +39,7 @@ func (e SaasEnvironment) EnvironmentAnalyticsPath() string {
 }
 
 func (e SaasEnvironment) EnvironmentNotificationsPath() string {
-	return consts.EnvironmentNotificationsPath()
+	return consts.EnvironmentNotificationsPath(e.EnvironmentAPI)
 }
 
 func (e SaasEnvironment) IsSelfManaged() bool {
