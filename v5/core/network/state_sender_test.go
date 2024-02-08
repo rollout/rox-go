@@ -72,13 +72,13 @@ func TestWillSerializeFlagsNewPlatformFormat(t *testing.T) {
 	flagBln := entities.NewFlag(false)
 	flagBln.(model.InternalVariant).SetName("flagBln")
 
-	flagStr := entities.NewRoxString("o1", []string {"o2"})
+	flagStr := entities.NewRoxString("o1", []string{"o2"})
 	flagStr.(model.InternalVariant).SetName("flagStr")
 
-	flagInt := entities.NewRoxInt(0, []int {1, 2})
+	flagInt := entities.NewRoxInt(0, []int{1, 2})
 	flagInt.(model.InternalVariant).SetName("flagInt")
 
-	flagFlt := entities.NewRoxDouble(3.14, []float64 {2.71})
+	flagFlt := entities.NewRoxDouble(3.14, []float64{2.71})
 	flagFlt.(model.InternalVariant).SetName("flagFlt")
 
 	flagRepo := &mocks.FlagRepository{}
@@ -263,12 +263,12 @@ func TestWillCallOnlyCDNStateMD5ChangesForFlag(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "C1C65A5AC8A732EAB7FCD81017BF5A87"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "C1C65A5AC8A732EAB7FCD81017BF5A87"), requestData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
 	flagRepo.AddFlag(entities.NewFlag(false), "flag2")
 	stateSender.Send()
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
 }
 
 func TestWillCallOnlyCDNStateMD5ChangesForCustomProperty(t *testing.T) {
@@ -289,12 +289,12 @@ func TestWillCallOnlyCDNStateMD5ChangesForCustomProperty(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "02338C470874941BEB8335F76A0F0FBB"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "02338C470874941BEB8335F76A0F0FBB"), requestData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
 	cpRepo.AddCustomProperty(properties.NewFloatProperty("cp2", 20))
 	stateSender.Send()
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "AE3A6DCB39C8306E854CB682548020F1"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "AE3A6DCB39C8306E854CB682548020F1"), requestData.URL)
 }
 
 func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
@@ -316,7 +316,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
 	flagRepo2 := repositories.NewFlagRepository()
@@ -324,7 +324,7 @@ func TestWillCallOnlyCDNStateMD5FlagOrderNotImportant(t *testing.T) {
 	flagRepo2.AddFlag(entities.NewFlag(false), "flag1")
 	stateSender = NewStateSender(request, dp, flagRepo2, cpRepo, environment, false)
 	stateSender.Send()
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "F367809AB0CCA5A05EA9DFB3C4E9E15C"), requestData.URL)
 }
 
 func TestWillCallOnlyCDNStateMD5CustomPropertyOrderNotImportant(t *testing.T) {
@@ -346,14 +346,14 @@ func TestWillCallOnlyCDNStateMD5CustomPropertyOrderNotImportant(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "8BB417F48703DDBD07EC0C2F2160B4B2"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "8BB417F48703DDBD07EC0C2F2160B4B2"), requestData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 
 	cpRepo2 := repositories.NewCustomPropertyRepository()
 	cpRepo2.AddCustomProperty(properties.NewStringProperty("cp2", "2222"))
 	cpRepo2.AddCustomProperty(properties.NewStringProperty("cp1", "1111"))
 	stateSender.Send()
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "8BB417F48703DDBD07EC0C2F2160B4B2"), requestData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "8BB417F48703DDBD07EC0C2F2160B4B2"), requestData.URL)
 }
 
 func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
@@ -378,7 +378,7 @@ func TestWillReturnNullWhenCDNFailsWithException(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 	assert.Equal(t, "", reqAPIData.URL)
 	request.AssertNumberOfCalls(t, "SendPost", 0)
@@ -406,7 +406,7 @@ func TestWillReturnNullWhenCDNSucceedWithEmptyResponse(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 	assert.Equal(t, "", reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 0)
@@ -434,7 +434,7 @@ func TestWillReturnNullWhenCDNSucceedWithNotJsonResponse(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "00C4910E8BA69D08C65D05849C9E6DFB"), reqCDNData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
 	assert.Equal(t, "", reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 0)
@@ -463,9 +463,9 @@ func TestWillReturnNullWhenCDNFails404APIWithException(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateAPIPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateAPIPath(consts.ROLLOUT_API), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 1)
 }
 
@@ -492,9 +492,9 @@ func TestWillReturnAPIDataWhenCDNSucceedWithResult404APIOK(t *testing.T) {
 	stateSender := NewStateSender(request, dp, flagRepo, cpRepo, environment, false)
 	stateSender.Send()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateCDNPath(consts.ROLLOUT_API), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqCDNData.URL)
 	request.AssertNumberOfCalls(t, "SendGet", 1)
-	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateAPIPath(), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
+	assert.Equal(t, fmt.Sprintf("%s/%s/%s", consts.EnvironmentStateAPIPath(consts.ROLLOUT_API), appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 1)
 }
 
@@ -524,4 +524,3 @@ func TestWillReturnAPIDataWhenWhenSelfManaged(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%s/%s/%s", "http://harta2.com/device/update_state_store", appKey, "996ABD4ED5D9D4DF02E56C39ED1F701C"), reqAPIData)
 	request.AssertNumberOfCalls(t, "SendPost", 1)
 }
-

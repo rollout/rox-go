@@ -32,7 +32,7 @@ func TestRequestConfigurationBuilderCDNRequestDataWillHaveDistinctID(t *testing.
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment(consts.ROLLOUT_API))
 	result := requestConfigurationBuilder.BuildForCDN()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentCDNPath(), appKey), result.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentCDNPath(consts.ROLLOUT_API), appKey), result.URL)
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
 }
 
@@ -91,7 +91,7 @@ func TestRequestConfigurationBuilderAPIRequestDataWillHaveServerData(t *testing.
 	requestConfigurationBuilder := network.NewRequestConfigurationBuilder(sdkSettings, buid, deviceProps, "", client.NewSaasEnvironment(consts.ROLLOUT_API))
 	result := requestConfigurationBuilder.BuildForAPI()
 
-	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentAPIPath(), appKey), result.URL)
+	assert.Equal(t, fmt.Sprintf("%s/%s/123", consts.EnvironmentAPIPath(consts.ROLLOUT_API), appKey), result.URL)
 	assert.Equal(t, "123", result.QueryParams["app_key"])
 	assert.Equal(t, "4.0.0", result.QueryParams["api_version"])
 	assert.Equal(t, "123", result.QueryParams["distinct_id"])
