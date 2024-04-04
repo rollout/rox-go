@@ -2,10 +2,11 @@ package core_test
 
 import (
 	"fmt"
-	"github.com/rollout/rox-go/v5/core"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/rollout/rox-go/v5/core"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/rollout/rox-go/v5/core/mocks"
 )
@@ -28,6 +29,7 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	options.On("ImpressionHandler").Return(nil)
 	options.On("SelfManagedOptions").Return(nil)
 	options.On("DynamicPropertyRuleHandler").Return(nil)
+	options.On("IsSignatureVerificationDisabled").Return(true)
 
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, options)
