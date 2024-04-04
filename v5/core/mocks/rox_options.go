@@ -47,7 +47,6 @@ func (m *RoxOptions) ConfigurationFetchedHandler() model.ConfigurationFetchedHan
 func (m *RoxOptions) RoxyURL() string {
 	args := m.Called()
 	return args.String(0)
-
 }
 
 func (m *RoxOptions) SelfManagedOptions() model.SelfManagedOptions {
@@ -73,5 +72,6 @@ func (m *RoxOptions) NetworkConfigurationsOptions() model.NetworkConfigurationsO
 }
 
 func (m *RoxOptions) IsSignatureVerificationDisabled() bool {
-	return false
+	args := m.Called()
+	return args.Bool(0)
 }

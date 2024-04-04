@@ -77,11 +77,15 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		roxyPath = roxOptions.RoxyURL()
 	}
 
+	if roxOptions != nil {
+		core.disableSignatureVerification = roxOptions.IsSignatureVerificationDisabled()
+	}
 	envApi := consts.ROLLOUT_API
 	if roxyPath == "" {
 		validMongoIdPattern := "^[a-f\\d]{24}$"
 		// Try to parse it as a mongo ID (rollout.io)
 		matched, err := regexp.Match(validMongoIdPattern, []byte(sdkSettings.APIKey()))
+
 		if err != nil || !matched {
 			// try to parse it as a UUID (platform)
 			_, err = uuid.Parse(sdkSettings.APIKey())
@@ -89,6 +93,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 				panic(invalidAPIKeyErrorMessage)
 			}
 			envApi = consts.PLATFORM_API
+			core.disableSignatureVerification = true
 		}
 	}
 
@@ -135,7 +140,6 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	var configurationFetchedHandler model.ConfigurationFetchedHandler
 	if roxOptions != nil {
 		configurationFetchedHandler = roxOptions.ConfigurationFetchedHandler()
-		core.disableSignatureVerification = roxOptions.IsSignatureVerificationDisabled()
 	}
 	core.configurationFetchedInvoker.RegisterFetchedHandler(core.wrapConfigurationFetchedHandler(configurationFetchedHandler))
 
