@@ -90,7 +90,7 @@ func EnvironmentAnalyticsPath(envApi EnvironmentAPI) string {
 	}
 
 	if envApi == PLATFORM_API {
-		return "https://fm-analytics.cloudbees.io/impressions"
+		return "https://fm-analytics.cloudbees.io/impression"
 	}
 	return "https://analytic.rollout.io"
 }
