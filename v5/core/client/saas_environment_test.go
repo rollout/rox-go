@@ -98,7 +98,7 @@ func TestSaasEnvironmentEnvironment_PlatformAPI_Path(t *testing.T) {
 				CDN:           "https://conf.rollout.io",
 				API:           "https://x-api.rollout.io/device/get_configuration",
 				StateCDN:      "https://statestore.rollout.io",
-				StateAPI:      "https://api.cloudbees.io/device/update_state_store",
+				StateAPI:      "https://x-api.rollout.io/device/update_state_store",
 				Analytics:     "https://analytic.rollout.io",
 				Notifications: "https://push.rollout.io/sse",
 			},
