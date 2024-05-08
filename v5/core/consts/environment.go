@@ -75,7 +75,7 @@ func EnvironmentStateAPIPath(envApi EnvironmentAPI) string {
 	if envApi == PLATFORM_API {
 		return "https://api.cloudbees.io/device/update_state_store"
 	}
-	return "https://api.cloudbees.io/device/update_state_store"
+	return "https://x-api.rollout.io/device/update_state_store"
 }
 
 // EnvironmentAnalyticsPath returns the URL for the analytics endpoint.
