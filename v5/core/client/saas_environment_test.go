@@ -61,7 +61,7 @@ func TestSaasEnvironmentEnvironment_PlatformAPI_Path(t *testing.T) {
 				StateCDN:      "https://rox-state.cloudbees.io",
 				StateAPI:      "https://api.cloudbees.io/device/update_state_store",
 				Analytics:     "https://fm-analytics.cloudbees.io/impression",
-				Notifications: "http://api.cloudbees.io/sse",
+				Notifications: "https://sdk-notification-service.cloudbees.io/sse",
 			},
 		},
 		{

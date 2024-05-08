@@ -106,7 +106,7 @@ func EnvironmentNotificationsPath(envApi EnvironmentAPI) string {
 	}
 
 	if envApi == PLATFORM_API {
-		return "http://api.cloudbees.io/sse"
+		return "https://sdk-notification-service.cloudbees.io/sse"
 	}
 	return "https://push.rollout.io/sse"
 }
