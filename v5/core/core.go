@@ -6,6 +6,7 @@ import (
 
 	uuid "github.com/google/uuid"
 
+	"github.com/rollout/rox-go/v5/core/analytics"
 	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/security"
 
@@ -105,10 +106,22 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.environment = client.NewSaasEnvironment(envApi)
 	}
 
-	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
-
 	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
-	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
+	analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
+		UriPath:           core.environment.EnvironmentAnalyticsPath(),
+		Request:           network.NewRequest(http.DefaultClient),
+		DeviceProperities: deviceProperties,
+	})
+	core.impressionInvoker = impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            core.internalFlags,
+		CustomPropertyRepository: core.customPropertyRepository,
+		DeviceProperties:         deviceProperties,
+		Analytics:                analyticsHandler,
+		IsRoxy:                   roxyPath != "",
+	})
+	if roxOptions != nil && (!roxOptions.IsAnalyticsReportingDisabled() || roxyPath == ""){
+		analyticsHandler.InitiateReporting(roxOptions.AnalyticsReportInterval())
+	}
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 

@@ -75,3 +75,13 @@ func (m *RoxOptions) IsSignatureVerificationDisabled() bool {
 	args := m.Called()
 	return args.Bool(0)
 }
+
+func (m *RoxOptions) AnalyticsReportInterval() time.Duration {
+	args := m.Called()
+	return args.Get(0).(time.Duration)
+}
+
+func (m *RoxOptions) IsAnalyticsReportingDisabled() bool {
+	args := m.Called()
+	return args.Bool(0)
+}

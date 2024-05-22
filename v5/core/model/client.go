@@ -39,6 +39,8 @@ type RoxOptions interface {
 	DevModeKey() string
 	Version() string
 	FetchInterval() time.Duration
+	AnalyticsReportInterval() time.Duration
+	IsAnalyticsReportingDisabled() bool
 	ImpressionHandler() ImpressionHandler
 	ConfigurationFetchedHandler() ConfigurationFetchedHandler
 	RoxyURL() string

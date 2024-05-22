@@ -11,6 +11,8 @@ type RoxOptionsBuilder struct {
 	Version                      string
 	DevModeKey                   string
 	FetchInterval                time.Duration
+	AnalyticsReportInterval      time.Duration
+	DisableAnalyticsReporting    bool
 	Logger                       logging.Logger
 	ImpressionHandler            model.ImpressionHandler
 	ConfigurationFetchedHandler  model.ConfigurationFetchedHandler
@@ -25,6 +27,8 @@ type roxOptions struct {
 	version                      string
 	devModeKey                   string
 	fetchInterval                time.Duration
+	analyticsReportInterval      time.Duration
+	disableAnalyticsReporting    bool
 	impressionHandler            model.ImpressionHandler
 	configurationFetchedHandler  model.ConfigurationFetchedHandler
 	roxyURL                      string
@@ -60,6 +64,10 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		logging.SetLogger(NewServerLogger())
 	}
 
+	if builder.AnalyticsReportInterval == 0 {
+		builder.DisableAnalyticsReporting = true
+	}
+
 	var dynamicPropertyRuleHandler = builder.DynamicPropertyRuleHandler
 	if dynamicPropertyRuleHandler == nil {
 		dynamicPropertyRuleHandler = func(args model.DynamicPropertyRuleHandlerArgs) interface{} {
@@ -74,6 +82,8 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		version:                      version,
 		devModeKey:                   devModeKey,
 		fetchInterval:                fetchInterval,
+		analyticsReportInterval:      builder.AnalyticsReportInterval,
+		disableAnalyticsReporting:    builder.DisableAnalyticsReporting,
 		impressionHandler:            builder.ImpressionHandler,
 		configurationFetchedHandler:  builder.ConfigurationFetchedHandler,
 		roxyURL:                      builder.RoxyURL,
@@ -122,4 +132,12 @@ func (ro *roxOptions) NetworkConfigurationsOptions() model.NetworkConfigurations
 
 func (ro *roxOptions) IsSignatureVerificationDisabled() bool {
 	return ro.disableSignatureVerification
+}
+
+func (ro *roxOptions) AnalyticsReportInterval() time.Duration {
+	return ro.analyticsReportInterval
+}
+
+func (ro *roxOptions) IsAnalyticsReportingDisabled() bool {
+	return ro.disableAnalyticsReporting
 }

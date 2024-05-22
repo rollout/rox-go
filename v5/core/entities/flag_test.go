@@ -42,7 +42,13 @@ func TestFlagForConsistencyWithString(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -59,7 +65,13 @@ func TestFlagForConsistencyWithInt(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -76,7 +88,13 @@ func TestFlagForConsistencyWithDouble(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
