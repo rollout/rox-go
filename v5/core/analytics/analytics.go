@@ -29,7 +29,7 @@ type AnalyticsDeps struct {
 	Request           model.Request
 	DeviceProperities model.DeviceProperties
 	Logger            logging.Logger
-	IsDisabled 			bool
+	IsDisabled        bool
 }
 
 func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
@@ -51,6 +51,9 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 // InitiateReporting starts the analytics reporting process all
 // impressions accumulated over 'interval' time will be sent to the analytics server
 func (ah *AnalyticsHandler) InitiateReporting(interval time.Duration) {
+	if interval == 0 {
+		interval = time.Minute
+	}
 	ticker := time.NewTicker(interval)
 
 	go func() {
