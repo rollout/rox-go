@@ -125,7 +125,7 @@ func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	analytics := &mocks.Analytics{}
 	analytics.On("IsAnalyticsReportingDisabled").Return(false)
-	analytics.On("Enqueue", mock.Anything, "name", "value").Return().Times(1)
+	analytics.On("CaptureImpressions", mock.Anything).Return().Times(1)
 
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,

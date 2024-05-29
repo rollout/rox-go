@@ -119,8 +119,8 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		Analytics:                analyticsHandler,
 		IsRoxy:                   roxyPath != "",
 	})
-	if roxOptions != nil && (!roxOptions.IsAnalyticsReportingDisabled() || roxyPath == ""){
-		analyticsHandler.InitiateReporting(roxOptions.AnalyticsReportInterval())
+	if roxOptions != nil && (!roxOptions.IsAnalyticsReportingDisabled() || roxyPath == "") {
+		analyticsHandler.InitiateIntervalReporting(roxOptions.AnalyticsReportInterval())
 	}
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)

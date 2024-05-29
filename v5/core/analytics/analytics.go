@@ -17,6 +17,7 @@ type AnalyticsHandler struct {
 	impressionsQueue ImpressionsStore
 	logger           logging.Logger
 	isDisabled       bool
+	flushAtSize      int
 }
 
 type ImpressionsStore struct {
@@ -30,12 +31,14 @@ type AnalyticsDeps struct {
 	DeviceProperities model.DeviceProperties
 	Logger            logging.Logger
 	IsDisabled        bool
+	FlushAtSize       int
 }
 
 func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 	if deps.Logger == nil {
 		deps.Logger = logging.GetLogger()
 	}
+
 	return &AnalyticsHandler{
 		uriPath:          deps.UriPath,
 		request:          deps.Request,
@@ -44,52 +47,72 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 		impressionsQueue: ImpressionsStore{
 			impressions: make([]model.Impression, 0),
 		},
-		isDisabled: deps.IsDisabled,
+		isDisabled:  deps.IsDisabled,
+		flushAtSize: deps.FlushAtSize | 500,
 	}
 }
 
 // InitiateReporting starts the analytics reporting process all
 // impressions accumulated over 'interval' time will be sent to the analytics server
-func (ah *AnalyticsHandler) InitiateReporting(interval time.Duration) {
-	if interval == 0 {
-		interval = time.Minute
-	}
+func (ah *AnalyticsHandler) InitiateIntervalReporting(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 
 	go func() {
 		for range ticker.C {
-			err := ah.postImpressions()
-			if err != nil {
-				ah.logger.Error("Error posting impressions: %v", err)
+			// extract current impressions and flush the queue
+			ah.impressionsQueue.mu.Lock()
+			extractedImpressions := ah.impressionsQueue.impressions
+			ah.impressionsQueue.impressions = make([]model.Impression, 0)
+			ah.impressionsQueue.mu.Unlock()
+
+			if len(extractedImpressions) > 0 {
+				err := ah.postImpressions(extractedImpressions)
+				if err != nil {
+					// don't requeue to avoid stack overflow if analytics server is unreachable
+					ah.logger.Error("Error posting impressions: %v", err)
+				}
 			}
 		}
 	}()
 }
 
-func (ah *AnalyticsHandler) postImpressions() error {
+// CaptureImpressions adds a new impression to the queue and will report the
+// impressions if max queues size will be exceeded
+func (ah *AnalyticsHandler) CaptureImpressions(newImpressions []model.Impression) {
 	ah.impressionsQueue.mu.Lock()
-	defer ah.impressionsQueue.mu.Unlock()
-
-	if len(ah.impressionsQueue.impressions) == 0 {
-		return nil
+	totalImpressions := append(ah.impressionsQueue.impressions, newImpressions...)
+	metFlushSize := len(totalImpressions) >= ah.flushAtSize
+	if metFlushSize {
+		ah.impressionsQueue.impressions = make([]model.Impression, 0)
+	} else {
+		ah.impressionsQueue.impressions = totalImpressions
 	}
+	ah.impressionsQueue.mu.Unlock()
 
+	if metFlushSize {
+		go func() {
+			err := ah.postImpressions(totalImpressions)
+			if err != nil {
+				// don't requeue to avoid stack overflow if analytics server is unreachable
+				ah.logger.Error("Error posting full queue of impressions due to http error, impressions data lost", err)
+			}
+		}()
+	}
+}
+
+func (ah *AnalyticsHandler) postImpressions(impressions []model.Impression) error {
 	properties := ah.deviceProperties.GetAllProperties()
 	bodyContent := &model.SDKEventBatch{
 		AnalyticsVersion: "1.0.0",
 		SdkKeyId:         ah.deviceProperties.RolloutKey(),
-		Timestamp:        float64(time.Now().Second()),
+		Timestamp:        float64(time.Now().Unix()),
 		Platform:         properties[consts.PropertyTypePlatform.Name],
 		SDKVersion:       properties[consts.PropertyTypeLibVersion.Name],
-		Events:           ah.impressionsQueue.impressions,
+		Events:           impressions,
 	}
 
-	uri := fmt.Sprintf("%s/impressions/%s", ah.uriPath, bodyContent.SdkKeyId)
+	uri := fmt.Sprintf("%s/%s", ah.uriPath, bodyContent.SdkKeyId)
 	res, err := ah.request.SendPost(uri, bodyContent)
-
-	// accumulated impressions are flushed regardless of reporting success or
-	// failure to avoid stack overflow if analytics server is unreachable
-	ah.flushImpressions()
 
 	if err != nil {
 		return err
@@ -99,21 +122,6 @@ func (ah *AnalyticsHandler) postImpressions() error {
 	}
 
 	return nil
-}
-
-func (ah *AnalyticsHandler) Enqueue(time float64, flagName string, value interface{}) {
-	ah.impressionsQueue.mu.Lock()
-	defer ah.impressionsQueue.mu.Unlock()
-
-	ah.impressionsQueue.impressions = append(ah.impressionsQueue.impressions, model.Impression{
-		Timestamp: time,
-		FlagName:  flagName,
-		Value:     value,
-	})
-}
-
-func (ah *AnalyticsHandler) flushImpressions() {
-	ah.impressionsQueue.impressions = make([]model.Impression, 0)
 }
 
 func (ah *AnalyticsHandler) IsAnalyticsReportingDisabled() bool {

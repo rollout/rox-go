@@ -3,8 +3,8 @@ package model
 import "time"
 
 type Analytics interface {
-	Enqueue(timeStampe float64, flagName string, value interface{})
-	InitiateReporting(interval time.Duration)
+	CaptureImpressions([]Impression)
+	InitiateIntervalReporting(interval time.Duration)
 	IsAnalyticsReportingDisabled() bool
 }
 

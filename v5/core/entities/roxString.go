@@ -118,7 +118,6 @@ func (v *roxString) InternalGetValue(ctx context.Context) (returnValue string, i
 	}
 
 	if v.impressionInvoker != nil && sendImpression {
-
 		targeting := false
 		if v.clientExperiment != nil {
 			targeting = true

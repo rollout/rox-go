@@ -1,6 +1,7 @@
 package impression
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -39,12 +40,19 @@ func NewImpressionInvoker(deps *ImpressionsDeps) model.ImpressionInvoker {
 }
 
 func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context.Context) {
+	// TODO Remove this line
+	fmt.Printf("ImpressionInvoker.Invoke: %v\n", value)
+
 	if value == nil {
 		return
 	}
 
-	if ii.analytics != nil && (!ii.analytics.IsAnalyticsReportingDisabled() && !ii.isRoxy) {
-		ii.analytics.Enqueue(float64(time.Now().Second()), value.Name, value.Value)
+	if ii.analytics != nil && !(ii.analytics.IsAnalyticsReportingDisabled() || ii.isRoxy) {
+		ii.analytics.CaptureImpressions([]model.Impression{{
+			Timestamp: float64(time.Now().Unix()),
+			FlagName:  value.Name,
+			Value:     value.Value,
+		}})
 	}
 
 	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Context: context})

@@ -4,17 +4,19 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/mock"
+
+	"github.com/rollout/rox-go/v5/core/model"
 )
 
 type Analytics struct {
 	mock.Mock
 }
 
-func (m *Analytics) Enqueue(timeStamp float64, name string, value interface{}) {
-	m.Called(timeStamp, name, value)
+func (m *Analytics) CaptureImpressions(impressions []model.Impression) {
+	m.Called(impressions)
 }
 
-func (m *Analytics) InitiateReporting(interval time.Duration) {
+func (m *Analytics) InitiateIntervalReporting(interval time.Duration) {
 	m.Called()
 }
 

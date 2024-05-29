@@ -64,8 +64,8 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		logging.SetLogger(NewServerLogger())
 	}
 
-	if builder.AnalyticsReportInterval == 0 {
-		builder.DisableAnalyticsReporting = true
+	if !builder.DisableAnalyticsReporting && builder.AnalyticsReportInterval == 0 {
+		builder.AnalyticsReportInterval = 1 * time.Minute
 	}
 
 	var dynamicPropertyRuleHandler = builder.DynamicPropertyRuleHandler

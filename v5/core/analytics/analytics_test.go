@@ -2,6 +2,7 @@ package analytics
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
@@ -80,7 +81,7 @@ func Test_postImpressions(t *testing.T) {
 			path := "hostPath"
 			deviceProperties := commonDevicePropertiesMock(sdkKey, "platform", "libVersion")
 			request := &mocks.Request{}
-			expectedUri := fmt.Sprintf("%s/impressions/%s", path, sdkKey)
+			expectedUri := fmt.Sprintf("%s/%s", path, sdkKey)
 			request.
 				On("SendPost", expectedUri, mock.Anything).
 				Return(&model.Response{
@@ -100,20 +101,123 @@ func Test_postImpressions(t *testing.T) {
 				},
 			}
 
+			impressions := make([]model.Impression, 0)
 			for i := 0; i < tc.msgCount; i++ {
-				analytics.Enqueue(float64(time.Now().Second()), "name", "value")
+				impressions = append(impressions, model.Impression{
+					Timestamp: float64(time.Now().Unix()),
+					FlagName:  "name",
+					Value:     "value",
+				})
 			}
-			err := analytics.postImpressions()
-			// ensure message queue is flushed after POST request
-			analytics.impressionsQueue.mu.Lock()
-			assert.Equal(t, 0, len(analytics.impressionsQueue.impressions))
-			analytics.impressionsQueue.mu.Unlock()
+			err := analytics.postImpressions(impressions)
 
 			if tc.expectedErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestAnalyticsHandler_CaptureImpressions(t *testing.T) {
+	testCases := []struct {
+		testName          string
+		existingQueueSize int
+		numImpressions    int
+		maxQueueSize      int
+		expectedRequest   int
+		responseErr       error
+		errorsExpected    int
+		expectedQueueSize int
+	}{
+		{
+			testName:          "Queue size met",
+			existingQueueSize: 400,
+			numImpressions:    100,
+			maxQueueSize:      500,
+			expectedRequest:   1,
+			errorsExpected:    0,
+			responseErr:       nil,
+			expectedQueueSize: 0,
+		},
+		{
+			testName:          "Queue size exceeded",
+			existingQueueSize: 400,
+			numImpressions:    500,
+			maxQueueSize:      500,
+			expectedRequest:   1,
+			errorsExpected:    0,
+			responseErr:       nil,
+			expectedQueueSize: 0,
+		},
+		{
+			testName:          "Queue size not exceeded",
+			existingQueueSize: 400,
+			numImpressions:    99,
+			maxQueueSize:      500,
+			expectedRequest:   0,
+			errorsExpected:    0,
+			responseErr:       nil,
+			expectedQueueSize: 499,
+		},
+		{
+			testName:          "Empty queue, size met",
+			existingQueueSize: 0,
+			numImpressions:    500,
+			maxQueueSize:      500,
+			expectedRequest:   1,
+			errorsExpected:    0,
+			responseErr:       nil,
+			expectedQueueSize: 0,
+		},
+		{
+			testName:          "Error sending request",
+			existingQueueSize: 400,
+			numImpressions:    100,
+			maxQueueSize:      500,
+			expectedRequest:   1,
+			errorsExpected:    1,
+			responseErr:       fmt.Errorf("error"),
+			expectedQueueSize: 0,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			sdkKey := "sdkKey1"
+			path := "hostPath1"
+			deviceProperties := commonDevicePropertiesMock(sdkKey, "platform", "libVersion")
+			request := &mocks.Request{}
+			expectedUri := fmt.Sprintf("%s/%s", path, sdkKey)
+			request.
+				On("SendPost", expectedUri, mock.Anything).
+				Return(&model.Response{
+					StatusCode: http.StatusOK,
+				}, tc.responseErr).
+				Times(tc.expectedRequest)
+
+			logger := &mocks.Logger{}
+			logger.On("Error", mock.Anything).Times(tc.errorsExpected)
+
+			analytics := &AnalyticsHandler{
+				uriPath:          path,
+				request:          request,
+				deviceProperties: deviceProperties,
+				logger:           logger,
+				impressionsQueue: ImpressionsStore{
+					impressions: make([]model.Impression, tc.existingQueueSize),
+				},
+				flushAtSize: tc.maxQueueSize,
+			}
+
+			analytics.CaptureImpressions(make([]model.Impression, tc.numImpressions))
+			if tc.errorsExpected > 0 {
+				assert.Error(t, tc.responseErr)
+			} else {
+				assert.NoError(t, tc.responseErr)
+			}
+			assert.Equal(t, tc.expectedQueueSize, len(analytics.impressionsQueue.impressions))
 		})
 	}
 }

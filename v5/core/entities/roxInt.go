@@ -1,12 +1,13 @@
 package entities
 
 import (
+	"strconv"
+
 	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/model"
 	"github.com/rollout/rox-go/v5/core/roxx"
 	"github.com/rollout/rox-go/v5/core/utils"
-	"strconv"
 )
 
 type roxInt struct {
