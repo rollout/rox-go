@@ -1,23 +1,37 @@
 package impression_test
 
 import (
+	"testing"
+
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/impression"
 	"github.com/rollout/rox-go/v5/core/mocks"
 	"github.com/rollout/rox-go/v5/core/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestImpressionInvokerEmptyInvokeNotThrowingException(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
 	impressionInvoker.Invoke(nil, nil)
 }
 
 func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:    internalFlags,
+		DeviceProperties: nil,
+		IsRoxy:           false,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
 
 	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
 	reportingValue := model.NewReportingValue("name", "value", true)
@@ -37,7 +51,14 @@ func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 
 func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	impressionInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
 
 	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
 	reportingValue := model.NewReportingValue("name", "value", true)
@@ -53,17 +74,57 @@ func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
 }
 
 func TestImpressionInvokerWillNotInvokeAnalyticsWhenFlagIsOff(t *testing.T) {
-	// TODO
+	internalFlags := &mocks.InternalFlags{}
+
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
+
+	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
+	reportingValue := model.NewReportingValue("name", "value", true)
+
+	impressionInvoker.Invoke(reportingValue, ctx)
 }
 
 func TestImpressionInvokerWillNotInvokeAnalyticsWhenIsRoxy(t *testing.T) {
-	// TODO
+	internalFlags := &mocks.InternalFlags{}
+
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   true,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
+
+	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
+	reportingValue := model.NewReportingValue("name", "value", true)
+
+	impressionInvoker.Invoke(reportingValue, ctx)
 }
 
 func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
-	// TODO
-}
+	internalFlags := &mocks.InternalFlags{}
+	internalFlags.On("IsEnabled", "rox.internal.analytics").Return(true)
+	analytics := &mocks.Analytics{}
+	analytics.On("CaptureImpressions", mock.Anything).Return().Times(1)
 
-func TestImpressionInvokerWillInvokeAnalyticsWithBadDistinctID(t *testing.T) {
-	// TODO
+	deps := &impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                analytics,
+		IsRoxy:                   false,
+	}
+	impressionInvoker := impression.NewImpressionInvoker(deps)
+
+	ctx := context.NewContext(map[string]interface{}{"obj1": 1})
+	reportingValue := model.NewReportingValue("name", "value", true)
+
+	impressionInvoker.Invoke(reportingValue, ctx)
+	mock.AssertExpectationsForObjects(t, analytics)
 }

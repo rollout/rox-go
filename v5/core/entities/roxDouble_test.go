@@ -1,13 +1,14 @@
 package entities
 
 import (
+	"testing"
+
 	"github.com/rollout/rox-go/v5/core/impression"
 	"github.com/rollout/rox-go/v5/core/mocks"
 	"github.com/rollout/rox-go/v5/core/model"
 	"github.com/rollout/rox-go/v5/core/roxx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 func TestRoxDoubleWithoutOptions(t *testing.T) {
@@ -81,7 +82,12 @@ func TestRoxDoubleWillRaiseImpressionInvoker(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -98,7 +104,12 @@ func TestRoxDoubleForConsistencyWithString(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -115,7 +126,13 @@ func TestRoxDoubleForConsistencyWithInt(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -132,7 +149,12 @@ func TestRoxDoubleForConsistencyWithBoolean(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})

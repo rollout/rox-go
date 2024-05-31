@@ -30,6 +30,8 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	options.On("SelfManagedOptions").Return(nil)
 	options.On("DynamicPropertyRuleHandler").Return(nil)
 	options.On("IsSignatureVerificationDisabled").Return(true)
+	options.On("IsAnalyticsReportingDisabled").Return(true)
+
 
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, options)
@@ -105,6 +107,7 @@ func TestValidAPIKey_GoogleUUID(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
+	deviceProperties.On("RolloutKey").Return("12345678901234567890abcd")
 
 	defer func() {
 		assert.Nil(t, recover(), "we should not have panicked as the API key was valid")
@@ -127,6 +130,7 @@ func TestValidAPIKey_Uuid(t *testing.T) {
 
 	deviceProperties := &mocks.DeviceProperties{}
 	deviceProperties.On("GetAllProperties").Return(map[string]string{})
+	deviceProperties.On("RolloutKey").Return("sdkKey")
 
 	defer func() {
 		assert.Nil(t, recover(), "we should not have panicked as the API key was valid")
@@ -145,6 +149,7 @@ func TestEmptyAPIKey(t *testing.T) {
 	sdkSettings.On("APIKey").Return("")
 
 	deviceProperties := &mocks.DeviceProperties{}
+	deviceProperties.On("RolloutKey").Return("sdkKey")
 
 	c := core.NewCore()
 	defer func() {

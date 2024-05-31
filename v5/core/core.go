@@ -6,6 +6,7 @@ import (
 
 	uuid "github.com/google/uuid"
 
+	"github.com/rollout/rox-go/v5/core/analytics"
 	"github.com/rollout/rox-go/v5/core/consts"
 	"github.com/rollout/rox-go/v5/core/security"
 
@@ -35,6 +36,7 @@ type Core struct {
 	flagSetter                   *entities.FlagSetter
 	parser                       roxx.Parser
 	impressionInvoker            model.ImpressionInvoker
+	analyticsHandler             model.Analytics
 	configurationFetchedInvoker  *configuration.FetchedInvoker
 	stateSender                  *network.StateSender
 	sdkSettings                  model.SdkSettings
@@ -105,10 +107,27 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.environment = client.NewSaasEnvironment(envApi)
 	}
 
-	// TODO Analytics.Analytics.Initialize(deviceProperties.RolloutKey, deviceProperties)
-
 	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
-	core.impressionInvoker = impression.NewImpressionInvoker(core.internalFlags, core.customPropertyRepository, deviceProperties /* TODO Analytics.Analytics.Client, */, roxyPath != "")
+	impressionDeps := &impression.ImpressionsDeps{
+		InternalFlags:            core.internalFlags,
+		CustomPropertyRepository: core.customPropertyRepository,
+		DeviceProperties:         deviceProperties,
+		IsRoxy:                   roxyPath != "",
+	}
+	analyticsEnabled := roxOptions != nil && !roxOptions.IsAnalyticsReportingDisabled() && roxyPath != ""
+	if analyticsEnabled {
+		analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
+			UriPath:           core.environment.EnvironmentAnalyticsPath(),
+			Request:           network.NewRequest(http.DefaultClient),
+			DeviceProperities: deviceProperties,
+			FlushAtSize:       roxOptions.AnalyticsQueueSize(),
+		})
+		impressionDeps.Analytics = analyticsHandler
+		core.analyticsHandler = analyticsHandler
+		analyticsHandler.InitiateIntervalReporting(roxOptions.AnalyticsReportInterval())
+	}
+	core.impressionInvoker = impression.NewImpressionInvoker(impressionDeps)
+
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
@@ -262,6 +281,10 @@ func (core *Core) Shutdown() <-chan struct{} {
 		if core.pushUpdatesListener != nil {
 			core.pushUpdatesListener.Stop()
 			core.pushUpdatesListener = nil
+		}
+		if core.analyticsHandler != nil {
+			core.analyticsHandler.StopIntervalReporting()
+			core.analyticsHandler = nil
 		}
 		close(core.quit)
 	}()

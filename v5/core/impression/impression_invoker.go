@@ -1,33 +1,55 @@
 package impression
 
 import (
+	"sync"
+	"time"
+
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/logging"
 	"github.com/rollout/rox-go/v5/core/model"
-	"sync"
 )
 
 type impressionInvoker struct {
 	internalFlags            model.InternalFlags
 	customPropertyRepository model.CustomPropertyRepository
 	deviceProperties         model.DeviceProperties
+	analytics                model.Analytics
 	isRoxy                   bool
 
 	impressionHandlers []model.ImpressionHandler
 	handlersMutex      sync.RWMutex
 }
 
-func NewImpressionInvoker(internalFlags model.InternalFlags, customPropertyRepository model.CustomPropertyRepository, deviceProperties model.DeviceProperties, isRoxy bool) model.ImpressionInvoker {
+type ImpressionsDeps struct {
+	InternalFlags            model.InternalFlags
+	CustomPropertyRepository model.CustomPropertyRepository
+	DeviceProperties         model.DeviceProperties
+	Analytics                model.Analytics
+	IsRoxy                   bool
+}
+
+func NewImpressionInvoker(deps *ImpressionsDeps) model.ImpressionInvoker {
 	return &impressionInvoker{
-		internalFlags:            internalFlags,
-		customPropertyRepository: customPropertyRepository,
-		deviceProperties:         deviceProperties,
-		isRoxy:                   isRoxy,
+		internalFlags:            deps.InternalFlags,
+		customPropertyRepository: deps.CustomPropertyRepository,
+		deviceProperties:         deps.DeviceProperties,
+		analytics:                deps.Analytics,
+		isRoxy:                   deps.IsRoxy,
 	}
 }
 
 func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context.Context) {
-	// TODO Implement analytics logic
+	if value == nil {
+		return
+	}
+
+	if ii.analytics != nil && !ii.isRoxy && ii.internalFlags.IsEnabled("rox.internal.analytics") {
+		ii.analytics.CaptureImpressions([]model.Impression{{
+			Timestamp: float64(time.Now().Unix()),
+			FlagName:  value.Name,
+			Value:     value.Value,
+		}})
+	}
 
 	ii.raiseImpressionEvent(model.ImpressionArgs{ReportingValue: value, Context: context})
 }

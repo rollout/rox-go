@@ -81,7 +81,12 @@ func TestRoxStringWillRaiseImpression(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -98,7 +103,12 @@ func TestRoxStringForConsistencyWithInt(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -115,7 +125,12 @@ func TestRoxStringForConsistencyWithDouble(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})
@@ -132,7 +147,12 @@ func TestRoxStringForConsistencyWithBool(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
 		isImpressionRaised = true
 	})

@@ -1,6 +1,8 @@
 package extensions_test
 
 import (
+	"testing"
+
 	"github.com/rollout/rox-go/v5/core/context"
 	"github.com/rollout/rox-go/v5/core/entities"
 	"github.com/rollout/rox-go/v5/core/extensions"
@@ -11,7 +13,6 @@ import (
 	"github.com/rollout/rox-go/v5/core/repositories"
 	"github.com/rollout/rox-go/v5/core/roxx"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestExperimentsExtensionsCustomPropertyWithSimpleValue(t *testing.T) {
@@ -116,7 +117,13 @@ func TestExperimentsExtensionsFlagDependencyImpressionHandler(t *testing.T) {
 	experimentRepository := repositories.NewExperimentRepository()
 	flagRepository := repositories.NewFlagRepository()
 	internalFlags := &mocks.InternalFlags{}
-	ii := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+
+	ii := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		IsRoxy:                   false,
+	})
 	experimentsExtensions := extensions.NewExperimentsExtensions(parser, targetGroupsRepository, flagRepository, experimentRepository)
 	experimentsExtensions.Extend()
 

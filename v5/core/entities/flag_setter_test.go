@@ -19,7 +19,13 @@ func TestFlagSetterWillSetFlagData(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
 
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 
 	flagRepo.AddFlag(NewFlag(false), "f1")
 	expRepo.SetExperiments([]*model.ExperimentModel{
@@ -43,7 +49,13 @@ func TestFlagSetterWillNotSetForOtherFlag(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
 
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 
 	flagRepo.AddFlag(NewFlag(false), "f1")
 	flagRepo.AddFlag(NewFlag(false), "f2")
@@ -68,7 +80,13 @@ func TestFlagSetterWillSetExperimentForFlagAndWillRemoveIt(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
 
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 
 	flagSetter := NewFlagSetter(flagRepo, parser, expRepo, impInvoker)
 	flagRepo.AddFlag(NewFlag(false), "f2")
@@ -100,7 +118,13 @@ func TestFlagSetterWillSetFlagWithoutExperimentAndThenAddExperiment(t *testing.T
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
 
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 
 	flagSetter := NewFlagSetter(flagRepo, parser, expRepo, impInvoker)
 	flagRepo.AddFlag(NewFlag(false), "f2")
@@ -130,7 +154,13 @@ func TestFlagSetterWillSetDataForAddedFlag(t *testing.T) {
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(nil))
 
 	internalFlags := &mocks.InternalFlags{}
-	impInvoker := impression.NewImpressionInvoker(internalFlags, nil, nil, false)
+	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+		InternalFlags:            internalFlags,
+		CustomPropertyRepository: nil,
+		DeviceProperties:         nil,
+		Analytics:                nil,
+		IsRoxy:                   false,
+	})
 
 	expRepo.SetExperiments([]*model.ExperimentModel{
 		model.NewExperimentModel("1", "1", "1", false, []string{"f1"}, nil),
