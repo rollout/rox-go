@@ -11,8 +11,6 @@ type Analytics interface {
 type Impression struct {
 	Timestamp         float64     `json:"time"`
 	FlagName          string      `json:"flag"`
-	ExperimentId      string      `json:"experimentId,omitempty"`
-	ExperimentVersion string      `json:"experimentVersion,omitempty"`
 	Value             interface{} `json:"value"`
 	Type              string      `json:"type"`
 	Count             float64     `json:"count,omitempty"`
