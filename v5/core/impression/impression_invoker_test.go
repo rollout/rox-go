@@ -26,12 +26,9 @@ func TestImpressionInvokerEmptyInvokeNotThrowingException(t *testing.T) {
 
 func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:    internalFlags,
 		DeviceProperties: nil,
-		Analytics:        analytics,
 		IsRoxy:           false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -54,14 +51,11 @@ func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 
 func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
 
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -81,14 +75,11 @@ func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
 
 func TestImpressionInvokerWillNotInvokeAnalyticsWhenFlagIsOff(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
 
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -97,19 +88,15 @@ func TestImpressionInvokerWillNotInvokeAnalyticsWhenFlagIsOff(t *testing.T) {
 	reportingValue := model.NewReportingValue("name", "value", true)
 
 	impressionInvoker.Invoke(reportingValue, ctx)
-	mock.AssertExpectationsForObjects(t, analytics)
 }
 
 func TestImpressionInvokerWillNotInvokeAnalyticsWhenIsRoxy(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(false)
 
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   true,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -118,13 +105,11 @@ func TestImpressionInvokerWillNotInvokeAnalyticsWhenIsRoxy(t *testing.T) {
 	reportingValue := model.NewReportingValue("name", "value", true)
 
 	impressionInvoker.Invoke(reportingValue, ctx)
-	mock.AssertExpectationsForObjects(t, analytics)
 }
 
 func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(false)
 	analytics.On("CaptureImpressions", mock.Anything).Return().Times(1)
 
 	deps := &impression.ImpressionsDeps{

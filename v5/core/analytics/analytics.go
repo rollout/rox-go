@@ -18,6 +18,7 @@ type AnalyticsHandler struct {
 	logger           logging.Logger
 	isDisabled       bool
 	flushAtSize      int
+	ticker           *time.Ticker
 }
 
 type ImpressionsStore struct {
@@ -30,7 +31,6 @@ type AnalyticsDeps struct {
 	Request           model.Request
 	DeviceProperities model.DeviceProperties
 	Logger            logging.Logger
-	IsDisabled        bool
 	FlushAtSize       int
 }
 
@@ -47,7 +47,6 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 		impressionsQueue: ImpressionsStore{
 			impressions: make([]model.Impression, 0),
 		},
-		isDisabled:  deps.IsDisabled,
 		flushAtSize: deps.FlushAtSize | 500,
 	}
 }
@@ -55,10 +54,14 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 // InitiateReporting starts the analytics reporting process all
 // impressions accumulated over 'interval' time will be sent to the analytics server
 func (ah *AnalyticsHandler) InitiateIntervalReporting(interval time.Duration) {
-	ticker := time.NewTicker(interval)
+	if ah.isDisabled {
+		return
+	}
+
+	ah.ticker = time.NewTicker(interval)
 
 	go func() {
-		for range ticker.C {
+		for range ah.ticker.C {
 			// extract current impressions and flush the queue
 			ah.impressionsQueue.mu.Lock()
 			extractedImpressions := ah.impressionsQueue.impressions
@@ -74,6 +77,12 @@ func (ah *AnalyticsHandler) InitiateIntervalReporting(interval time.Duration) {
 			}
 		}
 	}()
+}
+
+func (ah *AnalyticsHandler) StopIntervalReporting() {
+	if ah.ticker != nil {
+		ah.ticker.Stop()
+	}
 }
 
 // CaptureImpressions adds a new impression to the queue and will report the
@@ -122,8 +131,4 @@ func (ah *AnalyticsHandler) postImpressions(impressions []model.Impression) erro
 	}
 
 	return nil
-}
-
-func (ah *AnalyticsHandler) IsAnalyticsReportingDisabled() bool {
-	return ah.isDisabled
 }

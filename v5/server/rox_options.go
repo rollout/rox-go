@@ -12,6 +12,7 @@ type RoxOptionsBuilder struct {
 	DevModeKey                   string
 	FetchInterval                time.Duration
 	AnalyticsReportInterval      time.Duration
+	AnalyticsQueueSize           int
 	DisableAnalyticsReporting    bool
 	Logger                       logging.Logger
 	ImpressionHandler            model.ImpressionHandler
@@ -28,6 +29,7 @@ type roxOptions struct {
 	devModeKey                   string
 	fetchInterval                time.Duration
 	analyticsReportInterval      time.Duration
+	analyticsQueueSize           int
 	disableAnalyticsReporting    bool
 	impressionHandler            model.ImpressionHandler
 	configurationFetchedHandler  model.ConfigurationFetchedHandler
@@ -83,6 +85,7 @@ func NewRoxOptions(builder RoxOptionsBuilder) model.RoxOptions {
 		devModeKey:                   devModeKey,
 		fetchInterval:                fetchInterval,
 		analyticsReportInterval:      builder.AnalyticsReportInterval,
+		analyticsQueueSize:           builder.AnalyticsQueueSize,
 		disableAnalyticsReporting:    builder.DisableAnalyticsReporting,
 		impressionHandler:            builder.ImpressionHandler,
 		configurationFetchedHandler:  builder.ConfigurationFetchedHandler,
@@ -140,4 +143,8 @@ func (ro *roxOptions) AnalyticsReportInterval() time.Duration {
 
 func (ro *roxOptions) IsAnalyticsReportingDisabled() bool {
 	return ro.disableAnalyticsReporting
+}
+
+func (ro *roxOptions) AnalyticsQueueSize() int {
+	return ro.analyticsQueueSize
 }

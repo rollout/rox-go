@@ -32,6 +32,7 @@ func TestCoreWillCheckCoreSetupWhenOptionsWithRoxy(t *testing.T) {
 	options.On("IsSignatureVerificationDisabled").Return(true)
 	options.On("IsAnalyticsReportingDisabled").Return(true)
 
+
 	c := core.NewCore()
 	<-c.Setup(sdkSettings, deviceProperties, options)
 }

@@ -36,6 +36,7 @@ type Core struct {
 	flagSetter                   *entities.FlagSetter
 	parser                       roxx.Parser
 	impressionInvoker            model.ImpressionInvoker
+	analyticsHandler             model.Analytics
 	configurationFetchedInvoker  *configuration.FetchedInvoker
 	stateSender                  *network.StateSender
 	sdkSettings                  model.SdkSettings
@@ -106,22 +107,30 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.environment = client.NewSaasEnvironment(envApi)
 	}
 
-	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
-	analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
-		UriPath:           core.environment.EnvironmentAnalyticsPath(),
-		Request:           network.NewRequest(http.DefaultClient),
-		DeviceProperities: deviceProperties,
-	})
-	core.impressionInvoker = impression.NewImpressionInvoker(&impression.ImpressionsDeps{
+	analyticsDisabled := (roxOptions != nil && roxOptions.IsAnalyticsReportingDisabled()) ||
+		roxyPath == "" ||
+		!core.internalFlags.IsEnabled("rox.internal.analytics")
+
+	impressionDeps := &impression.ImpressionsDeps{
 		InternalFlags:            core.internalFlags,
 		CustomPropertyRepository: core.customPropertyRepository,
 		DeviceProperties:         deviceProperties,
-		Analytics:                analyticsHandler,
 		IsRoxy:                   roxyPath != "",
-	})
-	if roxOptions != nil && (!roxOptions.IsAnalyticsReportingDisabled() || roxyPath == "") {
+	}
+	if !analyticsDisabled {
+		core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
+		analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
+			UriPath:           core.environment.EnvironmentAnalyticsPath(),
+			Request:           network.NewRequest(http.DefaultClient),
+			DeviceProperities: deviceProperties,
+			FlushAtSize:       roxOptions.AnalyticsQueueSize(),
+		})
+		impressionDeps.Analytics = analyticsHandler
+		core.analyticsHandler = analyticsHandler
 		analyticsHandler.InitiateIntervalReporting(roxOptions.AnalyticsReportInterval())
 	}
+	core.impressionInvoker = impression.NewImpressionInvoker(impressionDeps)
+
 	core.flagSetter = entities.NewFlagSetter(core.flagRepository, core.parser, core.experimentRepository, core.impressionInvoker)
 	buid := client.NewBUID(sdkSettings, deviceProperties, core.flagRepository, core.customPropertyRepository)
 
@@ -275,6 +284,10 @@ func (core *Core) Shutdown() <-chan struct{} {
 		if core.pushUpdatesListener != nil {
 			core.pushUpdatesListener.Stop()
 			core.pushUpdatesListener = nil
+		}
+		if core.analyticsHandler != nil {
+			core.analyticsHandler.StopIntervalReporting()
+			core.analyticsHandler = nil
 		}
 		close(core.quit)
 	}()

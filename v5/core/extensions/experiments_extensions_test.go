@@ -117,14 +117,11 @@ func TestExperimentsExtensionsFlagDependencyImpressionHandler(t *testing.T) {
 	experimentRepository := repositories.NewExperimentRepository()
 	flagRepository := repositories.NewFlagRepository()
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
 
 	ii := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   false,
 	})
 	experimentsExtensions := extensions.NewExperimentsExtensions(parser, targetGroupsRepository, flagRepository, experimentRepository)

@@ -20,12 +20,6 @@ func (m *Analytics) InitiateIntervalReporting(interval time.Duration) {
 	m.Called()
 }
 
-func (m *Analytics) IsAnalyticsReportingDisabled() bool {
-	ret := m.Called()
-
-	r0 := ret.Get(0)
-	if r0 == nil {
-		return false
-	}
-	return r0.(bool)
+func (m *Analytics) StopIntervalReporting() {
+	m.Called()
 }

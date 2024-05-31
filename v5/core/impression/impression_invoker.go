@@ -47,7 +47,7 @@ func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context
 		return
 	}
 
-	if ii.analytics != nil && !(ii.analytics.IsAnalyticsReportingDisabled() || ii.isRoxy) {
+	if ii.analytics != nil && !ii.isRoxy {
 		ii.analytics.CaptureImpressions([]model.Impression{{
 			Timestamp: float64(time.Now().Unix()),
 			FlagName:  value.Name,

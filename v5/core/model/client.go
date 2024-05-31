@@ -40,6 +40,7 @@ type RoxOptions interface {
 	Version() string
 	FetchInterval() time.Duration
 	AnalyticsReportInterval() time.Duration
+	AnalyticsQueueSize() int
 	IsAnalyticsReportingDisabled() bool
 	ImpressionHandler() ImpressionHandler
 	ConfigurationFetchedHandler() ConfigurationFetchedHandler

@@ -5,7 +5,7 @@ import "time"
 type Analytics interface {
 	CaptureImpressions([]Impression)
 	InitiateIntervalReporting(interval time.Duration)
-	IsAnalyticsReportingDisabled() bool
+	StopIntervalReporting()
 }
 
 type Impression struct {

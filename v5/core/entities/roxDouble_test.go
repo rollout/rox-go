@@ -80,16 +80,12 @@ func TestRoxDoubleWillRaiseImpressionInvoker(t *testing.T) {
 	parser := &mocks.Parser{}
 	parser.On("EvaluateExpression", mock.Anything, mock.Anything).Return(roxx.NewEvaluationResult(2.0))
 
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
-
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
 	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   false,
 	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
@@ -112,7 +108,6 @@ func TestRoxDoubleForConsistencyWithString(t *testing.T) {
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                nil,
 		IsRoxy:                   false,
 	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
@@ -131,14 +126,11 @@ func TestRoxDoubleForConsistencyWithInt(t *testing.T) {
 
 	isImpressionRaised := false
 	internalFlags := &mocks.InternalFlags{}
-	analytics := &mocks.Analytics{}
-	analytics.On("IsAnalyticsReportingDisabled").Return(true)
 
 	impInvoker := impression.NewImpressionInvoker(&impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                analytics,
 		IsRoxy:                   false,
 	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {
@@ -161,7 +153,6 @@ func TestRoxDoubleForConsistencyWithBoolean(t *testing.T) {
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
 		DeviceProperties:         nil,
-		Analytics:                nil,
 		IsRoxy:                   false,
 	})
 	impInvoker.RegisterImpressionHandler(func(e model.ImpressionArgs) {

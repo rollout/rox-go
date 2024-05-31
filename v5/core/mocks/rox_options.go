@@ -85,3 +85,8 @@ func (m *RoxOptions) IsAnalyticsReportingDisabled() bool {
 	args := m.Called()
 	return args.Bool(0)
 }
+
+func (m *RoxOptions) AnalyticsQueueSize() int {
+	args := m.Called()
+	return args.Int(0)
+}
