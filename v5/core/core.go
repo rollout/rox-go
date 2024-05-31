@@ -107,18 +107,15 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		core.environment = client.NewSaasEnvironment(envApi)
 	}
 
-	analyticsDisabled := (roxOptions != nil && roxOptions.IsAnalyticsReportingDisabled()) ||
-		roxyPath == "" ||
-		!core.internalFlags.IsEnabled("rox.internal.analytics")
-
+	core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
 	impressionDeps := &impression.ImpressionsDeps{
 		InternalFlags:            core.internalFlags,
 		CustomPropertyRepository: core.customPropertyRepository,
 		DeviceProperties:         deviceProperties,
 		IsRoxy:                   roxyPath != "",
 	}
-	if !analyticsDisabled {
-		core.internalFlags = client.NewInternalFlags(core.experimentRepository, core.parser, core.environment)
+	analyticsEnabled := roxOptions != nil && !roxOptions.IsAnalyticsReportingDisabled() && roxyPath != ""
+	if analyticsEnabled {
 		analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
 			UriPath:           core.environment.EnvironmentAnalyticsPath(),
 			Request:           network.NewRequest(http.DefaultClient),

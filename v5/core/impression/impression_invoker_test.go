@@ -109,6 +109,7 @@ func TestImpressionInvokerWillNotInvokeAnalyticsWhenIsRoxy(t *testing.T) {
 
 func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
+	internalFlags.On("IsEnabled", "rox.internal.analytics").Return(true)
 	analytics := &mocks.Analytics{}
 	analytics.On("CaptureImpressions", mock.Anything).Return().Times(1)
 
