@@ -30,3 +30,4 @@ Rollout Go SDK is free-to-use, proprietary software. Please see the full license
 ## Feedback
 
 Feedback is always welcomed support@rollout.io
+ 
