@@ -3,12 +3,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   release:
-
-    runs-on: macos-11
+    runs-on: macos-12
 
     steps:
       - name: Set version
