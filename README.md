@@ -17,8 +17,11 @@ Getting started guide, use cases, examples and videos can be found in [Rollout s
 Rollout Go SDK. Define and use simple and advanced feature flags, remote configuration variables, static and computed custom properties in code. Control your application features via Rollout's dashboard.
 
 ## Installation
+
+In order to get the latest version of the SDK use following command:
+
 ```
-go get -u github.com/rollout/rox-go/v5/...
+go get -u github.com/rollout/rox-go/v6/...
 ```
 
 ## LICENSE
