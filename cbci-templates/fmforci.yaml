@@ -6,7 +6,7 @@ spec:
   serviceAccountName: ops-gcr-rw
   containers:    
     - name: server
-      image: golang:alpine
+      image: golang:1.18
       tty: true
       resources:
           requests:

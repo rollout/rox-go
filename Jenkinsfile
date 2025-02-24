@@ -21,7 +21,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'unit-test-' + UUID.randomUUID().toString()
-                    inheritFrom 'default'
+                    inheritFrom 'golang'
                     yamlFile './cbci-templates/fmforci.yaml'
                 }
             }
@@ -30,12 +30,14 @@ pipeline {
                 container(name: "server", shell: "sh") {
                     withCredentials([
                         sshUserPrivateKey(credentialsId: 'SDK_E2E_SSH_KEY', keyFileVariable: 'SDK_E2E_SSH_KEY', passphraseVariable: '', usernameVariable: 'cloudbees.eslint@cloudbees.com'),
-                        file(credentialsId: 'ENV_SECRETS', variable: 'ENV_SECRETS_PATH'),
+                        // file(credentialsId: 'ENV_SECRETS', variable: 'ENV_SECRETS_PATH'),
                     ]) {
-                        addGitHubFingerprint()
-                        echo "====++++executing Run tests++++===="
-                        sh script: 'cd ./v6 && /usr/local/go/bin/go test ./core/...', 
-                           label: "Running unit tests"
+                        withEnv(['PATH+GO=$PATH:/usr/local/go/bin']) {
+                            echo "====++++executing Run tests++++===="
+                            sh 'echo "Current PATH: $PATH"'
+                            sh script: 'cd ./v6 && go test ./core/...', 
+                                label: "Running unit tests"
+                        }
                     }
                 }
             }
