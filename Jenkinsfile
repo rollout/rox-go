@@ -17,7 +17,7 @@ pipeline {
             }
         }
 
-        stage("Run unit tests"){
+        stage("Run Unit tests"){
             agent {
                 kubernetes {
                     label 'unit-test-' + UUID.randomUUID().toString()
@@ -32,9 +32,8 @@ pipeline {
                         sshUserPrivateKey(credentialsId: 'SDK_E2E_SSH_KEY', keyFileVariable: 'SDK_E2E_SSH_KEY', passphraseVariable: '', usernameVariable: 'cloudbees.eslint@cloudbees.com'),
                         // file(credentialsId: 'ENV_SECRETS', variable: 'ENV_SECRETS_PATH'),
                     ]) {
-                        withEnv(['PATH+GO=$PATH:/usr/local/go/bin']) {
+                        withEnv(["PATH+GO=$PATH:/usr/local/go/bin"]) {
                             echo "====++++executing Run tests++++===="
-                            sh 'echo "Current PATH: $PATH"'
                             sh script: 'cd ./v6 && go test ./core/...', 
                                 label: "Running unit tests"
                         }
@@ -51,6 +50,63 @@ pipeline {
                 failure{
                     echo 'Unit Tests Failed;'
                 }
+            }
+        }
+
+        stage("Run E2E tests"){
+            agent {
+                kubernetes {
+                    label 'e2e-tests-' + UUID.randomUUID().toString()
+                    inheritFrom 'default'
+                    yamlFile './cbci-templates/fmforci.yaml'
+                }
+            }
+
+            steps {
+                container("rox-proxy") {
+                    waitForRoxProxy()
+                }
+
+                container(name: "server", shell: 'sh') {
+                    withCredentials([
+                        string(credentialsId: 'TEST_E2E_BEARER', variable: 'TEST_E2E_BEARER'),
+                        sshUserPrivateKey(credentialsId: 'SDK_E2E_SSH_KEY', keyFileVariable: 'SDK_E2E_SSH_KEY', passphraseVariable: '', usernameVariable: 'cloudbees.eslint@cloudbees.com'),
+                        sshUserPrivateKey(credentialsId: 'SDK_E2E_TESTS_DEPLOY_KEY', keyFileVariable: 'SDK_E2E_TESTS_DEPLOY_KEY', passphraseVariable: '', usernameVariable: 'cloudbees.eslint@cloudbees.com'),                        
+                    ]) {
+                        script {
+                            addGitHubFingerprint()
+                            TESTENVPARAMS = "QA_E2E_BEARER=$TEST_E2E_BEARER API_HOST=https://api.test.rollout.io CD_API_ENDPOINT=https://api.test.rollout.io/device/get_configuration CD_S3_ENDPOINT=https://rox-conf.test.rollout.io/ SS_API_ENDPOINT=https://api.test.rollout.io/device/update_state_store/ SS_S3_ENDPOINT=https://rox-state.test.rollout.io/ CLIENT_DATA_CACHE_KEY=client_data ANALYTICS_ENDPOINT=https://analytic.test.rollout.io/ NOTIFICATIONS_ENDPOINT=https://push.test.rollout.io/sse"
+
+                            withEnv(["GIT_SSH_COMMAND=ssh -i ${SDK_E2E_SSH_KEY}", "PATH+GO=$PATH:/usr/local/go/bin"]) {
+                                sh "echo ${TESTENVPARAMS}"
+                                sh script: """
+                                    apt-get update && apt-get install -y curl gnupg
+                                    curl -sL https://deb.nodesource.com/setup_lts.x | bash - 
+                                    apt-get install -y nodejs && npm install -g yarn
+                                    
+                                    git clone git@github.com:rollout/sdk-end-2-end-tests.git
+                                    ls -la
+                                    ln -s ${pwd()}/v6/driver ./sdk-end-2-end-tests/drivers/go
+                                    cd sdk-end-2-end-tests
+                                    yarn install --frozen-lockfile
+                                    SDK_LANG=go ${TESTENVPARAMS} NODE_ENV=container yarn test:env
+                                """, label: "Pull SDK end2 tests repository"
+                            }// end withEnv
+                        }
+                    }
+                }
+            }
+            post{
+                always{
+                    echo "====++++always++++===="
+                }
+                success{
+                    echo "====++++Run E2E tests executed successfully++++===="
+                }
+                failure{
+                    echo "====++++Run E2E tests execution failed++++===="
+                }
+        
             }
         }
     }
