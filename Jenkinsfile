@@ -62,6 +62,10 @@ pipeline {
                 }
             }
 
+            when {
+                branch 'master'
+            }
+
             steps {
                 container("rox-proxy") {
                     waitForRoxProxy()
@@ -97,14 +101,14 @@ pipeline {
                 }
             }
             post{
-                always{
-                    echo "====++++always++++===="
-                }
                 success{
-                    echo "====++++Run E2E tests executed successfully++++===="
+                    script {
+                        echo 'E2E Tests OK; posting results'
+                        currentBuild.result = 'SUCCESS'
+                    }
                 }
                 failure{
-                    echo "====++++Run E2E tests execution failed++++===="
+                    echo 'E2E Tests Failed;'
                 }
         
             }
