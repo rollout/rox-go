@@ -19,7 +19,6 @@ pipeline {
         stage("Run Unit tests"){
             agent {
                 kubernetes {
-                    label 'unit-test-' + UUID.randomUUID().toString()
                     inheritFrom 'golang'
                     yamlFile './cbci-templates/fmforci.yaml'
                 }
@@ -40,10 +39,7 @@ pipeline {
             }
             post{
                 success{
-                    script {
-                        echo 'Unit Tests OK; posting results'
-                        currentBuild.result = 'SUCCESS'
-                    }
+                    echo 'Unit Tests OK; posting results'
                 }
                 failure{
                     echo 'Unit Tests Failed;'
@@ -54,7 +50,6 @@ pipeline {
         stage("Run E2E tests"){
             agent {
                 kubernetes {
-                    label 'e2e-tests-' + UUID.randomUUID().toString()
                     inheritFrom 'default'
                     yamlFile './cbci-templates/fmforci.yaml'
                 }
@@ -87,8 +82,7 @@ pipeline {
                                     apt-get install -y nodejs && npm install -g yarn
                                     
                                     git clone git@github.com:rollout/sdk-end-2-end-tests.git
-                                    ls -la
-                                    ln -s ./v6/driver ./sdk-end-2-end-tests/drivers/go
+                                    ln -s ${pwd()}/v6/driver/ ${pwd()}/sdk-end-2-end-tests/drivers/go
                                     cd sdk-end-2-end-tests
                                     yarn install --frozen-lockfile
                                     SDK_LANG=go ${TESTENVPARAMS} NODE_ENV=container yarn test:env
@@ -100,10 +94,7 @@ pipeline {
             }
             post{
                 success{
-                    script {
-                        echo 'E2E Tests OK; posting results'
-                        currentBuild.result = 'SUCCESS'
-                    }
+                    echo 'E2E Tests OK; posting results'
                 }
                 failure{
                     echo 'E2E Tests Failed;'
