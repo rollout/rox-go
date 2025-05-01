@@ -9,11 +9,12 @@ type Analytics interface {
 }
 
 type Impression struct {
-	Timestamp         float64     `json:"time"`
-	FlagName          string      `json:"flag"`
-	Value             interface{} `json:"value"`
-	Type              string      `json:"type"`
-	Count             float64     `json:"count,omitempty"`
+	DistinctId string      `json:"distinctId,omitempty"`
+	Timestamp  float64     `json:"time"`
+	FlagName   string      `json:"flag"`
+	Value      interface{} `json:"value"`
+	Type       string      `json:"type"`
+	Count      float64     `json:"count,omitempty"`
 }
 
 type SDKEventBatch struct {

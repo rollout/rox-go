@@ -9,6 +9,8 @@ import (
 	"github.com/rollout/rox-go/v6/core/model"
 )
 
+const impressionEventType = "IMPRESSION"
+
 type impressionInvoker struct {
 	internalFlags            model.InternalFlags
 	customPropertyRepository model.CustomPropertyRepository
@@ -45,9 +47,12 @@ func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context
 
 	if ii.analytics != nil && !ii.isRoxy && ii.internalFlags.IsEnabled("rox.internal.analytics") {
 		ii.analytics.CaptureImpressions([]model.Impression{{
-			Timestamp: float64(time.Now().Unix()),
-			FlagName:  value.Name,
-			Value:     value.Value,
+			DistinctId: ii.deviceProperties.DistinctID(),
+			Timestamp:  float64(time.Now().UnixMilli()),
+			FlagName:   value.Name,
+			Value:      value.Value,
+			Type:       impressionEventType,
+			Count:      1,
 		}})
 	}
 

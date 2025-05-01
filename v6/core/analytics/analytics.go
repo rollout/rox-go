@@ -38,6 +38,10 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 	if deps.Logger == nil {
 		deps.Logger = logging.GetLogger()
 	}
+	flushSize := 500
+	if deps.FlushAtSize > 0 {
+		flushSize = deps.FlushAtSize
+	}
 
 	return &AnalyticsHandler{
 		uriPath:          deps.UriPath,
@@ -47,7 +51,7 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 		impressionsQueue: ImpressionsStore{
 			impressions: make([]model.Impression, 0),
 		},
-		flushAtSize: deps.FlushAtSize | 500,
+		flushAtSize: flushSize,
 	}
 }
 
@@ -114,7 +118,7 @@ func (ah *AnalyticsHandler) postImpressions(impressions []model.Impression) erro
 	bodyContent := &model.SDKEventBatch{
 		AnalyticsVersion: "1.0.0",
 		SdkKeyId:         ah.deviceProperties.RolloutKey(),
-		Timestamp:        float64(time.Now().Unix()),
+		Timestamp:        float64(time.Now().UnixMilli()),
 		Platform:         properties[consts.PropertyTypePlatform.Name],
 		SDKVersion:       properties[consts.PropertyTypeLibVersion.Name],
 		Events:           impressions,

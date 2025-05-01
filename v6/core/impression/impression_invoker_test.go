@@ -3,6 +3,7 @@ package impression_test
 import (
 	"testing"
 
+	"github.com/rollout/rox-go/v6/core/consts"
 	"github.com/rollout/rox-go/v6/core/context"
 	"github.com/rollout/rox-go/v6/core/impression"
 	"github.com/rollout/rox-go/v6/core/mocks"
@@ -11,12 +12,27 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const distinctId = "123abc456def789xyz"
+
+func devicePropertiesMock() *mocks.DeviceProperties {
+	deviceProperties := &mocks.DeviceProperties{}
+
+	properties := map[string]string{
+		consts.PropertyTypeDistinctID.Name: distinctId,
+	}
+	deviceProperties.On("GetAllProperties").Return(properties)
+	deviceProperties.On("DistinctID").Return(distinctId)
+
+	return deviceProperties
+}
+
 func TestImpressionInvokerEmptyInvokeNotThrowingException(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
+
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
-		DeviceProperties:         nil,
+		DeviceProperties:         devicePropertiesMock(),
 		Analytics:                nil,
 		IsRoxy:                   false,
 	}
@@ -28,7 +44,7 @@ func TestImpressionInvokerInvokeAndParameters(t *testing.T) {
 	internalFlags := &mocks.InternalFlags{}
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:    internalFlags,
-		DeviceProperties: nil,
+		DeviceProperties: devicePropertiesMock(),
 		IsRoxy:           false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -55,7 +71,7 @@ func TestImpressionInvokerInvokeHandleUserCodePanic(t *testing.T) {
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
-		DeviceProperties:         nil,
+		DeviceProperties:         devicePropertiesMock(),
 		IsRoxy:                   false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -79,7 +95,7 @@ func TestImpressionInvokerWillNotInvokeAnalyticsWhenFlagIsOff(t *testing.T) {
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
-		DeviceProperties:         nil,
+		DeviceProperties:         devicePropertiesMock(),
 		IsRoxy:                   false,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -96,7 +112,7 @@ func TestImpressionInvokerWillNotInvokeAnalyticsWhenIsRoxy(t *testing.T) {
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
-		DeviceProperties:         nil,
+		DeviceProperties:         devicePropertiesMock(),
 		IsRoxy:                   true,
 	}
 	impressionInvoker := impression.NewImpressionInvoker(deps)
@@ -116,7 +132,7 @@ func TestImpressionInvokerWillInvokeAnalytics(t *testing.T) {
 	deps := &impression.ImpressionsDeps{
 		InternalFlags:            internalFlags,
 		CustomPropertyRepository: nil,
-		DeviceProperties:         nil,
+		DeviceProperties:         devicePropertiesMock(),
 		Analytics:                analytics,
 		IsRoxy:                   false,
 	}

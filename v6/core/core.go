@@ -114,7 +114,7 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 		DeviceProperties:         deviceProperties,
 		IsRoxy:                   roxyPath != "",
 	}
-	analyticsEnabled := roxOptions != nil && !roxOptions.IsAnalyticsReportingDisabled() && roxyPath != ""
+	analyticsEnabled := roxOptions != nil && !roxOptions.IsAnalyticsReportingDisabled() && !impressionDeps.IsRoxy
 	if analyticsEnabled {
 		analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
 			UriPath:           core.environment.EnvironmentAnalyticsPath(),
