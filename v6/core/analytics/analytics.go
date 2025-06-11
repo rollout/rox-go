@@ -27,11 +27,11 @@ type ImpressionsStore struct {
 }
 
 type AnalyticsDeps struct {
-	UriPath           string
-	Request           model.Request
-	DeviceProperities model.DeviceProperties
-	Logger            logging.Logger
-	FlushAtSize       int
+	UriPath          string
+	Request          model.Request
+	DeviceProperties model.DeviceProperties
+	Logger           logging.Logger
+	FlushAtSize      int
 }
 
 func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
@@ -46,7 +46,7 @@ func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 	return &AnalyticsHandler{
 		uriPath:          deps.UriPath,
 		request:          deps.Request,
-		deviceProperties: deps.DeviceProperities,
+		deviceProperties: deps.DeviceProperties,
 		logger:           deps.Logger,
 		impressionsQueue: ImpressionsStore{
 			impressions: make([]model.Impression, 0),
