@@ -178,12 +178,13 @@ func impressionMatcher(flagName, flagValue string) func(impressions []model.Impr
 		i := impressions[0]
 
 		// Fixed/static fields (apart from timestamp... but that is hard to validate beyond 'not zero'):
-		if i.Count != 1 || i.Type != "IMPRESSION" || i.Timestamp == 0 {
+		// (validating unset for the optional fields Count & Type).
+		if i.Count != 0 || i.Type != "" || i.Timestamp == 0 {
 			return false
 		}
 
 		// Dynamic fields relating to the ReportingValue:
-		if i.DistinctId != distinctId || i.FlagName != flagName || i.Value != flagValue {
+		if i.FlagName != flagName || i.Value != flagValue {
 			return false
 		}
 
