@@ -124,7 +124,7 @@ func (ah *AnalyticsHandler) postImpressions(impressions []model.Impression) erro
 		Events:           impressions,
 	}
 
-	uri := fmt.Sprintf("%s/%s", ah.uriPath, bodyContent.SdkKeyId)
+	uri := fmt.Sprintf("%s/impression/%s", ah.uriPath, bodyContent.SdkKeyId)
 	res, err := ah.request.SendPost(uri, bodyContent)
 
 	if err != nil {

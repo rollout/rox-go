@@ -1,15 +1,12 @@
 package impression
 
 import (
-	"sync"
-	"time"
-
 	"github.com/rollout/rox-go/v6/core/context"
 	"github.com/rollout/rox-go/v6/core/logging"
 	"github.com/rollout/rox-go/v6/core/model"
+	"sync"
+	"time"
 )
-
-const impressionEventType = "IMPRESSION"
 
 type impressionInvoker struct {
 	internalFlags            model.InternalFlags
@@ -47,12 +44,9 @@ func (ii *impressionInvoker) Invoke(value *model.ReportingValue, context context
 
 	if ii.analytics != nil && !ii.isRoxy && ii.internalFlags.IsEnabled("rox.internal.analytics") {
 		ii.analytics.CaptureImpressions([]model.Impression{{
-			DistinctId: ii.deviceProperties.DistinctID(),
-			Timestamp:  float64(time.Now().UnixMilli()),
-			FlagName:   value.Name,
-			Value:      value.Value,
-			Type:       impressionEventType,
-			Count:      1,
+			Timestamp: float64(time.Now().UnixMilli()),
+			FlagName:  value.Name,
+			Value:     value.Value,
 		}})
 	}
 
