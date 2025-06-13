@@ -81,7 +81,7 @@ func Test_postImpressions(t *testing.T) {
 			path := "hostPath"
 			deviceProperties := commonDevicePropertiesMock(sdkKey, "platform", "libVersion")
 			request := &mocks.Request{}
-			expectedUri := fmt.Sprintf("%s/%s", path, sdkKey)
+			expectedUri := fmt.Sprintf("%s/impression/%s", path, sdkKey)
 			request.
 				On("SendPost", expectedUri, mock.Anything).
 				Return(&model.Response{

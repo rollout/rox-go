@@ -27,27 +27,31 @@ type ImpressionsStore struct {
 }
 
 type AnalyticsDeps struct {
-	UriPath           string
-	Request           model.Request
-	DeviceProperities model.DeviceProperties
-	Logger            logging.Logger
-	FlushAtSize       int
+	UriPath          string
+	Request          model.Request
+	DeviceProperties model.DeviceProperties
+	Logger           logging.Logger
+	FlushAtSize      int
 }
 
 func NewAnalyticsHandler(deps *AnalyticsDeps) model.Analytics {
 	if deps.Logger == nil {
 		deps.Logger = logging.GetLogger()
 	}
+	flushSize := 500
+	if deps.FlushAtSize > 0 {
+		flushSize = deps.FlushAtSize
+	}
 
 	return &AnalyticsHandler{
 		uriPath:          deps.UriPath,
 		request:          deps.Request,
-		deviceProperties: deps.DeviceProperities,
+		deviceProperties: deps.DeviceProperties,
 		logger:           deps.Logger,
 		impressionsQueue: ImpressionsStore{
 			impressions: make([]model.Impression, 0),
 		},
-		flushAtSize: deps.FlushAtSize | 500,
+		flushAtSize: flushSize,
 	}
 }
 
@@ -114,13 +118,13 @@ func (ah *AnalyticsHandler) postImpressions(impressions []model.Impression) erro
 	bodyContent := &model.SDKEventBatch{
 		AnalyticsVersion: "1.0.0",
 		SdkKeyId:         ah.deviceProperties.RolloutKey(),
-		Timestamp:        float64(time.Now().Unix()),
+		Timestamp:        float64(time.Now().UnixMilli()),
 		Platform:         properties[consts.PropertyTypePlatform.Name],
 		SDKVersion:       properties[consts.PropertyTypeLibVersion.Name],
 		Events:           impressions,
 	}
 
-	uri := fmt.Sprintf("%s/%s", ah.uriPath, bodyContent.SdkKeyId)
+	uri := fmt.Sprintf("%s/impression/%s", ah.uriPath, bodyContent.SdkKeyId)
 	res, err := ah.request.SendPost(uri, bodyContent)
 
 	if err != nil {

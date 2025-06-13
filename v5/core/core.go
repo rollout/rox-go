@@ -117,10 +117,10 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 	analyticsEnabled := roxOptions != nil && !roxOptions.IsAnalyticsReportingDisabled() && roxyPath != ""
 	if analyticsEnabled {
 		analyticsHandler := analytics.NewAnalyticsHandler(&analytics.AnalyticsDeps{
-			UriPath:           core.environment.EnvironmentAnalyticsPath(),
-			Request:           network.NewRequest(http.DefaultClient),
-			DeviceProperities: deviceProperties,
-			FlushAtSize:       roxOptions.AnalyticsQueueSize(),
+			UriPath:          core.environment.EnvironmentAnalyticsPath(),
+			Request:          network.NewRequest(http.DefaultClient),
+			DeviceProperties: deviceProperties,
+			FlushAtSize:      roxOptions.AnalyticsQueueSize(),
 		})
 		impressionDeps.Analytics = analyticsHandler
 		core.analyticsHandler = analyticsHandler

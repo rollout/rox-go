@@ -9,11 +9,13 @@ type Analytics interface {
 }
 
 type Impression struct {
-	Timestamp         float64     `json:"time"`
-	FlagName          string      `json:"flag"`
-	Value             interface{} `json:"value"`
-	Type              string      `json:"type"`
-	Count             float64     `json:"count,omitempty"`
+	Timestamp float64     `json:"time"`
+	FlagName  string      `json:"flag"`
+	Value     interface{} `json:"value"`
+	// Optional: telegraf-input-impressions will default to 'IMPRESSION' if not set / empty.
+	Type string `json:"type,omitempty"`
+	// Optional: telegraf-input-impressions will default to 1 if not set / zero.
+	Count float64 `json:"count,omitempty"`
 }
 
 type SDKEventBatch struct {
