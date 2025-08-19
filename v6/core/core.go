@@ -169,11 +169,6 @@ func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.De
 
 		if roxOptions != nil && roxOptions.ImpressionHandler() != nil {
 			core.impressionInvoker.RegisterImpressionHandler(roxOptions.ImpressionHandler())
-		} else {
-			var impressions []model.ImpressionArgs
-			core.impressionInvoker.RegisterImpressionHandler(func(args model.ImpressionArgs) {
-				impressions = append(impressions, args)
-			})
 		}
 
 		if roxOptions != nil && roxOptions.FetchInterval() != 0 {
