@@ -254,13 +254,19 @@ func (core *Core) wrapConfigurationFetchedHandler(handler model.ConfigurationFet
 }
 
 func (core *Core) startOrStopPushUpdatesListener() {
-
-	if core.pushUpdatesListener == nil {
-		core.pushUpdatesListener = notifications.NewNotificationListener(core.environment.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
-		core.pushUpdatesListener.On("changed", func(event notifications.Event) {
-			<-core.Fetch()
-		})
-		core.pushUpdatesListener.Start()
+	if core.internalFlags.IsEnabled("rox.internal.pushUpdates") {
+		if core.pushUpdatesListener == nil {
+			core.pushUpdatesListener = notifications.NewNotificationListener(core.environment.EnvironmentNotificationsPath(), core.sdkSettings.APIKey())
+			core.pushUpdatesListener.On("changed", func(event notifications.Event) {
+				<-core.Fetch()
+			})
+			core.pushUpdatesListener.Start()
+		}
+	} else {
+		if core.pushUpdatesListener != nil {
+			core.pushUpdatesListener.Stop()
+			core.pushUpdatesListener = nil
+		}
 	}
 }
 
