@@ -176,7 +176,7 @@ func (p *roxxParser) setBasicOperators() {
 			stack.Push(false)
 		} else {
 			for _, item := range op2 {
-				if valuesEqual(item, op1) {
+				if item == op1 {
 					stack.Push(true)
 					return
 				}

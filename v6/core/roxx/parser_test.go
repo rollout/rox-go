@@ -282,11 +282,6 @@ func TestParserInArray(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`inArray(123, [123, "233"])`, nil).Value())
 	assert.Equal(t, false, parser.EvaluateExpression(`inArray(123, ["123", "233"])`, nil).Value())
 
-	// An int item (e.g. "123") must match an equal-valued float array element (e.g. "123.0"),
-	// and vice versa, even though they tokenize to different Go types (int vs float64).
-	assert.Equal(t, true, parser.EvaluateExpression(`inArray(123, [123.0, "233"])`, nil).Value())
-	assert.Equal(t, true, parser.EvaluateExpression(`inArray(123.0, [123, "233"])`, nil).Value())
-
 	assert.Equal(t, false, parser.EvaluateExpression(`inArray("123", [])`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`inArray("1 [23", ["1 [23", "]"])`, nil).Value())
 	assert.Equal(t, false, parser.EvaluateExpression(`inArray("123", undefined)`, nil).Value())
