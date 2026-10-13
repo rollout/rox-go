@@ -61,6 +61,17 @@ func TestParserEqExpressionsEvaluation(t *testing.T) {
 	assert.Equal(t, true, parser.EvaluateExpression(`not(eq(not(undefined), undefined))`, nil).Value())
 	assert.Equal(t, true, parser.EvaluateExpression(`not(undefined)`, nil).Value())
 
+	// An int literal (e.g. "123") and a float literal that is numerically equal (e.g. "123.0")
+	// must compare equal even though they tokenize to different Go types (int vs float64).
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(123, 123.0)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`eq(123.0, 123)`, nil).Value())
+	assert.Equal(t, false, parser.EvaluateExpression(`ne(123, 123.0)`, nil).Value())
+	assert.Equal(t, true, parser.EvaluateExpression(`ne(123, 124.0)`, nil).Value())
+
+	// Two distinct same-type int literals beyond 2^53 must stay distinct — comparing via
+	// float64 would lose precision and incorrectly consider them equal.
+	assert.Equal(t, false, parser.EvaluateExpression(`eq(9007199254740993, 9007199254740992)`, nil).Value())
+
 	roxxString := `la \"la\" la`
 	assert.Equal(t, true, parser.EvaluateExpression(fmt.Sprintf(`eq("%s", "la \"la\" la")`, roxxString), nil).Value())
 }

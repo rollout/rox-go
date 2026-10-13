@@ -129,7 +129,7 @@ func (p *roxxParser) setBasicOperators() {
 			op2 = false
 		}
 
-		stack.Push(op1 != op2)
+		stack.Push(!valuesEqual(op1, op2))
 	})
 
 	p.AddOperator("eq", func(p Parser, stack *CoreStack, context context.Context) {
@@ -144,7 +144,7 @@ func (p *roxxParser) setBasicOperators() {
 			op2 = false
 		}
 
-		stack.Push(op1 == op2)
+		stack.Push(valuesEqual(op1, op2))
 	})
 
 	p.AddOperator("not", func(p Parser, stack *CoreStack, context context.Context) {
@@ -226,6 +226,37 @@ func (p *roxxParser) setBasicOperators() {
 			stack.Push(TokenTypeUndefined)
 		}
 	})
+}
+
+// valuesEqual compares two roxx operands for equality. Numeric literals and
+// context property values can surface as either int or float64 depending on
+// how they were parsed/supplied, and Go's == never considers an int equal to
+// a float64 (even for the same mathematical value) since interface equality
+// requires identical dynamic types. Only convert to float64 when the two
+// operands have different numeric types (int vs float64) — same-type ints
+// are compared exactly, avoiding float64's precision loss above 2^53.
+// Deliberately not reusing utils.ToFloat here: it also coerces numeric
+// strings, which would make eq("500", 500) true and change eq/ne's existing
+// string-equality semantics beyond this fix's scope.
+func valuesEqual(op1, op2 interface{}) bool {
+	switch v1 := op1.(type) {
+	case int:
+		switch v2 := op2.(type) {
+		case int:
+			return v1 == v2
+		case float64:
+			return float64(v1) == v2
+		}
+	case float64:
+		switch v2 := op2.(type) {
+		case float64:
+			return v1 == v2
+		case int:
+			return v1 == float64(v2)
+		}
+	}
+
+	return op1 == op2
 }
 
 func (p *roxxParser) reverseTokens(tokens []*Node) {
