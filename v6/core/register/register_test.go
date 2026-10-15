@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/rollout/rox-go/v6/core/entities"
+	"github.com/rollout/rox-go/v6/core/logging"
 	"github.com/rollout/rox-go/v6/core/model"
 	"github.com/rollout/rox-go/v6/core/register"
 	"github.com/rollout/rox-go/v6/core/repositories"
@@ -112,4 +113,98 @@ func TestRegisterWillUseVariableNameIgnoringOtherTags(t *testing.T) {
 	assert.Equal(t, nil, flag, "flag was wrongly registered with unrecognized tag")
 
 	assert.Equal(t, "ns1.Flag2", flagRepo.GetFlag("ns1.Flag2").Name())
+}
+
+type warnCapturingLogger struct {
+	warnings []string
+}
+
+func (l *warnCapturingLogger) Debug(message string, err interface{}) {}
+func (l *warnCapturingLogger) Error(message string, err interface{}) {}
+func (l *warnCapturingLogger) Warn(message string, err interface{}) {
+	l.warnings = append(l.warnings, message)
+}
+
+func captureWarnings(t *testing.T) *warnCapturingLogger {
+	logger := &warnCapturingLogger{}
+	logging.SetLogger(logger)
+	t.Cleanup(func() { logging.SetLogger(nil) })
+	return logger
+}
+
+type ContainerWithUnexported struct {
+	Flag1   model.Flag
+	flag2   model.Flag
+	string1 model.RoxString `flagName:"string-1"`
+
+	somethingElse interface{}
+	counter       int
+}
+
+func TestRegisterWillWarnAboutUnexportedFlags(t *testing.T) {
+	logger := captureWarnings(t)
+	flagRepo := repositories.NewFlagRepository()
+	container := &ContainerWithUnexported{
+		Flag1:         entities.NewFlag(false),
+		flag2:         entities.NewFlag(false),
+		string1:       entities.NewRoxString("1", []string{"1", "2"}),
+		somethingElse: struct{}{},
+	}
+	registerer := register.NewRegisterer(flagRepo)
+	registerer.RegisterInstance(container, "")
+
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+	assert.NotNil(t, flagRepo.GetFlag("Flag1"))
+	assert.Nil(t, flagRepo.GetFlag("flag2"))
+	assert.Nil(t, flagRepo.GetFlag("string-1"))
+
+	assert.Equal(t, []string{
+		"Flag field \"flag2\" is unexported, so it cannot be registered. Rename it to \"Flag2\" and add the tag `flagName:\"flag2\"` to keep the same flag name.",
+		"Flag field \"string1\" is unexported, so it cannot be registered. Rename it to \"String1\" and add the tag `flagName:\"string-1\"` to keep the same flag name.",
+	}, logger.warnings)
+}
+
+func TestRegisterWillIncludeNamespaceInUnexportedFlagWarning(t *testing.T) {
+	logger := captureWarnings(t)
+	flagRepo := repositories.NewFlagRepository()
+	container := &ContainerWithUnexported{
+		Flag1: entities.NewFlag(false),
+		flag2: entities.NewFlag(false),
+	}
+	registerer := register.NewRegisterer(flagRepo)
+	registerer.RegisterInstance(container, "ns1")
+
+	assert.Contains(t, logger.warnings, "Flag field \"flag2\" in namespace \"ns1\" is unexported, so it cannot be registered. Rename it to \"Flag2\" and add the tag `flagName:\"flag2\"` to keep the same flag name.")
+}
+
+func TestRegisterWillNotWarnWhenAllFlagsAreExported(t *testing.T) {
+	logger := captureWarnings(t)
+	flagRepo := repositories.NewFlagRepository()
+	container := &Container2{
+		Variant1:      entities.NewRoxString("1", []string{"1", "2", "3"}),
+		Flag1:         entities.NewFlag(false),
+		Flag2:         entities.NewFlag(false),
+		Flag3:         entities.NewFlag(false),
+		SomethingElse: struct{}{},
+	}
+	registerer := register.NewRegisterer(flagRepo)
+	registerer.RegisterInstance(container, "")
+
+	assert.Equal(t, 4, len(flagRepo.GetAllFlags()))
+	assert.Empty(t, logger.warnings)
+}
+
+func TestRegisterWillWarnAboutUnexportedFlagsWhenContainerPassedByValue(t *testing.T) {
+	logger := captureWarnings(t)
+	flagRepo := repositories.NewFlagRepository()
+	container := ContainerWithUnexported{
+		Flag1: entities.NewFlag(false),
+		flag2: entities.NewFlag(false),
+	}
+	registerer := register.NewRegisterer(flagRepo)
+	registerer.RegisterInstance(container, "")
+
+	assert.Equal(t, 1, len(flagRepo.GetAllFlags()))
+	assert.NotNil(t, flagRepo.GetFlag("Flag1"))
+	assert.Equal(t, 2, len(logger.warnings))
 }
