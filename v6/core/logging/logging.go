@@ -16,3 +16,7 @@ func GetLogger() Logger {
 
 	return dummyLogger
 }
+
+func IsConfigured() bool {
+	return mainLogger != nil
+}

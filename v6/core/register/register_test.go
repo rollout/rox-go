@@ -208,3 +208,17 @@ func TestRegisterWillWarnAboutUnexportedFlagsWhenContainerPassedByValue(t *testi
 	assert.NotNil(t, flagRepo.GetFlag("Flag1"))
 	assert.Equal(t, 2, len(logger.warnings))
 }
+
+func TestRegisterWillLogUnexportedFlagWarningsOnFlushWhenNoLoggerConfigured(t *testing.T) {
+	registerer := register.NewRegisterer(repositories.NewFlagRepository())
+	registerer.RegisterInstance(&ContainerWithUnexported{flag2: entities.NewFlag(false)}, "")
+
+	logger := captureWarnings(t)
+	assert.Empty(t, logger.warnings)
+
+	registerer.FlushWarnings()
+	assert.Equal(t, 2, len(logger.warnings))
+
+	registerer.FlushWarnings()
+	assert.Equal(t, 2, len(logger.warnings))
+}

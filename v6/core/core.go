@@ -72,6 +72,7 @@ func NewCore() *Core {
 }
 
 func (core *Core) Setup(sdkSettings model.SdkSettings, deviceProperties model.DeviceProperties, roxOptions model.RoxOptions) <-chan struct{} {
+	core.registerer.FlushWarnings()
 	core.sdkSettings = sdkSettings
 
 	roxyPath := ""

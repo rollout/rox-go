@@ -11,9 +11,10 @@ import (
 )
 
 type Registerer struct {
-	flagRepository model.FlagRepository
-	namespaces     map[string]bool
-	mutex          sync.Mutex
+	flagRepository  model.FlagRepository
+	namespaces      map[string]bool
+	pendingWarnings []string
+	mutex           sync.Mutex
 }
 
 func NewRegisterer(flagRepository model.FlagRepository) *Registerer {
@@ -41,7 +42,7 @@ func (r *Registerer) RegisterInstance(container interface{}, ns string) {
 	for i := 0; i < v.NumField(); i++ {
 		if !v.Field(i).CanInterface() {
 			if field := v.Type().Field(i); field.Type.Implements(variantType) {
-				warnUnexportedFlag(field, ns)
+				r.warnUnexportedFlag(field, ns)
 			}
 			continue
 		}
@@ -68,7 +69,7 @@ func (r *Registerer) RegisterInstance(container interface{}, ns string) {
 	}
 }
 
-func warnUnexportedFlag(field reflect.StructField, ns string) {
+func (r *Registerer) warnUnexportedFlag(field reflect.StructField, ns string) {
 	runes := []rune(field.Name)
 	runes[0] = unicode.ToUpper(runes[0])
 
@@ -82,7 +83,27 @@ func warnUnexportedFlag(field reflect.StructField, ns string) {
 		location = fmt.Sprintf(" in namespace %q", ns)
 	}
 
-	logging.GetLogger().Warn(fmt.Sprintf(
+	message := fmt.Sprintf(
 		"Flag field %q%s is unexported, so it cannot be registered. Rename it to %q and add the tag `flagName:\"%s\"` to keep the same flag name.",
-		field.Name, location, string(runes), flagName), nil)
+		field.Name, location, string(runes), flagName)
+
+	if logging.IsConfigured() {
+		logging.GetLogger().Warn(message, nil)
+		return
+	}
+
+	r.mutex.Lock()
+	r.pendingWarnings = append(r.pendingWarnings, message)
+	r.mutex.Unlock()
+}
+
+func (r *Registerer) FlushWarnings() {
+	r.mutex.Lock()
+	pending := r.pendingWarnings
+	r.pendingWarnings = nil
+	r.mutex.Unlock()
+
+	for _, message := range pending {
+		logging.GetLogger().Warn(message, nil)
+	}
 }
